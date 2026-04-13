@@ -7,7 +7,7 @@
 Clean-room implementations of ant-only tools (REPL, Tungsten), injected into CC's tool registry via binary patching. Users get the tools that Anthropic restricts to internal use.
 
 **Location:** `/Users/tom.kyser/dev/claude-code-patches/claude-governance/`
-**Build:** `pnpm build` → 145KB | **Verify:** `node dist/index.mjs check` → 14/14 SOVEREIGN
+**Build:** `pnpm build` → 148KB | **Verify:** `node dist/index.mjs check` → 6/14 (8 prompt overrides failing — G5)
 **CC Version:** 2.1.101 (native, arm64-darwin, pinned via DISABLE_AUTOUPDATER=1)
 
 ## Current State
@@ -15,20 +15,22 @@ Clean-room implementations of ant-only tools (REPL, Tungsten), injected into CC'
 | Phase | Status |
 |-------|--------|
 | 2a: Tool Injection Mechanism | COMPLETE |
-| 2a-gaps: Tool Injection Hardening | NEXT — 7 gaps (4 high, 2 medium, 1 low) |
+| 2a-gaps: Tool Injection Hardening | IN PROGRESS — 4/12 done, next G6+G7 |
 | 2b: Clean-Room REPL | Blocked on 2a-gaps |
 | 2c: Clean-Room Tungsten | Planned |
 | 2d: Context Snipping Tool | Planned |
 
-## Binary Vault (NEW — from 2a-gaps)
+## Binary Vault (baked into codebase — G1+G2)
 
-Virgin binaries stored at `~/.claude-governance/binaries/virgin-{version}.bin`. Immutable, verified at download time. All operations work on copies made with `/bin/cp` (NOT Node.js `fs`).
+**Module:** `src/binaryVault.ts` — full vault with XDG path discovery, GCS download, SHA256 verification, cross-platform support.
 
-**Critical discovery:** Node.js v24 `fs.copyFile()` / `fs.writeFile()` corrupts Mach-O binaries — replaces non-UTF-8 bytes with U+FFFD, bloating 201MB → 304MB. Shell `/bin/cp` is binary-safe.
+**Paths (from CC's own xdg.ts):** Versions at `$XDG_DATA_HOME/claude/versions`, bin at `~/.local/bin/claude`.
 
-**Apply workaround:** Pre-create `~/.claude-governance/native-binary.backup` with `/bin/cp` from virgin before running apply. Apply finds existing backup, skips creating one (avoids `fs.copyFile` corruption).
+**GCS:** `$BUCKET/{version}/{platform}/claude` with `manifest.json` SHA256 checksums. `$BUCKET/latest` returns current version. Platforms: `darwin-arm64`, `darwin-x64`, `linux-x64`, `linux-arm64`, `linux-x64-musl`, `win32-x64`, `win32-arm64`.
 
-**GCS download URL:** `https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/{version}/darwin-arm64/claude`
+**Binary-safe ops:** `binarySafeCopy()` — `/bin/cp` (unix), `copy /b` (win32). NEVER Node.js fs for binary I/O. `installationBackup.ts` now uses this too.
+
+**Shim failsafe (G8):** Exit code 111 = governance failed. Shim falls through to find real claude via PATH or XDG versions dir. Writes `shim-fallback.json` marker (G10) so session-start hook shows UNPROTECTED banner.
 
 ## What's Working (Phase 2a)
 
@@ -65,6 +67,7 @@ Return `{ data: string }` for simple text results. The loader provides defaults 
 
 | File | Purpose |
 |------|---------|
+| `src/binaryVault.ts` | Binary vault — download, verify, lock, copy |
 | `src/patches/governance.ts` | All patches incl. `writeToolInjection()` |
 | `src/patches/index.ts` | Patch orchestrator + definitions |
 | `src/shim.ts` | Claude wrapper shim generator |

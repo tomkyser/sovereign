@@ -1,6 +1,6 @@
 # Project State
 
-Last updated: 2026-04-12
+Last updated: 2026-04-13
 
 ## Current Claude Code Version
 - **Installed:** 2.1.101 (native, arm64-darwin)
@@ -16,7 +16,7 @@ and governance-specific `check` command added.
 - **Fork location:** `/Users/tom.kyser/dev/claude-code-patches/claude-governance/`
 - **Based on:** tweakcc 4.0.11 (full fork, fresh git)
 - **Config dir:** `~/.claude-governance/` (falls back to `~/.tweakcc/` for migration)
-- **Build:** `pnpm build` → 139KB | **Package:** 2.2MB (npm pack)
+- **Build:** `pnpm build` → 148KB | **Package:** 2.2MB (npm pack)
 - **Apply:** `node dist/index.mjs --apply` (or just `node dist/index.mjs`)
 - **Verify:** `node dist/index.mjs check`
 - **Restore:** `node dist/index.mjs --restore`
@@ -85,7 +85,14 @@ and governance-specific `check` command added.
 - **1e:** COMPLETE — npm packaging, setup wizard, postinstall welcome
 - **M-1 Retro:** COMPLETE — 18 gaps fixed, canary→Phase 3, dashboard→deferred
 - **2a:** COMPLETE — tool injection patch, external tool loader, transparent claude shim
-- **2a-gaps:** NEXT — binary vault, apply corruption fix, Zod shim fix, prompt override verification
+- **2a-gaps:** IN PROGRESS — 4/12 done (G1 vault, G2 backup fix, G8 shim failsafe, G10 observability). Next: G6+G7
 - **2b:** PLANNED — clean-room REPL (blocked on 2a-gaps)
+
+### Binary Vault (from 2a-gaps)
+- **Module:** `src/binaryVault.ts` — XDG path discovery, GCS download, SHA256 verification, immutable locking
+- **Virgin:** `~/.claude-governance/binaries/virgin-{version}.bin` — always fresh download, locked
+- **Working:** `~/.claude-governance/binaries/working-{version}.bin` — apply operates here
+- **Binary-safe copy:** `/bin/cp` (unix), `copy /b` (win32) — NEVER Node.js fs
+- **Shim failsafe:** Exit 111 + fallback to direct CC launch + UNPROTECTED banner
 
 See `.planning/ROADMAP.md` for full details.

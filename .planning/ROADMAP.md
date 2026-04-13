@@ -199,15 +199,20 @@ binary patching of the tool registry.
 - [x] Transparent claude shim: `~/.claude-governance/bin/claude` wraps every session
 - [ ] *Deferred:* Binary-patched reasoning block renderer (collapsible, dimmed)
 
-### 2a-gaps: Tool Injection Hardening
-Runtime testing of tool injection revealed 7 gaps across binary management, Zod compatibility, and apply-flow corruption.
-- [ ] **G1: Binary vault architecture** — download → verify → lock → copy to work on (HIGH)
-- [ ] **G2: Apply binary corruption** — Node.js v24 fs ops corrupt Mach-O, must use /bin/cp (HIGH)
+### 2a-gaps: Tool Injection Hardening [IN PROGRESS]
+Runtime testing revealed gaps across binary management, Zod compatibility, shim reliability, and embedded tools verification.
+- [x] **G1: Binary vault architecture** — `src/binaryVault.ts`: XDG paths, GCS download, manifest.json SHA256, magic bytes, immutable locking, binary-safe copy
+- [x] **G2: Apply binary corruption** — `installationBackup.ts`: replaced fs.copyFile with binarySafeCopy
 - [ ] **G3: Tool input validation mismatch** — safeParse uses Agent schema, not passthrough (HIGH)
 - [ ] **G4: Zod passthrough shim** — borrow MCPTool passthrough, not Agent tool schema (HIGH)
 - [ ] **G5: Prompt override verification** — 8 overrides not matching on fresh binary (MEDIUM)
 - [ ] **G6: Auto-updater race condition** — sessions without DISABLE_AUTOUPDATER overwrite (MEDIUM)
 - [ ] **G7: Installer UTF-8 corruption** — install.sh produces corrupted binary (LOW)
+- [x] **G8: Shim failsafe** — sentinel exit code 111, fallback to direct CC launch, XDG version scan
+- [ ] **G9: Dynamic tool injection** — survive CC updates, robust detection beyond hardcoded var names (MEDIUM)
+- [x] **G10: System observability** — shim-fallback.json marker, UNPROTECTED banner, GOVERNANCE CRITICAL stdout
+- [ ] **G11: Embedded tools registry exclusion** — verify Glob/Grep excluded when bfs/ugrep active, halt-and-catch-fire (HIGH)
+- [ ] **G12: Embedded tools statusline** — verify registry state not just binary existence (MEDIUM)
 
 ### 2b: Clean-Room REPL
 - [ ] Implement per spec: `specs/repl-clean-room.md`
@@ -311,7 +316,7 @@ Full extraction, editing, version control, and targeted degradation fixes.
 
 - [ ] Context monitor: token tracking, CLAUDE.md presence, compaction detection
 - [ ] Message filter visibility (show intentionally hidden messages)
-- [ ] Visible reasoning/thinking restoration
+- [ ] Visible reasoning/thinking restoration (needs to recreate what we used to be able to see which was the thinking block from the api response, while this may be stripped out on the server side, the LLM is aware of its thinking block during response generation, I suspect it can be guided with instruction to copy and keep updated its thinking to the response body to recreate this)
 - [ ] Usage monitoring dashboard
 
 ---
