@@ -154,12 +154,6 @@ Standalone verification improvements — no dependency on 1b wrapper.
 - [x] **Status line integration:** Fixed `statusline-combined.cjs` and `governance-statusline.cjs` — correct config dir resolution, new field names, ISO timestamp parsing.
 - [x] **Survives resumes, compacts, logins, subagent spawning:** SessionStart hook fires on every session start (including resumes). Status line reads state.json on every render. Wrapper pre-flight covers initial launches.
 
-### Milestone 1 Retro — Pinned for Re-evaluation
-*Evaluate at end of Phase 1 (after 1e) whether these belong in Phase 1 or later.*
-
-- **Canary prompts:** Inject unique test phrases into prompt overrides, verify at runtime by prompting model for canary response. Requires conversation-level integration. May fit better in Phase 3 (System Prompt Control) or Phase 7 (Advanced Governance).
-- **Verification dashboard:** Rich terminal output showing all patches, overrides, flags, and environment state in a single view. May be better served by Phase 7 (context monitor) or 1d (modular architecture with pluggable status).
-
 ### Phase 1d: Modular Architecture [COMPLETE]
 - [x] Plugin/module system — GovernanceModule interface, registry, barrel exports
 - [x] Core module: wraps existing 13 verification entries (required, always enabled)
@@ -263,6 +257,7 @@ Full extraction, editing, version control, and targeted degradation fixes.
 - [ ] Phase 3c - Targeted fixes for specific degradation prompts
 - [ ] Phase 3d - User-editable prompt overrides with merge-on-update
 - [ ] Phase 3e - Prompt version control (git-style diffing across CC versions)
+- [ ] Phase 3f - Canary prompts Inject unique test phrases into prompt overrides, verify at runtime by prompting model for canary response. Requires conversation-level integration.
 
 ---
 ### Milestone 3 Retro
@@ -344,6 +339,8 @@ Full extraction, editing, version control, and targeted degradation fixes.
 ## Milestone 7: Launch Ready for Public Use -- Post M1 through M6, we should be at a state where this can be used by others and it should be able to survive and fully function as expected on newer versions beyond 2.1.101
 Phase planning TODO. - MUST be at a state where EVERYTHING ABOVE WILL WORK ACROSS NEWER VERSIONS - NOTHING CAN BE HARDCODED TO JUST 2.1.101 - Our strategy will be automate a test when a new claude code version drops (in a sandbox to keep my system clean) that test should assess what needs to be adjusted if anything - we will also need to wait for the upstream system prompts repo to be updated with latest prompt extractions - we should have a SOVREIGN /update command and a statusline visual.
 This will be 1.0.0 everything after this shall then adhere to the strict semver and git strategy for dev and releases, no more work pushed directly to master.
+
+- **Verification dashboard:** Rich terminal output showing all patches, overrides, flags, and environment state in a single view.
 
 ---
 ### Milestone 7 Retro

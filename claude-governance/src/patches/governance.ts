@@ -551,18 +551,23 @@ const TOOL_LOADER_CODE = [
   `}catch(_e){}`,
 ].join('');
 
-// Zod passthrough shim — injected AFTER _b is built so we can borrow
-// the real Zod passthrough schema from an existing base tool. The CC
-// execution pipeline calls .inputSchema.safeParse() in 10+ places
-// without checking for inputJSONSchema first. External tools that only
-// provide inputJSONSchema crash with "_._zod is not an object".
+// Zod passthrough shim — self-contained passthrough schema that accepts
+// any input. The CC execution pipeline calls tool.inputSchema.safeParse()
+// in toolExecution.ts:615 and .parse() in permissions.ts. External tools
+// only provide inputJSONSchema (plain JSON Schema for the API), not a Zod
+// schema. Without this shim, safeParse validates against whatever schema
+// was borrowed — previously _b[0] (Agent tool), which requires "description"
+// and "prompt" fields, causing InputValidationError on any external tool call.
 const TOOL_ZOD_SHIM_CODE = [
-  `var _zps=_b[0]&&_b[0].inputSchema;`,
-  `if(_zps){for(var _zi=0;_zi<${TOOL_LOADER_SIGNATURE}.length;_zi++){`,
+  `var _zps={`,
+  `safeParse:function(d){return{success:!0,data:d}},`,
+  `parse:function(d){return d}`,
+  `};`,
+  `for(var _zi=0;_zi<${TOOL_LOADER_SIGNATURE}.length;_zi++){`,
   `var _zt=${TOOL_LOADER_SIGNATURE}[_zi];`,
   `if(!_zt.inputSchema)_zt.inputSchema=_zps;`,
-  `if(!_zt.outputSchema&&_b[0].outputSchema)_zt.outputSchema=_b[0].outputSchema;`,
-  `}}`,
+  `if(!_zt.outputSchema)_zt.outputSchema=_zps;`,
+  `}`,
 ].join('');
 
 export const writeToolInjection = (
