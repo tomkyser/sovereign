@@ -89,6 +89,7 @@ and governance-specific `check` command added.
 - **2b:** COMPLETE — clean-room REPL (auto-discovery loader, 9 handlers, coexist/replace modes). Post-testing fixes: replace mode stash, state persistence, IIFE fallback, defensive extraction.
 - **2b-gaps:** COMPLETE — 14/14 gaps + 2 post-testing fixes (parentMessage F17, IIFE script-source). User benchmark: 6.5/7 handlers functional.
 - **2b-gaps-2:** COMPLETE — G15 already working (F18), G9-test/G11-test prompt effectiveness verified
+- **2b-gaps-3:** NEXT — G16-G23: glob ignores .gitignore, model fallback behavior, hooks module, benchmark rewrite. Glob fix (rg-based), 4 safety hooks, binary REPL guidance patch, and prompt override delivered but integration gaps remain.
 - **2c:** Planned — clean-room Tungsten (spec at specs/tungsten-clean-room.md)
 
 ### Binary Vault (from 2a-gaps)
