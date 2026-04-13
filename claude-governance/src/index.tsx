@@ -150,6 +150,7 @@ const main = async () => {
     .description(
       'Restore user authority over Claude Code. Governance patches, prompt overrides, and verification.'
     )
+    .enablePositionalOptions()
     .version(VERSION)
     .option('-d, --debug', 'enable debug mode')
     .option('-v, --verbose', 'enable verbose debug mode (includes diffs)')
@@ -248,6 +249,7 @@ const main = async () => {
   program
     .command('launch')
     .description('Launch Claude Code with governance pre-flight verification')
+    .passThroughOptions()
     .option('--no-verify', 'skip pre-flight governance verification')
     .option('--force-apply', 'reapply governance patches even if state is current')
     .argument('[args...]', 'arguments to pass to Claude Code')

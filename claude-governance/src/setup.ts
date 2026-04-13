@@ -22,6 +22,7 @@ import {
   type ModulesConfig,
   type ModuleContext,
 } from './modules';
+import { installShim, isShimInstalled, isShimInPath, addShimToPath } from './shim';
 
 const lineQueue: string[] = [];
 const lineWaiters: Array<(line: string) => void> = [];
@@ -175,6 +176,9 @@ export async function handleSetup(): Promise<void> {
     // Fresh config
   }
   existingConfig.modules = modulesConfig;
+  if (binaryPath) {
+    existingConfig.ccInstallationPath = binaryPath;
+  }
   await fs.writeFile(configPath, JSON.stringify(existingConfig, null, 2) + '\n', 'utf8');
   console.log(`  ${chalk.green('✓')} ${configPath}`);
 
@@ -245,11 +249,49 @@ export async function handleSetup(): Promise<void> {
     }
   }
 
+  // Claude shim — transparent wrapper
+  const shimInstalled = isShimInstalled();
+  const shimInPath = isShimInPath();
+
+  if (!shimInstalled || !shimInPath) {
+    console.log(chalk.bold('\nClaude Wrapper:\n'));
+    console.log('  Install a transparent wrapper so the regular ' + chalk.cyan('claude') + ' command');
+    console.log('  goes through governance pre-flight automatically.');
+    console.log('  All args (--resume, -p, etc.) pass through unchanged.\n');
+
+    initRL();
+    const installWrapper = await confirm('  Install claude wrapper?');
+    closeRL();
+
+    if (installWrapper) {
+      try {
+        const { shimPath } = await installShim();
+        console.log(chalk.green(`  ✓ Wrapper installed: ${shimPath}`));
+
+        const pathResult = await addShimToPath();
+        if (pathResult?.added) {
+          console.log(chalk.green(`  ✓ PATH added to ${pathResult.profile}`));
+          console.log(chalk.dim(`    Restart your shell or run: source ${pathResult.profile}`));
+        } else if (pathResult && !pathResult.added) {
+          console.log(chalk.dim(`  ○ PATH already configured in ${pathResult.profile}`));
+        } else {
+          console.log(chalk.yellow(`  ⚠ Could not detect shell profile`));
+          console.log(`    Add manually: ${chalk.cyan('export PATH="$HOME/.claude-governance/bin:$PATH"')}`);
+        }
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        console.log(chalk.yellow(`  ⚠ Wrapper install failed: ${msg}`));
+      }
+    }
+  } else {
+    console.log(chalk.green(`\n  ✓ claude wrapper active`));
+  }
+
   // Summary
   console.log(chalk.green.bold('\n✓ Setup complete.\n'));
   console.log('  Next steps:');
+  console.log(`    ${chalk.cyan('claude')}                     — launches with governance (via wrapper)`);
   console.log(`    ${chalk.cyan('claude-governance check')}    — verify governance status`);
-  console.log(`    ${chalk.cyan('claude-governance launch')}   — start Claude Code with governance`);
   console.log(`    ${chalk.cyan('claude-governance modules')}  — view module status`);
   console.log('');
 
