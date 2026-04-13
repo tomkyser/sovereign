@@ -21,6 +21,8 @@ Fix every issue discovered during first live runtime test of tool injection. Bin
 | G8 | Shim reliability — governance wrapper shim breaks CC launch when system is unhealthy | High | Done |
 | G9 | Ensure that tool injection is dynamic** — this feature must survive Claude Code updates - detection must be more robust than just current binary extracted var and fn names. | Medium | Pending |
 | G10 | System Observability — IF governance wrapper or system breaks CC launch needs visual indication | High | Done |
+| G11 | Embedded search tools — verify Glob/Grep exclusion from registry when bfs/ugrep active, confirm tool injection patch preserves exclusion, halt-and-catch-fire if inferior tools leak through | High | Pending |
+| G12 | Embedded search tools — statusline EMB segment must confirm active tools + absence of inferior Glob/Grep, not just binary existence | Medium | Pending |
 
 ## Gap Details
 
@@ -65,6 +67,15 @@ Fix every issue discovered during first live runtime test of tool injection. Bin
 ### G10: System Observability — DONE
 **Problem:** When governance fails and the shim falls through, the user and Claude have no indication that the session is running unprotected.
 **Fix:** Two-part signal chain. (1) Shim writes `shim-fallback.json` marker to config dir before fallback launch, containing timestamp, exit code, and reason. (2) Session-start hook (`governance-verify.cjs`) checks for marker on every session start — if found, renders red `UNPROTECTED` banner to stderr (user sees) and emits `[GOVERNANCE CRITICAL]` to stdout (Claude sees in system-reminder). Marker is consumed (deleted) after reading so it doesn't persist across sessions.
+
+### G11: Embedded Search Tools — Registry Exclusion Verification
+**Problem:** When `EMBEDDED_SEARCH_TOOLS=1` and bfs/ugrep are active, CC's `getAllBaseTools()` is supposed to exclude the inferior `Glob` and `Grep` tools from the registry. But: (a) we haven't verified this works in the minified binary, (b) our tool injection patch modifies `getAllBaseTools()` — we may have broken the exclusion logic, (c) the existing 8-point verification hook only checks that bfs/ugrep/rg binaries respond to argv0 dispatch, not that Glob/Grep are actually absent from the tool list Claude sees.
+**CC source evidence:** `embeddedTools.ts` — `hasEmbeddedSearchTools()` checks `EMBEDDED_SEARCH_TOOLS` env + entrypoint. `primitiveTools.ts:25-26` confirms `getAllBaseTools()` excludes Glob/Grep when true. Multiple agent prompts adjust guidance based on this flag.
+**Fix:** (a) Verify in extracted JS that the conditional exclusion survives minification. (b) Verify our tool injection patch preserves the exclusion branch — the `concat` we append should not re-add Glob/Grep. (c) Add a runtime verification check: after tools are loaded, confirm Glob/Grep are NOT in the tool list when embedded tools are active. Halt and catch fire if they leak through.
+
+### G12: Embedded Search Tools — Statusline Verification
+**Problem:** The EMB statusline segment confirms tool binaries exist but doesn't verify that the inferior tools are actually excluded from the registry. A session could show "EMB 8/8" while still offering Glob/Grep to Claude.
+**Fix:** Extend the embedded tools hook and statusline segment to check tool registry state, not just binary availability. If bfs/ugrep are active but Glob/Grep are still in the registry, show EMB:LEAK warning.
 
 ## Current Binary State
 
