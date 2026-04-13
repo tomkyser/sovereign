@@ -231,3 +231,79 @@ prompt override.
 
 **Future option:** Binary patch `getUsingYourToolsSection()` to detect REPL-only mode
 and return minimal text. Low priority — current approach works.
+
+---
+
+## F13: Replace Mode Requires Tool Stashing (2026-04-13)
+
+**Phase:** 2b gap-closing | **Impact:** Critical architectural fix
+
+Replace mode filters primitives (Read, Write, Edit, Bash, NotebookEdit, Agent) from
+`getAllBaseTools()` return array. But `context.options.tools` is built FROM that return
+array — so REPL's `findTool('Read')` returns null in replace mode. The REPL can't
+delegate to tools that were filtered out.
+
+Ant's REPL avoids this because `getReplPrimitiveTools()` bypasses `getAllBaseTools()`
+entirely, giving the REPL direct tool references outside the registry.
+
+**Fix:** The binary-patched loader stashes filtered tools on the REPL tool object
+(`_replTool._stashedTools = [...]`) BEFORE removing them from the array. REPL's
+`findTool()` checks `selfRef._stashedTools` first, then falls back to
+`context.options.tools`. This gives REPL access to tools the user can't see.
+
+**Lesson:** When one component filters tools and another component delegates to them,
+the delegation path must be considered before the filter is applied.
+
+---
+
+## F14: VM SyntaxError Crosses Realms (2026-04-13)
+
+**Phase:** 2b gap-closing | **Impact:** IIFE fallback detection
+
+`vm.runInContext` throws errors from the sandbox's V8 realm. The sandbox has its own
+`SyntaxError` constructor, different from the outer Node.js realm. So `err instanceof
+SyntaxError` always returns `false` for errors thrown inside the VM.
+
+**Fix:** Use `err.name === 'SyntaxError'` (string-based check) instead of `instanceof`.
+This is a well-known VM gotcha that applies to all error types across realm boundaries.
+
+---
+
+## F15: IIFE Wrapping Kills Variable Persistence (2026-04-13)
+
+**Phase:** 2b gap-closing | **Impact:** State persistence design
+
+Wrapping scripts in `(async () => { ${script} })()` for top-level `await` support
+creates a function scope. All `const`, `let`, and `var` declarations inside the IIFE
+are local to that function — they never touch the VM context and don't persist.
+
+Only bare assignments (`x = 42`) persist in an IIFE because they create implicit
+globals. But `const x = 42` is function-scoped and lost.
+
+**Fix:** Two-pass execution:
+1. Try running script directly (no IIFE). `var` and implicit globals persist on VM
+   context. Fails with SyntaxError if script uses `await` or `return`.
+2. On SyntaxError, fall back to IIFE wrapper. Variables don't persist but `await`
+   and `return` work.
+3. `state` object always persists (it's on the VM context, not in the script scope).
+
+**Lesson:** Any VM-based REPL that wraps for async support must explicitly address
+the persistence trade-off. The Ant REPL likely handles this — worth investigating
+if their approach is better.
+
+---
+
+## F16: WebFetch Returns AI-Processed Content (2026-04-13)
+
+**Phase:** 2b gap-closing | **Impact:** REPL fetch handler behavior
+
+CC's WebFetch tool does NOT return raw HTTP response bodies. It returns an object with:
+- `bytes`, `code`, `codeText`, `url`, `durationMs` — metadata
+- `result` — an AI-generated markdown **summary** of the response content
+
+The raw response (e.g., JSON from httpbin.org) is transformed into a narrative
+description. Users expecting `fetch()` in the REPL to behave like `node-fetch` or
+browser `fetch()` will get summarized text instead of raw data.
+
+**This is CC's design, not our bug.** But it needs documentation in the REPL prompt
+and user-facing docs. Users who need raw HTTP should use `bash('curl ...')` instead.
