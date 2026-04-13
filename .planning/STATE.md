@@ -39,8 +39,9 @@ and governance-specific `check` command added.
 | Command | Description |
 |---------|-------------|
 | `(default)` / `--apply` | Apply all governance patches + prompt overrides |
+| `launch [-- args]` | Pre-flight verify + launch CC (wrapper mode) |
 | `--restore` | Restore binary to original state from backup |
-| `check` | Verify governance signatures against extracted JS |
+| `check` | Verify 13 governance signatures against extracted JS |
 | `--list-patches` | List available governance patches |
 | `--list-system-prompts` | List available prompt overrides |
 | `unpack <path>` | Extract JS from native binary |
@@ -71,7 +72,7 @@ and governance-specific `check` command added.
 - **1a:** COMPLETE — fork, strip, governance patches, check command
 - **1a-gaps:** COMPLETE — contamination detection, already-applied, dead file cleanup, warning suppression
 - **1a-verification-foundation:** COMPLETE — 13-entry registry, per-override verification, state.json
-- **1b:** NEXT — wrapper layer
-- **1c:** Planned — 1b-informed verification
+- **1b:** COMPLETE — launch subcommand, pre-flight verification, process control
+- **1c:** NEXT — 1b-informed verification
 
 See `.planning/ROADMAP.md` for full details.

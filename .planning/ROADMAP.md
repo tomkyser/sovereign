@@ -46,6 +46,13 @@ Distributed as modular NPM packages — users choose what they want.
 - [x] state.json output from both check and apply flows
 - [x] 13/13 SOVEREIGN verified on 2.1.101
 
+### Phase 1b: Wrapper Layer
+- [x] `launch` subcommand with pre-flight governance verification
+- [x] Process spawning: stdio inherit, signal forwarding, exit code propagation
+- [x] Version-change detection via state.json ccVersion comparison
+- [x] Environment variable injection from config.json
+- [x] Options: --no-verify, --force-apply
+
 ### Embedded Search Tools
 - [x] Activation: `EMBEDDED_SEARCH_TOOLS=1` — bfs 4.1, ugrep 7.5.0, rg 14.1.1
 - [x] Verification hook: 8-point halt-and-catch-fire check
@@ -102,18 +109,19 @@ Standalone verification improvements — no dependency on 1b wrapper.
 - [x] **Apply state output:** `state.json` written to config dir by both `check` and `apply` flows. Contains timestamp, version, per-check results, overall status.
 - [x] Verifies against EXTRACTED JS via `extractClaudeJsFromNativeInstallation`, never `strings`.
 
-### 1b: Wrapper Layer
+### 1b: Wrapper Layer [COMPLETE]
 
 **References:**
 - Wrapper architecture: https://github.com/0Chencc/clawgod/tree/main | https://clawgod.0chen.cc/
 - Hooks-based governance (active on Tom's setup): https://github.com/LZong-tw/clawback
 - Active hooks: `~/.claude/hooks/governance-verify.cjs`, `embedded-tools-verify.cjs`, `statusline-combined.cjs`
 
-- [ ] ClawGod-style wrapper — our tool becomes entry point, spawns real CC binary
-- [ ] Pre-flight governance verification before CC launch
-- [ ] Process-level control over CC invocation
-- [ ] Environment variable injection at wrapper level
-- [ ] Version-change detection at launch (auto-reapply or block)
+- [x] `launch` subcommand — pre-flight verification, spawns CC binary with inherited stdio
+- [x] Pre-flight: read state.json, compare ccVersion, auto-reapply on mismatch
+- [x] Process control: signal forwarding (SIGINT/SIGTERM/SIGHUP), exit code propagation
+- [x] Environment variable injection from config.json settings.governance.env
+- [x] Version-change detection: state.json ccVersion vs detected binary version
+- [x] Options: `--no-verify` (skip pre-flight), `--force-apply` (reapply even if current)
 
 ### 1c: Verification Engine
 1b-informed verification — depends on wrapper design decisions.

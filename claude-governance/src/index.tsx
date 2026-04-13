@@ -229,6 +229,21 @@ const main = async () => {
     });
 
   program
+    .command('launch')
+    .description('Launch Claude Code with governance pre-flight verification')
+    .option('--no-verify', 'skip pre-flight governance verification')
+    .option('--force-apply', 'reapply governance patches even if state is current')
+    .argument('[args...]', 'arguments to pass to Claude Code')
+    .action(async (args: string[], cmdOptions: { verify?: boolean; forceApply?: boolean }) => {
+      const options = program.opts();
+      if (options.debug) enableDebug();
+      await handleLaunch(args, {
+        skipVerify: cmdOptions.verify === false,
+        forceApply: cmdOptions.forceApply === true,
+      });
+    });
+
+  program
     .command('unpack')
     .argument('<output-js-path>', 'path to write extracted JS')
     .argument('[binary-path]', 'path to native binary (default: auto-detect)')
@@ -390,7 +405,7 @@ async function handleApplyMode(
             : criticalFail.length > 0
               ? 'DEGRADED'
               : 'PARTIAL';
-          await writeVerificationState(verifyResults, status, binaryForVerify);
+          await writeVerificationState(verifyResults, status, binaryForVerify, ccInstInfo.version);
           console.log(chalk.dim(`  Verified: ${status} (${passing}/${verifyResults.length})`));
         }
       } catch {
@@ -697,10 +712,40 @@ function runVerification(js: string): CheckResult[] {
   return results;
 }
 
+interface VerificationState {
+  timestamp: string;
+  governanceVersion: string;
+  ccVersion?: string;
+  binaryPath: string;
+  status: string;
+  checks: Array<{
+    id: string;
+    name: string;
+    pass: boolean;
+    critical: boolean;
+    details?: string;
+  }>;
+  passCount: number;
+  totalCount: number;
+}
+
+async function readVerificationState(): Promise<VerificationState | null> {
+  const fsP = await import('node:fs/promises');
+  const pathM = await import('node:path');
+  const statePath = pathM.join(CONFIG_DIR, 'state.json');
+  try {
+    const raw = await fsP.readFile(statePath, 'utf8');
+    return JSON.parse(raw) as VerificationState;
+  } catch {
+    return null;
+  }
+}
+
 async function writeVerificationState(
   results: CheckResult[],
   status: string,
   binaryPath: string,
+  ccVersion?: string,
 ): Promise<void> {
   const fsP = await import('node:fs/promises');
   const pathM = await import('node:path');
@@ -708,9 +753,10 @@ async function writeVerificationState(
   const stateDir = CONFIG_DIR;
   await fsP.mkdir(stateDir, { recursive: true });
 
-  const state = {
+  const state: VerificationState = {
     timestamp: new Date().toISOString(),
     governanceVersion: '0.1.0',
+    ccVersion,
     binaryPath,
     status,
     checks: results.map(r => ({
@@ -733,6 +779,7 @@ async function handleCheck(binaryPath?: string): Promise<void> {
 
   // Find the binary
   let targetPath = binaryPath;
+  let detectedVersion: string | undefined;
   if (!targetPath) {
     try {
       const config = await readConfigFile();
@@ -742,6 +789,7 @@ async function handleCheck(binaryPath?: string): Promise<void> {
       } else if (result.startupCheckInfo?.ccInstInfo?.cliPath) {
         targetPath = result.startupCheckInfo.ccInstInfo.cliPath;
       }
+      detectedVersion = result.startupCheckInfo?.ccInstInfo?.version;
     } catch {
       // Fall through
     }
@@ -828,9 +876,161 @@ async function handleCheck(binaryPath?: string): Promise<void> {
   }
 
   // Write verification state
-  await writeVerificationState(results, status, targetPath);
+  await writeVerificationState(results, status, targetPath, detectedVersion);
 
   process.exit(criticalFail.length > 0 ? 1 : 0);
+}
+
+// =============================================================================
+// Launch Mode (Wrapper)
+// =============================================================================
+
+async function handleLaunch(
+  args: string[],
+  options: { skipVerify?: boolean; forceApply?: boolean },
+): Promise<void> {
+  const { spawn } = await import('node:child_process');
+
+  // Detect CC installation
+  let ccInstInfo;
+  try {
+    const config = await readConfigFile();
+    const result = await startupCheck({ interactive: false }, config);
+    ccInstInfo = result.startupCheckInfo?.ccInstInfo;
+  } catch {
+    // Fall through
+  }
+
+  if (!ccInstInfo) {
+    console.error(chalk.red('Could not find Claude Code installation.'));
+    process.exit(1);
+  }
+
+  const binaryPath = ccInstInfo.nativeInstallationPath ?? ccInstInfo.cliPath;
+  if (!binaryPath) {
+    console.error(chalk.red('Could not determine Claude Code binary path.'));
+    process.exit(1);
+  }
+
+  // Pre-flight governance verification
+  if (!options.skipVerify) {
+    let needsApply = options.forceApply === true;
+
+    if (!needsApply) {
+      const state = await readVerificationState();
+      if (!state) {
+        console.log(chalk.yellow('No governance state found — applying patches...'));
+        needsApply = true;
+      } else if (state.ccVersion !== ccInstInfo.version) {
+        console.log(
+          chalk.yellow(
+            `CC version changed (${state.ccVersion} → ${ccInstInfo.version}) — reapplying...`
+          )
+        );
+        needsApply = true;
+      } else if (state.status !== 'SOVEREIGN') {
+        console.log(chalk.yellow(`Governance ${state.status} — reapplying...`));
+        needsApply = true;
+      } else {
+        console.log(chalk.green(`Governance: SOVEREIGN (${state.passCount}/${state.totalCount})`));
+      }
+    }
+
+    if (needsApply) {
+      try {
+        const config = await readConfigFile();
+        await handleApplyForLaunch(config, ccInstInfo);
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        console.log(chalk.yellow(`⚠ Governance apply failed: ${msg}`));
+        console.log(chalk.yellow('  Launching without governance patches.'));
+      }
+    }
+  }
+
+  // Build environment — merge config env overrides
+  const launchEnv = { ...process.env };
+  try {
+    const config = await readConfigFile();
+    const govConfig = (config.settings as unknown as Record<string, unknown>)
+      .governance as Record<string, unknown> | undefined;
+    const envOverrides = govConfig?.env as Record<string, string> | undefined;
+    if (envOverrides) {
+      for (const [key, value] of Object.entries(envOverrides)) {
+        launchEnv[key] = String(value);
+      }
+    }
+  } catch {
+    // Config read failure is non-fatal for env injection
+  }
+
+  // Spawn CC with inherited stdio and signal forwarding
+  console.log(chalk.dim(`Launching Claude Code ${ccInstInfo.version}...`));
+
+  const child = spawn(binaryPath, args, {
+    stdio: 'inherit',
+    env: launchEnv,
+  });
+
+  const signals: NodeJS.Signals[] = ['SIGINT', 'SIGTERM', 'SIGHUP'];
+  for (const sig of signals) {
+    process.on(sig, () => {
+      child.kill(sig);
+    });
+  }
+
+  child.on('exit', (code, signal) => {
+    if (signal) {
+      process.kill(process.pid, signal);
+    } else {
+      process.exit(code ?? 1);
+    }
+  });
+
+  child.on('error', (err) => {
+    console.error(chalk.red(`Failed to launch Claude Code: ${err.message}`));
+    process.exit(1);
+  });
+}
+
+async function handleApplyForLaunch(
+  config: import('./types').TweakccConfig,
+  ccInstInfo: import('./types').ClaudeCodeInstallationInfo,
+): Promise<void> {
+  await preloadStringsFile(ccInstInfo.version);
+  const { results } = await applyCustomization(config, ccInstInfo, null);
+
+  const applied = results.filter(r => r.applied).length;
+  const failed = results.filter(r => r.failed).length;
+
+  if (failed > 0) {
+    console.log(chalk.yellow(`  Applied ${applied}, failed ${failed}`));
+  } else {
+    console.log(chalk.green(`  Applied ${applied} patches`));
+  }
+
+  // Post-apply verification + state.json
+  const binaryForVerify = ccInstInfo.nativeInstallationPath ?? ccInstInfo.cliPath;
+  if (binaryForVerify) {
+    try {
+      const verifyBuffer = await extractClaudeJsFromNativeInstallation(binaryForVerify);
+      if (verifyBuffer) {
+        const verifyJs = verifyBuffer.toString('utf8');
+        const verifyResults = runVerification(verifyJs);
+        const failing = verifyResults.filter(r => !r.pass);
+        const criticalFail = failing.filter(r => r.critical);
+        const status = failing.length === 0
+          ? 'SOVEREIGN'
+          : criticalFail.length > 0
+            ? 'DEGRADED'
+            : 'PARTIAL';
+        await writeVerificationState(verifyResults, status, binaryForVerify, ccInstInfo.version);
+        console.log(chalk.green(`  Governance: ${status} (${verifyResults.filter(r => r.pass).length}/${verifyResults.length})`));
+      }
+    } catch {
+      // Verification is best-effort
+    }
+  }
 }
 
 main();

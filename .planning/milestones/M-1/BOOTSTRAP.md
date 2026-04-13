@@ -14,5 +14,5 @@ cd /Users/tom.kyser/dev/claude-code-patches/claude-governance
 node dist/index.mjs check
 ```
 
-**Completed:** 1a, 1a-gaps, 1a-verification-foundation
-**Next:** 1b (wrapper layer — ClawGod-style entry point, pre-flight verification, process control)
+**Completed:** 1a, 1a-gaps, 1a-verification-foundation, 1b
+**Next:** 1c (1b-informed verification — pre-flight API, version-change logic, hooks-based verification)

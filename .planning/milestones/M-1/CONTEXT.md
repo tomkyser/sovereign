@@ -17,8 +17,8 @@
 | 1a: Fork & Strip | COMPLETE |
 | 1a-gaps: Gap Resolutions | COMPLETE |
 | 1a-verification-foundation | COMPLETE |
-| 1b: Wrapper Layer | NEXT |
-| 1c: Verification Engine (1b-informed) | Planned |
+| 1b: Wrapper Layer | COMPLETE |
+| 1c: Verification Engine (1b-informed) | NEXT |
 | 1d: Modular Architecture | Planned |
 | 1e: CLI & Distribution | Planned |
 
