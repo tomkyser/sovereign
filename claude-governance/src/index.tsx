@@ -46,6 +46,14 @@ import {
   writeVerificationState,
   deriveStatus,
 } from './verification';
+import {
+  getVerificationRegistry,
+  getEnabledModules,
+  getAllModules,
+  applyModules,
+  type ModulesConfig,
+  type ModuleContext,
+} from './modules';
 
 // =============================================================================
 // Invocation Command Detection
@@ -249,6 +257,15 @@ const main = async () => {
     });
 
   program
+    .command('modules')
+    .description('List governance modules and their status')
+    .action(async () => {
+      const options = program.opts();
+      if (options.debug) enableDebug();
+      await handleModules();
+    });
+
+  program
     .command('unpack')
     .argument('<output-js-path>', 'path to write extracted JS')
     .argument('[binary-path]', 'path to native binary (default: auto-detect)')
@@ -394,14 +411,33 @@ async function handleApplyMode(
       console.log(chalk.green('All governance patches applied successfully.'));
     }
 
-    // Post-apply verification — run check against the patched binary and write state.json
+    // Run module apply (env-flags, etc.)
+    const modulesConfig = readModulesConfig();
     const binaryForVerify = ccInstInfo.nativeInstallationPath ?? ccInstInfo.cliPath;
     if (binaryForVerify) {
+      const moduleContext: ModuleContext = {
+        configDir: CONFIG_DIR,
+        ccVersion: ccInstInfo.version,
+        binaryPath: binaryForVerify,
+      };
+      const moduleResults = await applyModules(moduleContext, modulesConfig);
+      for (const [modId, modResult] of moduleResults) {
+        if (modResult.applied) {
+          console.log(chalk.green(`  ✓ ${modId}: ${modResult.message}`));
+        } else if (modResult.message) {
+          console.log(chalk.dim(`  ○ ${modId}: ${modResult.message}`));
+        }
+      }
+    }
+
+    // Post-apply verification — run check against the patched binary and write state.json
+    if (binaryForVerify) {
       try {
+        const registry = getVerificationRegistry(modulesConfig);
         const verifyBuffer = await extractClaudeJsFromNativeInstallation(binaryForVerify);
         if (verifyBuffer) {
           const verifyJs = verifyBuffer.toString('utf8');
-          const verifyResults = runVerification(verifyJs);
+          const verifyResults = runVerification(verifyJs, registry);
           const status = deriveStatus(verifyResults);
           await writeVerificationState(verifyResults, status, binaryForVerify, ccInstInfo.version);
           const passing = verifyResults.filter(r => r.pass).length;
@@ -705,7 +741,8 @@ async function handleCheck(binaryPath?: string): Promise<void> {
     }
   }
 
-  const results: CheckResult[] = runVerification(js);
+  const registry = getVerificationRegistry(readModulesConfig());
+  const results: CheckResult[] = runVerification(js, registry);
   const status = deriveStatus(results);
 
   // --- Display results ---
@@ -722,7 +759,7 @@ async function handleCheck(binaryPath?: string): Promise<void> {
 
   for (const cat of categories) {
     const catResults = results.filter(
-      r => VERIFICATION_REGISTRY.find(e => e.id === r.id)?.category === cat.key
+      r => registry.find(e => e.id === r.id)?.category === cat.key
     );
     if (catResults.length === 0) continue;
 
@@ -884,14 +921,31 @@ async function handleApplyForLaunch(
     console.log(chalk.green(`  Applied ${applied} patches`));
   }
 
-  // Post-apply verification + state.json
+  // Run module apply
+  const modulesConfig = readModulesConfig();
   const binaryForVerify = ccInstInfo.nativeInstallationPath ?? ccInstInfo.cliPath;
   if (binaryForVerify) {
+    const moduleContext: ModuleContext = {
+      configDir: CONFIG_DIR,
+      ccVersion: ccInstInfo.version,
+      binaryPath: binaryForVerify,
+    };
+    const moduleResults = await applyModules(moduleContext, modulesConfig);
+    for (const [modId, modResult] of moduleResults) {
+      if (modResult.applied) {
+        console.log(chalk.green(`  ✓ ${modId}: ${modResult.message}`));
+      }
+    }
+  }
+
+  // Post-apply verification + state.json
+  if (binaryForVerify) {
     try {
+      const registry = getVerificationRegistry(modulesConfig);
       const verifyBuffer = await extractClaudeJsFromNativeInstallation(binaryForVerify);
       if (verifyBuffer) {
         const verifyJs = verifyBuffer.toString('utf8');
-        const verifyResults = runVerification(verifyJs);
+        const verifyResults = runVerification(verifyJs, registry);
         const status = deriveStatus(verifyResults);
         await writeVerificationState(verifyResults, status, binaryForVerify, ccInstInfo.version);
         const passing = verifyResults.filter(r => r.pass).length;
@@ -901,6 +955,82 @@ async function handleApplyForLaunch(
       // Verification is best-effort
     }
   }
+}
+
+// =============================================================================
+// Modules
+// =============================================================================
+
+function readModulesConfig(): ModulesConfig | undefined {
+  const fsSync = require('node:fs') as typeof import('node:fs');
+  const pathM = require('node:path') as typeof import('node:path');
+  try {
+    const configPath = pathM.join(CONFIG_DIR, 'config.json');
+    const raw = fsSync.readFileSync(configPath, 'utf8');
+    const config = JSON.parse(raw);
+    return config.modules as ModulesConfig | undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+async function handleModules(): Promise<void> {
+  const modulesConfig = readModulesConfig();
+  const all = getAllModules();
+  const enabled = getEnabledModules(modulesConfig);
+  const enabledIds = new Set(enabled.map(m => m.id));
+
+  console.log(chalk.blue.bold('Governance Modules\n'));
+
+  // Detect CC for module status
+  let moduleContext: ModuleContext | null = null;
+  try {
+    const config = await readConfigFile();
+    const result = await startupCheck({ interactive: false }, config);
+    const ccInstInfo = result.startupCheckInfo?.ccInstInfo;
+    if (ccInstInfo) {
+      const binaryPath = ccInstInfo.nativeInstallationPath ?? ccInstInfo.cliPath;
+      if (binaryPath) {
+        moduleContext = {
+          configDir: CONFIG_DIR,
+          ccVersion: ccInstInfo.version,
+          binaryPath,
+        };
+      }
+    }
+  } catch {
+    // Status check is best-effort
+  }
+
+  for (const mod of all) {
+    const isEnabled = enabledIds.has(mod.id);
+    const icon = isEnabled ? chalk.green('●') : chalk.dim('○');
+    const tag = mod.required ? chalk.dim(' (required)') : '';
+    console.log(`  ${icon} ${chalk.bold(mod.name)}${tag}`);
+    console.log(`    ${chalk.gray(mod.description)}`);
+
+    if (isEnabled && mod.getStatus && moduleContext) {
+      try {
+        const status = await mod.getStatus(moduleContext);
+        const healthIcon = status.healthy ? chalk.green('✓') : chalk.yellow('⚠');
+        console.log(`    ${healthIcon} ${chalk.gray(status.details ?? '')}`);
+      } catch {
+        // Status check failed — skip
+      }
+    }
+
+    if (mod.verificationEntries.length > 0) {
+      console.log(`    ${chalk.dim(`${mod.verificationEntries.length} verification entries`)}`);
+    }
+    console.log('');
+  }
+
+  console.log(
+    chalk.dim(
+      'Configure modules in config.json:\n' +
+      '  { "modules": { "env-flags": false } }\n'
+    )
+  );
 }
 
 main();

@@ -1,5 +1,5 @@
 import { CONFIG_DIR } from './config';
-import { VERIFICATION_REGISTRY } from './patches/governance';
+import type { VerificationEntry } from './patches/governance';
 
 // =============================================================================
 // Types
@@ -42,10 +42,13 @@ export function matchEntry(
   return typeof pattern === 'string' ? js.includes(pattern) : pattern.test(js);
 }
 
-export function runVerification(js: string): CheckResult[] {
+export function runVerification(
+  js: string,
+  registry: VerificationEntry[],
+): CheckResult[] {
   const results: CheckResult[] = [];
 
-  for (const entry of VERIFICATION_REGISTRY) {
+  for (const entry of registry) {
     const hasSig = entry.signature ? matchEntry(js, entry.signature) : true;
     const hasAntiSig = entry.antiSignature
       ? matchEntry(js, entry.antiSignature)
