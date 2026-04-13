@@ -86,7 +86,7 @@ and governance-specific `check` command added.
 - **M-1 Retro:** COMPLETE — 18 gaps fixed, canary→Phase 3, dashboard→deferred
 - **2a:** COMPLETE — tool injection patch, external tool loader, transparent claude shim
 - **2a-gaps:** COMPLETE — 12/12 gaps closed. 15/15 SOVEREIGN on 2.1.101
-- **2b:** PLANNED — clean-room REPL (blocked on 2a-gaps)
+- **2b:** NEXT — clean-room REPL (unblocked, spec at specs/repl-clean-room.md)
 
 ### Binary Vault (from 2a-gaps)
 - **Module:** `src/binaryVault.ts` — XDG path discovery, GCS download, SHA256 verification, immutable locking
