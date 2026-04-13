@@ -68,6 +68,13 @@ Distributed as modular NPM packages — users choose what they want.
 - [x] Module-driven verification in check/apply/launch flows
 - [x] Config override: `{ "modules": { "env-flags": false } }`
 
+### Phase 1e: CLI & Distribution
+- [x] NPM `files` whitelist — dist/, recent prompt data, scripts/ (2.2MB package)
+- [x] Postinstall welcome message — global installs only, never throws
+- [x] `setup` subcommand — interactive first-run wizard with module selection, apply + verify
+- [x] Readline line-queue pattern for reliable piped stdin handling
+- [x] Older prompt versions download on demand from GitHub
+
 ### Embedded Search Tools
 - [x] Activation: `EMBEDDED_SEARCH_TOOLS=1` — bfs 4.1, ugrep 7.5.0, rg 14.1.1
 - [x] Verification hook: 8-point halt-and-catch-fire check
@@ -163,11 +170,13 @@ Standalone verification improvements — no dependency on 1b wrapper.
 - [ ] *Deferred:* Optional Clawback install module (https://github.com/LZong-tw/clawback) — stub for 1e or Phase 2
 
 
-### 1e: CLI & Distribution
-- [ ] NPX-runnable: `npx claude-governance apply`
-- [ ] NPM installable: `npm install -g claude-governance`
-- [ ] Post-install verification + first-run setup
-- [ ] First-run setup wizard (what modules do you want?)
+### 1e: CLI & Distribution [COMPLETE]
+- [x] NPX-runnable: `npx claude-governance apply`
+- [x] NPM installable: `npm install -g claude-governance`
+- [x] Post-install welcome + suggested next steps
+- [x] First-run setup wizard — interactive module selection, apply + verify
+- [x] `files` whitelist — 2.2MB package, recent prompt data only (older versions download on demand)
+- [x] Readline line-queue for reliable piped stdin handling
 
 ---
 

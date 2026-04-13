@@ -7,7 +7,7 @@
 `claude-governance` — a fork of tweakcc that strips cosmetic patches and adds governance patches + prompt overrides to restore user authority over Claude Code.
 
 **Location:** `/Users/tom.kyser/dev/claude-code-patches/claude-governance/`
-**Build:** `pnpm build` → 135KB | **Verify:** `node dist/index.mjs check` → 13/13 SOVEREIGN
+**Build:** `pnpm build` → 139KB | **Package:** 2.2MB | **Verify:** `node dist/index.mjs check` → 13/13 SOVEREIGN
 **CC Version:** 2.1.101 (native, arm64-darwin, pinned via DISABLE_AUTOUPDATER=1)
 
 ## Current State
@@ -20,7 +20,7 @@
 | 1b: Wrapper Layer | COMPLETE |
 | 1c: Verification Engine (1b-informed) | COMPLETE |
 | 1d: Modular Architecture | COMPLETE |
-| 1e: CLI & Distribution | NEXT |
+| 1e: CLI & Distribution | COMPLETE |
 
 ## What's Applied (6/6 SOVEREIGN)
 
@@ -35,6 +35,8 @@
 | `src/index.tsx` | CLI entry — apply (default), check, launch, restore, unpack, repack |
 | `src/verification.ts` | Verification API — runVerification(js, registry), read/writeState, deriveStatus |
 | `src/modules/` | Module system — types, registry, core module, env-flags module |
+| `src/setup.ts` | First-run setup wizard — module selection, apply, verify |
+| `scripts/postinstall.mjs` | Postinstall welcome message for global installs |
 | `src/patches/index.ts` | Patch orchestrator — prompt overrides → gate resolution → governance |
 | `src/patches/governance.ts` | 5 governance patches + `isContentPatched()` + gate resolution |
 | `src/config.ts` | Config dir resolution (~/.claude-governance with ~/.tweakcc fallback) |
