@@ -85,8 +85,8 @@ Distributed as modular NPM packages — users choose what they want.
 - [x] GOV + EMB status segments in combined statusline
 
 ### Design Specs
-- [x] Tungsten clean-room spec v0.2 (`specs/tungsten-clean-room.md`)
-- [x] REPL clean-room spec v0.2 (`specs/repl-clean-room.md`)
+- [x] Tungsten clean-room spec v0.2 (`.planning/specs/tungsten-clean-room.md`)
+- [x] REPL clean-room spec v1.0 (`.planning/specs/repl-clean-room.md`) — updated with probe findings, Option B, config modes
 
 ---
 
@@ -192,8 +192,9 @@ binary patching of the tool registry.
 
 **References:**
 - CC leaked source (tool registry, AgentTool, runAgent): `/Users/tom.kyser/dev/cc-source/`
-- REPL design spec: `specs/repl-clean-room.md`
-- Tungsten design spec: `specs/tungsten-clean-room.md`
+- REPL design spec: `.planning/specs/repl-clean-room.md`
+- Tungsten design spec: `.planning/specs/tungsten-clean-room.md`
+- Findings: `.planning/FINDINGS.md` (F1, F2, F7, F9, F10, F11 inform REPL design)
 
 ### Phase 2a: Tool Injection Mechanism [COMPLETE]
 - [x] Patch `getAllBaseTools()` (minified `Ut()`) — structural pattern matching, version-resilient
@@ -219,10 +220,14 @@ binary patching of the tool registry.
 - [x] **G12: EMB statusline** — fixed state path, registry exclusion check, EMB:LEAK indicator
 
 ### Phase 2b: Clean-Room REPL
-- [ ] Implement per spec: `specs/repl-clean-room.md`
-- [ ] Node VM with persistent context across calls
-- [ ] Coexists with primitive tools (user toggles replace vs supplement)
-- [ ] Operation tracking for audit trail
+Full spec: `.planning/specs/repl-clean-room.md` v1.0
+- [ ] **Auto-discovery tool loader** — generic index.js scans tools dir, deployTools() mirrors deployPromptOverrides pattern
+- [ ] **REPL core** — Node VM with persistent context, 9 inner handlers (read/write/edit/bash/grep/glob/notebook_edit/fetch/agent) delegating to CC tools via context.options.tools (Option B — Finding F1)
+- [ ] **Console capture** — captured stdout/stderr, operation tracking with per-call logging, structured result formatting
+- [ ] **Configuration** — coexist (default) vs replace mode in config.json; replace mode filters primitives from loader + deploys REPL-focused prompt override
+- [ ] **Prompt strategy** — comprehensive prompt() teaching batch patterns; "Using your tools" override for replace mode (mirrors Ant behavior per Finding F2)
+- [ ] **Verification** — file-existence checks for tools dir, index.js, repl.js in check command
+- [ ] **Safety** — CC permission delegation via Option B, VM timeout, AbortController, safe require allowlist, result size limits
 
 ### Phase 2c: Clean-Room Tungsten
 - [ ] Implement per spec: `specs/tungsten-clean-room.md`

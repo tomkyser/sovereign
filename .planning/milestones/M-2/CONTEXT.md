@@ -90,12 +90,16 @@ Return `{ data: string }` for simple text results. The loader provides defaults 
 
 ## Design Specs
 
-- REPL: `/Users/tom.kyser/dev/claude-code-patches/specs/repl-clean-room.md`
-- Tungsten: `/Users/tom.kyser/dev/claude-code-patches/specs/tungsten-clean-room.md`
+- REPL: `.planning/specs/repl-clean-room.md` (v1.0 — updated with probe findings, Option B, config modes)
+- Tungsten: `.planning/specs/tungsten-clean-room.md` (v0.2 — draft)
+- Findings: `.planning/FINDINGS.md` (F1-F11, architecture-informing discoveries)
 
 ## External References
 
-- CC leaked source: `/Users/tom.kyser/dev/cc-source/`
+- CC leaked source: `/Users/tom.kyser/dev/cc-source/collection-claude-code-source-code/claude-code-source-code/src/`
 - Tool.ts (types): `cc-source/.../src/Tool.ts`
 - tools.ts (registry): `cc-source/.../src/tools.ts`
+- REPLTool constants: `cc-source/.../src/tools/REPLTool/constants.ts`
+- REPLTool primitives: `cc-source/.../src/tools/REPLTool/primitiveTools.ts`
+- Prompt assembly: `cc-source/.../src/constants/prompts.ts` (lines 269-285 = REPL prompt handling)
 - MCP tool creation: `cc-source/.../src/services/mcp/client.ts`

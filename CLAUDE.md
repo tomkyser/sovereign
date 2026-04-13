@@ -64,6 +64,8 @@ These checks prevent the kind of compounding errors that waste entire sessions.
 6. **Verify before building.** If the roadmap says something is "COMPLETE," verify it
    actually exists and works before building on top of it. Check git history, run the
    tool, inspect the output. Claims of completion are hypotheses until verified.
+7. **Read findings.** `.planning/FINDINGS.md` has architecture-informing discoveries
+   from prior sessions. These are facts that shape decisions — check before designing.
 
 ### On Every Decision
 1. **Align with the vision.** Does this decision serve the project intent described in
@@ -144,6 +146,7 @@ This process is mandatory. Every phase, every session, every agent. No shortcuts
 .planning/
   ROADMAP.md                          # Global roadmap — always current
   STATE.md                            # Global state — folds in from phase trackers
+  FINDINGS.md                         # Notable discoveries — goldmine moments, architecture-informing facts
   journals/                           # Session journals — named session-YYYY-MM-DD[-suffix].md
   reports/                            # Research reports, analysis docs
   research/                           # Dated research findings
@@ -176,24 +179,27 @@ This process is mandatory. Every phase, every session, every agent. No shortcuts
 9. Atomic git commits at each completed task
 10. Update phase tracker with decisions, issues found, and step completions
 11. Keep `CONTEXT.md` current — update after every significant decision or finding
+12. **Record findings.** When you discover something architecture-informing, surprising,
+    or goldmine-level useful — add it to `.planning/FINDINGS.md` with date, phase, and
+    impact. These persist across sessions and inform future design decisions.
 
 **On phase end:**
-12. Mark all tasks completed or delete stale ones
-13. Update phase tracker status to COMPLETE
-14. Generate handoff doc in `handoffs/HANDOFF-PHASE-{id}.md`
-15. Update `ROADMAP.md` — mark phase complete in both active and completed sections
-16. Update `STATE.md` — fold phase tracker into global state
-17. Update `CONTEXT.md` — refresh current state for next phase/agent
-18. Update `BOOTSTRAP.md` — point to next phase AND include path to latest handoff
-19. Commit all doc updates atomically
+13. Mark all tasks completed or delete stale ones
+14. Update phase tracker status to COMPLETE
+15. Generate handoff doc in `handoffs/HANDOFF-PHASE-{id}.md`
+16. Update `ROADMAP.md` — mark phase complete in both active and completed sections
+17. Update `STATE.md` — fold phase tracker into global state
+18. Update `CONTEXT.md` — refresh current state for next phase/agent
+19. Update `BOOTSTRAP.md` — point to next phase AND include path to latest handoff
+20. Commit all doc updates atomically
 
 ### On Milestone End (After All Phases in M-{n})
 
-20. Re-read `VISION.md` — verify milestone outcome aligns with project intent
-21. Generate retrospective in `retrospectives/RETRO-M-{n}.md`
-22. Evaluate pinned retro items from roadmap
-23. Update `STATE.md` — milestone-level state summary
-24. Create next milestone directory `M-{n+1}/` with empty CONTEXT.md
+21. Re-read `VISION.md` — verify milestone outcome aligns with project intent
+22. Generate retrospective in `retrospectives/RETRO-M-{n}.md`
+23. Evaluate pinned retro items from roadmap
+24. Update `STATE.md` — milestone-level state summary
+25. Create next milestone directory `M-{n+1}/` with empty CONTEXT.md
 
 ### Agent Context Protocol
 
