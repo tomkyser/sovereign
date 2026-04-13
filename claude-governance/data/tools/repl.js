@@ -644,13 +644,13 @@ return { name: pkg.name, depCount: deps.length, deps };
         returnValue = await returnValue;
       }
     } catch (syncErr) {
-      // G10: Only retry with IIFE for patterns that need function wrapping
-      // (await outside async, return outside function). Genuine syntax errors
-      // (typos, missing braces) are reported directly — wrapping them in IIFE
-      // produces confusing secondary errors.
+      // G10: Only retry with IIFE when the script uses await/return keywords.
+      // Check SCRIPT SOURCE, not error message — V8 error wording varies
+      // (e.g. "for await" gives "Unexpected reserved word", not mentioning await).
+      // If script doesn't use these keywords, the SyntaxError is genuine.
       const needsWrapping = syncErr.name === 'SyntaxError' && (
-        /\bawait\b/i.test(syncErr.message) ||
-        /\bIllegal return\b/i.test(syncErr.message)
+        /\bawait\b/.test(script) ||
+        /\breturn\b/.test(script)
       );
       if (needsWrapping) {
         try {
