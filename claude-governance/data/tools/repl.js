@@ -348,6 +348,10 @@ function getOrCreateVM() {
     read, write, edit, bash, grep, glob, notebook_edit,
     fetch: fetch_url, agent,
 
+    // Persistent state object — survives across REPL calls even in async scripts
+    // Use: state.myVar = 42 in one call, state.myVar in the next
+    state: {},
+
     // Console
     console: capturedConsole,
 
@@ -533,10 +537,18 @@ const deps = Object.keys(pkg.dependencies || {});
 return { name: pkg.name, depCount: deps.length, deps };
 \`\`\`
 
+## State Persistence
+- Scripts WITHOUT \`await\`: \`var\` declarations and bare assignments persist across calls
+  - \`var x = 42\` in call 1 → \`x\` available in call 2
+  - \`x = 42\` (no keyword) in call 1 → \`x\` available in call 2
+  - \`const\`/\`let\` do NOT persist (block-scoped by V8 design)
+- Scripts WITH \`await\`: wrapped in async function — local variables don't persist
+  - Use \`state.x = 42\` for values that must survive across async REPL calls
+  - The \`state\` object always persists
+
 ## Notes
 - \`console.log()\` output is captured and included in the result
 - \`return\` a value to include it in the response
-- Variables and functions persist across REPL calls in the same session
 - Use \`try/catch\` inside scripts to handle errors gracefully
 - \`require()\` is available for: path, url, querystring, crypto, util, os
 - All I/O goes through CC's permission system — writes will prompt for approval when configured`;
@@ -560,20 +572,43 @@ return { name: pkg.name, depCount: deps.length, deps };
     operations = [];
     ctx.console.clear();
 
-    // Wrap in async IIFE for top-level await
-    const wrappedScript = `(async () => { ${script} })()`;
-
     let returnValue;
     let error;
 
+    // Two-pass execution for variable persistence:
+    // Pass 1: Run script directly (no wrapper). Top-level var and implicit
+    //   globals persist on the VM context across calls. This fails if the
+    //   script uses `await` (SyntaxError: await outside async function).
+    // Pass 2: Wrap in async IIFE for await support. Variables declared with
+    //   const/let/var are function-scoped and DON'T persist. Use the `state`
+    //   object for explicit cross-call persistence in async scripts.
     try {
-      returnValue = await vm.runInContext(wrappedScript, ctx, {
+      returnValue = vm.runInContext(script, ctx, {
         timeout: getTimeout(),
         filename: 'repl-script.js',
         displayErrors: true,
       });
-    } catch (err) {
-      error = err;
+      // If the result is a promise (user wrote async code without await keyword
+      // at top level), await it
+      if (returnValue && typeof returnValue.then === 'function') {
+        returnValue = await returnValue;
+      }
+    } catch (syncErr) {
+      // If it's a SyntaxError (likely `await` outside async), retry with IIFE
+      if (syncErr.name === 'SyntaxError' && /await/.test(script)) {
+        try {
+          const wrappedScript = `(async () => { ${script} })()`;
+          returnValue = await vm.runInContext(wrappedScript, ctx, {
+            timeout: getTimeout(),
+            filename: 'repl-script.js',
+            displayErrors: true,
+          });
+        } catch (asyncErr) {
+          error = asyncErr;
+        }
+      } else {
+        error = syncErr;
+      }
     }
 
     return { data: formatResult(description, startTime, returnValue, error) };
