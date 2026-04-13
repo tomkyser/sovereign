@@ -17,7 +17,7 @@ Clean-room implementations of ant-only tools (REPL, Tungsten), injected into CC'
 | 2a: Tool Injection Mechanism | COMPLETE |
 | 2a-gaps: Tool Injection Hardening | COMPLETE — 12/12 gaps, 15/15 SOVEREIGN |
 | 2b: Clean-Room REPL | COMPLETE — auto-discovery loader, 9 handlers, coexist/replace modes |
-| 2b-gaps: REPL Hardening + Functional Verification | NEXT — 14 gaps (verification, handlers, execution, resilience) |
+| 2b-gaps: REPL Hardening + Functional Verification | COMPLETE — 14/14 gaps closed |
 | 2c: Clean-Room Tungsten | Planned |
 | 2d: Context Snipping Tool | Planned |
 

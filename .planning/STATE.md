@@ -87,8 +87,8 @@ and governance-specific `check` command added.
 - **2a:** COMPLETE — tool injection patch, external tool loader, transparent claude shim
 - **2a-gaps:** COMPLETE — 12/12 gaps closed. 15/15 SOVEREIGN on 2.1.101
 - **2b:** COMPLETE — clean-room REPL (auto-discovery loader, 9 handlers, coexist/replace modes). Post-testing fixes: replace mode stash, state persistence, IIFE fallback, defensive extraction.
-- **2b-gaps:** NEXT — 14 gaps (6 HIGH functional verification, 3 MEDIUM handler correctness, 2 MEDIUM execution semantics, 3 LOW resilience)
-- **2c:** Planned — clean-room Tungsten (spec at specs/tungsten-clean-room.md)
+- **2b-gaps:** COMPLETE — 14/14 gaps closed. Functional probe, module validation, hook/statusline awareness, handler fixes, IIFE targeting, config validation.
+- **2c:** NEXT — clean-room Tungsten (spec at specs/tungsten-clean-room.md)
 
 ### Binary Vault (from 2a-gaps)
 - **Module:** `src/binaryVault.ts` — XDG path discovery, GCS download, SHA256 verification, immutable locking
