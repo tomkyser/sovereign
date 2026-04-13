@@ -15,9 +15,9 @@ cd /Users/tom.kyser/dev/claude-code-patches/claude-governance
 node dist/index.mjs check
 ```
 
-**Completed:** 2a (tool injection), G1+G2 (vault + backup fix), G3+G4 (Zod passthrough), G6 (overwrite detection), G7 (corruption detection), G8 (shim failsafe), G10 (observability)
-**Next:** G5 (prompt overrides), G9 (dynamic injection), G11/G12 (embedded tools)
-**Then:** 2b (Clean-Room REPL — blocked on 2a-gaps)
+**Completed:** 2a (tool injection), 2a-gaps (12/12 — all gaps closed, 15/15 SOVEREIGN)
+**Next:** 2b (Clean-Room REPL)
+**Then:** 2c (Clean-Room Tungsten), 2d (Context Snipping Tool)
 **Then:** 2b (Clean-Room REPL — blocked on 2a-gaps)
 
 **CRITICAL — read before doing anything:**

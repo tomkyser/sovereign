@@ -7,7 +7,7 @@
 Clean-room implementations of ant-only tools (REPL, Tungsten), injected into CC's tool registry via binary patching. Users get the tools that Anthropic restricts to internal use.
 
 **Location:** `/Users/tom.kyser/dev/claude-code-patches/claude-governance/`
-**Build:** `pnpm build` → 148KB | **Verify:** `node dist/index.mjs check` → 6/14 (8 prompt overrides failing — G5)
+**Build:** `pnpm build` → 153KB | **Verify:** `node dist/index.mjs check` → 15/15 SOVEREIGN
 **CC Version:** 2.1.101 (native, arm64-darwin, pinned via DISABLE_AUTOUPDATER=1)
 
 ## Current State
@@ -15,7 +15,7 @@ Clean-room implementations of ant-only tools (REPL, Tungsten), injected into CC'
 | Phase | Status |
 |-------|--------|
 | 2a: Tool Injection Mechanism | COMPLETE |
-| 2a-gaps: Tool Injection Hardening | IN PROGRESS — 8/12 done, next G5/G9/G11/G12 |
+| 2a-gaps: Tool Injection Hardening | COMPLETE — 12/12 gaps, 15/15 SOVEREIGN |
 | 2b: Clean-Room REPL | Blocked on 2a-gaps |
 | 2c: Clean-Room Tungsten | Planned |
 | 2d: Context Snipping Tool | Planned |

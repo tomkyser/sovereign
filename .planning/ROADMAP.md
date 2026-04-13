@@ -81,7 +81,7 @@ Distributed as modular NPM packages — users choose what they want.
 - [x] Statusline integration: EMB segment
 
 ### Visual Governance Indicators
-- [x] SOVEREIGN banner (SessionStart hook)
+- [ ] SOVEREIGN banner (SessionStart hook)
 - [x] GOV + EMB status segments in combined statusline
 
 ### Design Specs
@@ -204,20 +204,19 @@ binary patching of the tool registry.
 - [x] Transparent claude shim: `~/.claude-governance/bin/claude` wraps every session
 - [ ] *Deferred:* Binary-patched reasoning block renderer (collapsible, dimmed)
 
-### Phase 2a-gaps: Tool Injection Hardening [IN PROGRESS]
-Runtime testing revealed gaps across binary management, Zod compatibility, shim reliability, and embedded tools verification.
+### Phase 2a-gaps: Tool Injection Hardening [COMPLETE]
+12/12 gaps closed. Runtime testing revealed gaps across binary management, Zod compatibility, shim reliability, and embedded tools verification.
 - [x] **G1: Binary vault architecture** — `src/binaryVault.ts`: XDG paths, GCS download, manifest.json SHA256, magic bytes, immutable locking, binary-safe copy
 - [x] **G2: Apply binary corruption** — `installationBackup.ts`: replaced fs.copyFile with binarySafeCopy
-- [x] **G3: Tool input validation mismatch** — safeParse uses Agent schema, not passthrough (HIGH)
-- [x] **G4: Zod passthrough shim** — borrow MCPTool passthrough, not Agent tool schema (HIGH)
-- [ ] **G5: Prompt override verification** — 8 overrides not matching on fresh binary (MEDIUM)
-- [x] **G6: Auto-updater race condition** — binary fingerprint in state.json, pre-flight overwrite detection
-- [x] **G7: Installer UTF-8 corruption** — detectCorruption() scans for U+FFFD, size anomaly, warns in check/launch
+- [x] **G3+G4: Zod passthrough** — self-contained passthrough shim replaces Agent schema borrow
+- [x] **G5: Prompt override deployment** — overrides bundled at data/overrides/, deployed before apply
+- [x] **G6: Auto-updater overwrite detection** — binary fingerprint in state.json, pre-flight comparison
+- [x] **G7: Installer corruption detection** — detectCorruption() scans for U+FFFD, size anomaly
 - [x] **G8: Shim failsafe** — sentinel exit code 111, fallback to direct CC launch, XDG version scan
-- [ ] **G9: Dynamic tool injection** — survive CC updates, robust detection beyond hardcoded var names (MEDIUM)
+- [x] **G9: Resilient tool injection** — 3-strategy detection with fallback, brace-counting, 8KB window
 - [x] **G10: System observability** — shim-fallback.json marker, UNPROTECTED banner, GOVERNANCE CRITICAL stdout
-- [ ] **G11: Embedded tools registry exclusion** — verify Glob/Grep excluded when bfs/ugrep active, halt-and-catch-fire (HIGH)
-- [ ] **G12: Embedded tools statusline** — verify registry state not just binary existence (MEDIUM)
+- [x] **G11: Glob/Grep registry exclusion** — verification entry confirms exclusion pattern in binary
+- [x] **G12: EMB statusline** — fixed state path, registry exclusion check, EMB:LEAK indicator
 
 ### Phase 2b: Clean-Room REPL
 - [ ] Implement per spec: `specs/repl-clean-room.md`

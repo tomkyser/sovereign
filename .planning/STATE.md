@@ -16,12 +16,12 @@ and governance-specific `check` command added.
 - **Fork location:** `/Users/tom.kyser/dev/claude-code-patches/claude-governance/`
 - **Based on:** tweakcc 4.0.11 (full fork, fresh git)
 - **Config dir:** `~/.claude-governance/` (falls back to `~/.tweakcc/` for migration)
-- **Build:** `pnpm build` → 148KB | **Package:** 2.2MB (npm pack)
+- **Build:** `pnpm build` → 153KB | **Package:** 2.2MB (npm pack)
 - **Apply:** `node dist/index.mjs --apply` (or just `node dist/index.mjs`)
 - **Verify:** `node dist/index.mjs check`
 - **Restore:** `node dist/index.mjs --restore`
 
-### What's Applied (Verified 14/14 via `check`)
+### What's Applied (Verified 15/15 via `check`)
 **Governance Patches (4 active):**
 - Disclaimer neutralization — replaces "may or may not be relevant" with directive framing
 - Context header reframing — replaces ambient "use the following context" with mandatory framing
@@ -85,7 +85,7 @@ and governance-specific `check` command added.
 - **1e:** COMPLETE — npm packaging, setup wizard, postinstall welcome
 - **M-1 Retro:** COMPLETE — 18 gaps fixed, canary→Phase 3, dashboard→deferred
 - **2a:** COMPLETE — tool injection patch, external tool loader, transparent claude shim
-- **2a-gaps:** IN PROGRESS — 8/12 done (G1 vault, G2 backup fix, G3+G4 Zod passthrough, G6 overwrite detection, G7 corruption detection, G8 shim failsafe, G10 observability). Next: G5 (prompt overrides), G9/G11/G12
+- **2a-gaps:** COMPLETE — 12/12 gaps closed. 15/15 SOVEREIGN on 2.1.101
 - **2b:** PLANNED — clean-room REPL (blocked on 2a-gaps)
 
 ### Binary Vault (from 2a-gaps)
