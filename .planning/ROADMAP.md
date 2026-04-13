@@ -1,6 +1,6 @@
 # Roadmap — Claude Code Governance Platform
 
-Last updated: 2026-04-12
+Last updated: 2026-04-13
 
 ## Mission
 
@@ -90,7 +90,7 @@ Distributed as modular NPM packages — users choose what they want.
 
 ---
 
-## Phase 1: Core Engine — Fork TweakCC
+## Milestone 1: Core Engine — Fork TweakCC
 
 The spine. Everything else builds on this.
 
@@ -103,7 +103,7 @@ The spine. Everything else builds on this.
 - Local tweakcc checkout: `/Users/tom.kyser/dev/tweakcc/`
 - CC leaked source (internals reference): `/Users/tom.kyser/dev/cc-source/`
 
-### 1a: Fork & Strip [COMPLETE]
+### Phase 1a: Fork & Strip [COMPLETE]
 - [x] Fork https://github.com/Piebald-AI/tweakcc → `claude-governance/`
 - [x] Strip Ink/React UI (deleted src/ui/, removed ink/react/cli-spinners deps — 127KB from 320KB)
 - [x] Strip all cosmetic patches (40+ removed from registry, kept files for reference)
@@ -116,14 +116,14 @@ The spine. Everything else builds on this.
 - [x] Env vars renamed: CLAUDE_GOVERNANCE_CONFIG_DIR, CLAUDE_GOVERNANCE_CC_PATH
 - [x] Verify: 6/6 SOVEREIGN, `claude --version` works post-apply
 
-### 1a-gaps: Gap Resolutions [COMPLETE]
+### Phase 1a-gaps: Gap Resolutions [COMPLETE]
 - [x] **Backup contamination detection:** Scans backup for governance signatures before apply. If contaminated, removes stale backup and falls through to installed binary.
 - [x] **"Already applied" vs "failed" distinction:** Patches declare `signature` field. If signature present in content → reports "already active" (✓) instead of failed (✗).
 - [x] **Dead cosmetic patch cleanup:** 50 dead .ts files + 3 dead tests removed. `src/patches/` down to 6 files. Dead `CUSTOM_MODELS` import removed from utils.ts. Build: 126KB.
 - [x] **Prompt sync warning suppression:** "Could not find" and "WARNING: Conflicts" downgraded to debug-level. Clean CLI output.
 - [x] **communication-style override:** Evaluated — prompt is Opus 4.6-only, gated behind `quiet_salted_ember` flag. Promotes concise updates, aligned with governance goals. No override needed.
 
-### 1a-verification-foundation: Verification Foundation [COMPLETE]
+### Phase 1a-verification-foundation: Verification Foundation [COMPLETE]
 Standalone verification improvements — no dependency on 1b wrapper.
 
 - [x] **Per-patch signature + anti-signature registry:** `VERIFICATION_REGISTRY` in governance.ts — 13 entries (4 governance, 1 gate, 8 prompt overrides) with signature, antiSignature, critical flag, category. Governance patches use both sig+antiSig; prompt overrides use sig-only (dead-code constants make antiSig unreliable).
@@ -131,7 +131,7 @@ Standalone verification improvements — no dependency on 1b wrapper.
 - [x] **Apply state output:** `state.json` written to config dir by both `check` and `apply` flows. Contains timestamp, version, per-check results, overall status.
 - [x] Verifies against EXTRACTED JS via `extractClaudeJsFromNativeInstallation`, never `strings`.
 
-### 1b: Wrapper Layer [COMPLETE]
+### Phase 1b: Wrapper Layer [COMPLETE]
 
 **References:**
 - Wrapper architecture: https://github.com/0Chencc/clawgod/tree/main | https://clawgod.0chen.cc/
@@ -145,7 +145,7 @@ Standalone verification improvements — no dependency on 1b wrapper.
 - [x] Version-change detection: state.json ccVersion vs detected binary version
 - [x] Options: `--no-verify` (skip pre-flight), `--force-apply` (reapply even if current)
 
-### 1c: Verification Engine [COMPLETE]
+### Phase 1c: Verification Engine [COMPLETE]
 1b-informed verification — extracted API, fixed hooks, restored status line.
 
 - [x] **Pre-flight verification API:** Extracted into `src/verification.ts` — CheckResult, VerificationState, runVerification, readVerificationState, writeVerificationState, deriveStatus. Importable by wrapper and CLI.
@@ -154,13 +154,13 @@ Standalone verification improvements — no dependency on 1b wrapper.
 - [x] **Status line integration:** Fixed `statusline-combined.cjs` and `governance-statusline.cjs` — correct config dir resolution, new field names, ISO timestamp parsing.
 - [x] **Survives resumes, compacts, logins, subagent spawning:** SessionStart hook fires on every session start (including resumes). Status line reads state.json on every render. Wrapper pre-flight covers initial launches.
 
-### Phase 1 Milestone Retro — Pinned for Re-evaluation
+### Milestone 1 Retro — Pinned for Re-evaluation
 *Evaluate at end of Phase 1 (after 1e) whether these belong in Phase 1 or later.*
 
 - **Canary prompts:** Inject unique test phrases into prompt overrides, verify at runtime by prompting model for canary response. Requires conversation-level integration. May fit better in Phase 3 (System Prompt Control) or Phase 7 (Advanced Governance).
 - **Verification dashboard:** Rich terminal output showing all patches, overrides, flags, and environment state in a single view. May be better served by Phase 7 (context monitor) or 1d (modular architecture with pluggable status).
 
-### 1d: Modular Architecture [COMPLETE]
+### Phase 1d: Modular Architecture [COMPLETE]
 - [x] Plugin/module system — GovernanceModule interface, registry, barrel exports
 - [x] Core module: wraps existing 13 verification entries (required, always enabled)
 - [x] Pluggable verification registry: modules declare verificationEntries, collected by getVerificationRegistry()
@@ -170,7 +170,7 @@ Standalone verification improvements — no dependency on 1b wrapper.
 - [ ] *Deferred:* Optional Clawback install module (https://github.com/LZong-tw/clawback) — stub for 1e or Phase 2
 
 
-### 1e: CLI & Distribution [COMPLETE]
+### Phase 1e: CLI & Distribution [COMPLETE]
 - [x] NPX-runnable: `npx claude-governance apply`
 - [x] NPM installable: `npm install -g claude-governance`
 - [x] Post-install welcome + suggested next steps
@@ -179,8 +179,13 @@ Standalone verification improvements — no dependency on 1b wrapper.
 - [x] Readline line-queue for reliable piped stdin handling
 
 ---
-
-## Phase 2: Native Tool Injection — REPL & Tungsten
+### Milestone 1 Retro
+- [x] Commentary
+- [x] Gap analysis
+- [x] Housekeeping
+- [x] Bootstrap Prompt
+---
+## Milestone 2: Native Tool Injection — REPL & Tungsten
 
 Clean-room implementations of ant-only tools, injected as native tools via
 binary patching of the tool registry.
@@ -190,7 +195,7 @@ binary patching of the tool registry.
 - REPL design spec: `specs/repl-clean-room.md`
 - Tungsten design spec: `specs/tungsten-clean-room.md`
 
-### 2a: Tool Injection Mechanism [COMPLETE]
+### Phase 2a: Tool Injection Mechanism [COMPLETE]
 - [x] Patch `getAllBaseTools()` (minified `Ut()`) — structural pattern matching, version-resilient
 - [x] Tool implementation directory: `~/.claude-governance/tools/index.js`
 - [x] Hot-loadable: update tool code without re-patching binary (require() at runtime)
@@ -199,7 +204,7 @@ binary patching of the tool registry.
 - [x] Transparent claude shim: `~/.claude-governance/bin/claude` wraps every session
 - [ ] *Deferred:* Binary-patched reasoning block renderer (collapsible, dimmed)
 
-### 2a-gaps: Tool Injection Hardening [IN PROGRESS]
+### Phase 2a-gaps: Tool Injection Hardening [IN PROGRESS]
 Runtime testing revealed gaps across binary management, Zod compatibility, shim reliability, and embedded tools verification.
 - [x] **G1: Binary vault architecture** — `src/binaryVault.ts`: XDG paths, GCS download, manifest.json SHA256, magic bytes, immutable locking, binary-safe copy
 - [x] **G2: Apply binary corruption** — `installationBackup.ts`: replaced fs.copyFile with binarySafeCopy
@@ -214,27 +219,33 @@ Runtime testing revealed gaps across binary management, Zod compatibility, shim 
 - [ ] **G11: Embedded tools registry exclusion** — verify Glob/Grep excluded when bfs/ugrep active, halt-and-catch-fire (HIGH)
 - [ ] **G12: Embedded tools statusline** — verify registry state not just binary existence (MEDIUM)
 
-### 2b: Clean-Room REPL
+### Phase 2b: Clean-Room REPL
 - [ ] Implement per spec: `specs/repl-clean-room.md`
 - [ ] Node VM with persistent context across calls
 - [ ] Coexists with primitive tools (user toggles replace vs supplement)
 - [ ] Operation tracking for audit trail
 
-### 2c: Clean-Room Tungsten
+### Phase 2c: Clean-Room Tungsten
 - [ ] Implement per spec: `specs/tungsten-clean-room.md`
 - [ ] Single tool with action enum (send, capture, create, list, kill, interrupt)
 - [ ] tmux session management via child_process
 - [ ] PID-based socket isolation, lazy session creation
 
-### 2d: Context Snipping Tool
+### Phase 2d: Context Snipping Tool
 - [ ] Design spec (clean-room)
 - [ ] Selective context removal — user or agent marks conversation segments for eviction
 - [ ] Survives compaction (snipped content stays gone, not re-summarized)
 - [ ] Integration with tool injection mechanism (2a)
 
 ---
+### Milestone 2 Retro
+- [ ] Commentary
+- [ ] Gap analysis
+- [ ] Housekeeping
+- [ ] Bootstrap Prompt
+---
 
-## Phase 3: System Prompt Control
+## Milestone 3: System Prompt Control
 
 Full extraction, editing, version control, and targeted degradation fixes.
 
@@ -247,15 +258,21 @@ Full extraction, editing, version control, and targeted degradation fixes.
 - Our 9 degradation-fix overrides: `/Users/tom.kyser/dev/claude-code-patches/prompts/`
 - Pieces data pipeline: inherited from tweakcc fork (Phase 1a)
 
-- [ ] Full system prompt extraction with version tracking
-- [ ] Prompt diff tool (compare across CC versions)
-- [ ] Targeted fixes for specific degradation prompts
-- [ ] User-editable prompt overrides with merge-on-update
-- [ ] Prompt version control (git-style diffing across CC versions)
+- [ ] Phase 3a - Full system prompt extraction with version tracking
+- [ ] Phase 3b - Prompt diff tool (compare across CC versions)
+- [ ] Phase 3c - Targeted fixes for specific degradation prompts
+- [ ] Phase 3d - User-editable prompt overrides with merge-on-update
+- [ ] Phase 3e - Prompt version control (git-style diffing across CC versions)
 
 ---
+### Milestone 3 Retro
+- [ ] Commentary
+- [ ] Gap analysis
+- [ ] Housekeeping
+- [ ] Bootstrap Prompt
+---
 
-## Phase 4: Feature Flag Control
+## Milestone 4: Feature Flag Control
 
 **References:**
 - Adaptive thinking degradation: https://old.reddit.com/r/ClaudeCode/comments/1sfihyr/psa_if_your_opus_is_lobotomized_disable_adaptive/
@@ -264,16 +281,22 @@ Full extraction, editing, version control, and targeted degradation fixes.
 - CC internals (GrowthBook, tengu flags): `/Users/tom.kyser/dev/cc-source/`
 - Compile-time flag audit: `.planning/research/2026-04-11-compile-flags-v2.1.101.md`
 
-- [ ] Flag inventory scanner (extract all flag names + defaults from binary)
-- [ ] Disk cache override for `~/.claude.json` cachedGrowthBookFeatures
-- [ ] Persistence through GrowthBook's 6-hour refresh cycle
-- [ ] Binary patch: intercept `getFeatureValue_CACHED` for local overrides
-- [ ] Per-version flag audit automation
-- [ ] User-facing flag toggle UI
+- [ ] Phase 4a - Flag inventory scanner (extract all flag names + defaults from binary)
+- [ ] Phase 4b - Disk cache override for `~/.claude.json` cachedGrowthBookFeatures
+- [ ] Phase 4c - Persistence through GrowthBook's 6-hour refresh cycle
+- [ ] Phase 4d - Binary patch: intercept `getFeatureValue_CACHED` for local overrides
+- [ ] Phase 4e - Per-version flag audit automation
+- [ ] Phase 4f - User-facing flag toggle UI
 
 ---
+### Milestone 4 Retro
+- [ ] Commentary
+- [ ] Gap analysis
+- [ ] Housekeeping
+- [ ] Bootstrap Prompt
+---
 
-## Phase 5: HTTP Proxy Layer
+## Milestone 5: HTTP Proxy Layer
 
 **References:**
 - Billing proxy: https://github.com/zacdcook/openclaw-billing-proxy
@@ -284,29 +307,53 @@ Full extraction, editing, version control, and targeted degradation fixes.
 - Usage monitoring: https://github.com/phuryn/claude-usage
 - Session viewer: https://github.com/d-kimuson/claude-code-viewer
 
-- [ ] Transparent proxy setup (CC → proxy → Anthropic)
-- [ ] Request/response logging
-- [ ] Cache TTL visibility and control
-- [ ] Static prompt extraction from requests
-- [ ] Usage monitoring (tokens, cost, effort level, model)
+- [ ] Phase 5a - Transparent proxy setup (CC → proxy → Anthropic)
+- [ ] Phase 5b - Request/response logging
+- [ ] Phase 5c - Cache TTL visibility and control
+- [ ] Phase 5d - Static prompt extraction from requests
+- [ ] Phase 5e - Usage monitoring (tokens, cost, effort level, model)
 
 ---
+### Milestone 5 Retro
+- [ ] Commentary
+- [ ] Gap analysis
+- [ ] Housekeeping
+- [ ] Bootstrap Prompt
+---
 
-## Phase 6: Version Management
+## Milestone 6: Version Management
 
 **References:**
 - Version pinning: https://www.reddit.com/r/ClaudeAI/comments/1rlpa05/how_do_i_install_a_specific_version_of_claude/
 - Native migration docs: https://code.claude.com/docs/en/setup#migrate-from-npm-to-native
 - CLI flags: https://code.claude.com/docs/en/cli-reference#cli-flags
 
-- [ ] Binary backup on CC update
-- [ ] Version inventory and switching
-- [ ] Update controls: block/allow/defer CC auto-updates
-- [ ] Patch compatibility matrix per version
+- [ ] Phase 6a - Binary backup on CC update
+- [ ] Phase 6b - Version inventory and switching
+- [ ] Phase 6c - Update controls: block/allow/defer CC auto-updates
+- [ ] Phase 6d - Patch compatibility matrix per version
 
 ---
+### Milestone 6 Retro
+- [ ] Commentary
+- [ ] Gap analysis
+- [ ] Housekeeping
+- [ ] Bootstrap Prompt
+---
 
-## Phase 7: Advanced Governance
+## Milestone 7: Launch Ready for Public Use -- Post M1 through M6, we should be at a state where this can be used by others and it should be able to survive and fully function as expected on newer versions beyond 2.1.101
+Phase planning TODO. - MUST be at a state where EVERYTHING ABOVE WILL WORK ACROSS NEWER VERSIONS - NOTHING CAN BE HARDCODED TO JUST 2.1.101 - Our strategy will be automate a test when a new claude code version drops (in a sandbox to keep my system clean) that test should assess what needs to be adjusted if anything - we will also need to wait for the upstream system prompts repo to be updated with latest prompt extractions - we should have a SOVREIGN /update command and a statusline visual.
+This will be 1.0.0 everything after this shall then adhere to the strict semver and git strategy for dev and releases, no more work pushed directly to master.
+
+---
+### Milestone 7 Retro
+- [ ] Commentary
+- [ ] Gap analysis
+- [ ] Housekeeping
+- [ ] Bootstrap Prompt
+---
+
+## Milestone 8: Advanced Governance (1.0.1)
 
 **References:**
 - Degradation evidence: [anthropics/claude-code#42796](https://github.com/anthropics/claude-code/issues/42796) (stellaraccident quantitative analysis)
@@ -314,15 +361,21 @@ Full extraction, editing, version control, and targeted degradation fixes.
 - CC internals research: https://gist.github.com/Haseeb-Qureshi/d0dc36844c19d26303ce09b42e7188c1
 - CC internals research: https://gist.github.com/unkn0wncode/f87295d055dd0f0e8082358a0b5cc467
 
-- [ ] Context monitor: token tracking, CLAUDE.md presence, compaction detection
-- [ ] Message filter visibility (show intentionally hidden messages)
-- [ ] Visible reasoning/thinking restoration (needs to recreate what we used to be able to see which was the thinking block from the api response, while this may be stripped out on the server side, the LLM is aware of its thinking block during response generation, I suspect it can be guided with instruction to copy and keep updated its thinking to the response body to recreate this)
-- [ ] Usage monitoring dashboard
+- [ ] Phase 8a - Context monitor: token tracking, CLAUDE.md presence, compaction detection
+- [ ] Phase 8b - Message filter visibility (show intentionally hidden messages)
+- [ ] Phase 8c - Visible reasoning/thinking restoration (needs to recreate what we used to be able to see which was the thinking block from the api response, while this may be stripped out on the server side, the LLM is aware of its thinking block during response generation, I suspect it can be guided with instruction to copy and keep updated its thinking to the response body to recreate this)
+- [ ] Phase 8d - Usage monitoring dashboard
 
 ---
+### Milestone 8 Retro
+- [ ] Commentary
+- [ ] Gap analysis
+- [ ] Housekeeping
+- [ ] Bootstrap Prompt
+---
 
-## Phase 8: Extended Tool Suite
-
+## Milestone 9: Extended Tool Suite (1.0.2)
+Phase planning TODO
 **References:**
 - CC leaked source (gated tool implementations): `/Users/tom.kyser/dev/cc-source/`
 - CC enhancement tools: https://github.com/frankbria/ralph-claude-code
@@ -332,6 +385,12 @@ Full extraction, editing, version control, and targeted degradation fixes.
 - [ ] Durable Cron, File Persistence, WebBrowser, Computer Use
 - [ ] Coordinator Mode, Daemon Mode, Reactive Compact
 
+---
+### Milestone 9 Retro
+- [ ] Commentary
+- [ ] Gap analysis
+- [ ] Housekeeping
+- [ ] Bootstrap Prompt
 ---
 
 ## Backlog / Research
