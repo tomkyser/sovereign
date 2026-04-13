@@ -34,6 +34,7 @@ import {
   InstallationDetectionError,
 } from './installationDetection';
 import { handleUnpack, handleRepack, handleAdhocPatch } from './commands';
+import { GOVERNANCE_FAIL_EXIT } from './shim';
 import {
   restoreClijsFromBackup,
   restoreNativeBinaryFromBackup,
@@ -831,13 +832,13 @@ async function handleLaunch(
 
   if (!ccInstInfo) {
     console.error(chalk.red('Could not find Claude Code installation.'));
-    process.exit(1);
+    process.exit(GOVERNANCE_FAIL_EXIT);
   }
 
   const binaryPath = ccInstInfo.nativeInstallationPath ?? ccInstInfo.cliPath;
   if (!binaryPath) {
     console.error(chalk.red('Could not determine Claude Code binary path.'));
-    process.exit(1);
+    process.exit(GOVERNANCE_FAIL_EXIT);
   }
 
   // Pre-flight governance verification
@@ -917,7 +918,7 @@ async function handleLaunch(
 
   child.on('error', (err) => {
     console.error(chalk.red(`Failed to launch Claude Code: ${err.message}`));
-    process.exit(1);
+    process.exit(GOVERNANCE_FAIL_EXIT);
   });
 }
 

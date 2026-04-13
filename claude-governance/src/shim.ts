@@ -27,13 +27,68 @@ function getGovernanceBin(): string {
   return 'claude-governance';
 }
 
+// Sentinel exit code: handleLaunch uses this when governance itself
+// fails (before CC is spawned). Distinguishes "governance broke" from
+// "CC ran and returned non-zero." 111 is unused by CC.
+export const GOVERNANCE_FAIL_EXIT = 111;
+
 function generateShimScript(): string {
   const govBin = getGovernanceBin();
   return `#!/bin/sh
 # claude-governance shim — transparent governance pre-flight for Claude Code
 # Installed by: claude-governance setup
 # Remove by deleting this file and the PATH line from your shell profile
-exec ${govBin} launch -- "$@"
+#
+# FAILSAFE: If governance fails before launching CC (exit 111 or 127),
+# fall through and launch CC directly. Never block the user.
+
+# Find the real claude binary by searching PATH without our shim dir
+find_real_claude() {
+  OIFS="$IFS"; IFS=":"
+  for dir in $PATH; do
+    case "$dir" in */.claude-governance/bin) continue ;; esac
+    if [ -x "$dir/claude" ]; then
+      echo "$dir/claude"
+      IFS="$OIFS"
+      return 0
+    fi
+  done
+  IFS="$OIFS"
+
+  # Fallback: check XDG versions directory directly
+  VERSIONS_DIR="\${XDG_DATA_HOME:-$HOME/.local/share}/claude/versions"
+  if [ -d "$VERSIONS_DIR" ]; then
+    LATEST=$(ls -1 "$VERSIONS_DIR" 2>/dev/null | grep -E '^[0-9]+\\.[0-9]+\\.[0-9]+$' | sort -t. -k1,1n -k2,2n -k3,3n | tail -1)
+    if [ -n "$LATEST" ] && [ -x "$VERSIONS_DIR/$LATEST" ]; then
+      echo "$VERSIONS_DIR/$LATEST"
+      return 0
+    fi
+  fi
+  return 1
+}
+
+# Run governance launch (not exec — keep shell alive for failsafe)
+${govBin} launch -- "$@"
+GOV_EXIT=$?
+
+# Exit 111 = governance failed before spawning CC (our sentinel)
+# Exit 127 = command not found (node missing, governance not installed)
+# Anything else = CC's own exit code, forward it
+if [ "$GOV_EXIT" -ne ${GOVERNANCE_FAIL_EXIT} ] && [ "$GOV_EXIT" -ne 127 ]; then
+  exit $GOV_EXIT
+fi
+
+# Governance failed — fall through to direct CC launch
+REAL_CLAUDE=$(find_real_claude)
+if [ -n "$REAL_CLAUDE" ] && [ -x "$REAL_CLAUDE" ]; then
+  echo "claude-governance: governance unavailable, launching claude directly" >&2
+  exec "$REAL_CLAUDE" "$@"
+fi
+
+echo "claude-governance: failed to launch Claude Code" >&2
+echo "  governance errored and no claude binary found" >&2
+echo "  remove shim: rm ~/.claude-governance/bin/claude" >&2
+exit 1
 `;
 }
 

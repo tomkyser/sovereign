@@ -18,7 +18,9 @@ Fix every issue discovered during first live runtime test of tool injection. Bin
 | G5 | Prompt override verification on fresh binary — 8 overrides not matching after re-download | Medium | Pending |
 | G6 | Auto-updater race condition — sessions without DISABLE_AUTOUPDATER overwrite patched binary | Medium | Pending |
 | G7 | Installer UTF-8 corruption — `claude.ai/install.sh` produces 304MB corrupted binary on macOS | Low | Pending |
-| G8 | Shim reliability — governance wrapper shim breaks CC launch when system is unhealthy | High | Pending |
+| G8 | Shim reliability — governance wrapper shim breaks CC launch when system is unhealthy | High | Done |
+| G9 | Ensure that tool injection is dynamic** — this feature must survive Claude Code updates - detection must be more robust than just current binary extracted var and fn names. | Medium | Pending |
+| G10 | System Observability — IF governance wrapper or system breaks CC launch needs visual indication | High | Pending |
 
 ## Gap Details
 
@@ -56,10 +58,9 @@ Fix every issue discovered during first live runtime test of tool injection. Bin
 **Workaround:** Download directly from GCS: `curl -fsSL -o $TARGET "$GCS_BUCKET/2.1.101/darwin-arm64/claude"`
 **GCS bucket:** `https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases`
 
-### G8: Shim Reliability
-**Problem:** The transparent claude shim at `~/.claude-governance/bin/claude` wraps every `claude` invocation through `claude-governance launch`. If the governance tool fails for ANY reason (bad build, missing deps, corrupted state, port exhaustion, etc.), the user cannot launch CC at all. Tom had to manually comment out the shim PATH entry and clean-install CC just to get a working session.
-**Root cause:** The shim is a hard gate with no bypass. If `claude-governance launch` errors, the error propagates and CC never starts.
-**Fix:** The shim must have a failsafe — if governance pre-flight fails, it should log a warning and fall through to launch CC directly. Never block the user from running CC. Options: (a) try-catch in shim with direct exec fallback, (b) timeout on governance check, (c) `--no-governance` flag that bypasses entirely.
+### G8: Shim Reliability — DONE
+**Problem:** Shim used hard `exec` — if governance failed, CC couldn't launch at all.
+**Fix:** Sentinel exit code architecture. `handleLaunch` uses exit code 111 (`GOVERNANCE_FAIL_EXIT`) for governance-specific failures (can't find CC, can't spawn). The shim script runs governance without `exec`, checks the exit code — if 111 or 127, falls through to find and launch the real claude binary directly. Finds real binary by: (1) searching PATH excluding the shim dir, (2) scanning XDG versions directory for highest version. User always gets CC, even if governance is broken.
 
 ## Current Binary State
 
