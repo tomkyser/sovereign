@@ -57,9 +57,11 @@ These checks prevent the kind of compounding errors that waste entire sessions.
 2. **Read the roadmap.** `.planning/ROADMAP.md` is the source of truth for what's complete
    and what's next. If the compaction summary disagrees, the roadmap wins.
 3. **Read CONTEXT.md.** `.planning/milestones/M-{n}/CONTEXT.md` has shared state.
-4. **Read the latest session journal.** It has decisions, findings, and gotchas that
+4. **Read the latest handoff.** The handoff for the most recently completed phase
+   (listed in `BOOTSTRAP.md`) has what was built, key decisions, and gotchas.
+5. **Read the latest session journal.** It has decisions, findings, and gotchas that
    the compaction summary may have flattened or misrepresented.
-4. **Verify before building.** If the roadmap says something is "COMPLETE," verify it
+6. **Verify before building.** If the roadmap says something is "COMPLETE," verify it
    actually exists and works before building on top of it. Check git history, run the
    tool, inspect the output. Claims of completion are hypotheses until verified.
 
@@ -138,27 +140,28 @@ This process is mandatory. Every phase, every session, every agent. No shortcuts
 2. Create tasks via TaskCreate tool for each work item
 3. Read `CONTEXT.md` — update if stale
 4. Read `ROADMAP.md` — confirm phase scope
+5. Read latest handoff in `handoffs/` — understand what the previous phase delivered
 
 **During phase:**
-5. Update task status (in_progress → completed) as work progresses
-6. Atomic git commits at each completed task
-7. Update phase tracker with decisions, issues found, and step completions
+6. Update task status (in_progress → completed) as work progresses
+7. Atomic git commits at each completed task
+8. Update phase tracker with decisions, issues found, and step completions
 
 **On phase end:**
-8. Mark all tasks completed or delete stale ones
-9. Update phase tracker status to COMPLETE
-10. Generate handoff doc in `handoffs/HANDOFF-PHASE-{id}.md`
-11. Update `ROADMAP.md` — mark phase complete in both active and completed sections
-12. Update `STATE.md` — fold phase tracker into global state
-13. Update `CONTEXT.md` — refresh current state for next phase/agent
-14. Update `BOOTSTRAP.md` — point to next phase
-15. Commit all doc updates atomically
+9. Mark all tasks completed or delete stale ones
+10. Update phase tracker status to COMPLETE
+11. Generate handoff doc in `handoffs/HANDOFF-PHASE-{id}.md`
+12. Update `ROADMAP.md` — mark phase complete in both active and completed sections
+13. Update `STATE.md` — fold phase tracker into global state
+14. Update `CONTEXT.md` — refresh current state for next phase/agent
+15. Update `BOOTSTRAP.md` — point to next phase AND include path to latest handoff
+16. Commit all doc updates atomically
 
 ### On Milestone End (After All Phases in M-{n})
 
-16. Generate retrospective in `retrospectives/RETRO-M-{n}.md`
-17. Evaluate pinned retro items from roadmap
-18. Create next milestone directory `M-{n+1}/` with empty CONTEXT.md
+17. Generate retrospective in `retrospectives/RETRO-M-{n}.md`
+18. Evaluate pinned retro items from roadmap
+19. Create next milestone directory `M-{n+1}/` with empty CONTEXT.md
 
 ### Agent Context Protocol
 

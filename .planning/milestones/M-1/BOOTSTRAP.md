@@ -7,6 +7,7 @@ Read these files in order:
 1. `.planning/milestones/M-1/CONTEXT.md` — Shared context (read FIRST)
 2. `.planning/ROADMAP.md` — Phase status and what's next
 3. `.planning/STATE.md` — Global project state
+4. `.planning/milestones/M-1/handoffs/HANDOFF-PHASE-1B.md` — Latest handoff (what just completed)
 
 Quick verify:
 ```bash
