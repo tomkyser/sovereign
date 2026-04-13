@@ -154,6 +154,12 @@ Standalone verification improvements — no dependency on 1b wrapper.
 - [x] **Status line integration:** Fixed `statusline-combined.cjs` and `governance-statusline.cjs` — correct config dir resolution, new field names, ISO timestamp parsing.
 - [x] **Survives resumes, compacts, logins, subagent spawning:** SessionStart hook fires on every session start (including resumes). Status line reads state.json on every render. Wrapper pre-flight covers initial launches.
 
+### Milestone 1 Retro — Pinned for Re-evaluation
+*Evaluate at end of Phase 1 (after 1e) whether these belong in Phase 1 or later.*
+
+- **Canary prompts:** Inject unique test phrases into prompt overrides, verify at runtime by prompting model for canary response. Requires conversation-level integration. May fit better in Phase 3 (System Prompt Control) or Phase 7 (Advanced Governance).
+- **Verification dashboard:** Rich terminal output showing all patches, overrides, flags, and environment state in a single view. May be better served by Phase 7 (context monitor) or 1d (modular architecture with pluggable status).
+
 ### Phase 1d: Modular Architecture [COMPLETE]
 - [x] Plugin/module system — GovernanceModule interface, registry, barrel exports
 - [x] Core module: wraps existing 13 verification entries (required, always enabled)
@@ -202,7 +208,8 @@ binary patching of the tool registry.
 Runtime testing revealed gaps across binary management, Zod compatibility, shim reliability, and embedded tools verification.
 - [x] **G1: Binary vault architecture** — `src/binaryVault.ts`: XDG paths, GCS download, manifest.json SHA256, magic bytes, immutable locking, binary-safe copy
 - [x] **G2: Apply binary corruption** — `installationBackup.ts`: replaced fs.copyFile with binarySafeCopy
-- [x] **G3+G4: Zod passthrough** — self-contained passthrough shim replaces Agent schema borrow
+- [x] **G3: Tool input validation mismatch** — safeParse uses Agent schema, not passthrough (HIGH)
+- [x] **G4: Zod passthrough shim** — borrow MCPTool passthrough, not Agent tool schema (HIGH)
 - [ ] **G5: Prompt override verification** — 8 overrides not matching on fresh binary (MEDIUM)
 - [x] **G6: Auto-updater race condition** — binary fingerprint in state.json, pre-flight overwrite detection
 - [x] **G7: Installer UTF-8 corruption** — detectCorruption() scans for U+FFFD, size anomaly, warns in check/launch
@@ -257,6 +264,7 @@ Full extraction, editing, version control, and targeted degradation fixes.
 - [ ] Phase 3d - User-editable prompt overrides with merge-on-update
 - [ ] Phase 3e - Prompt version control (git-style diffing across CC versions)
 - [ ] Phase 3f - Canary prompts Inject unique test phrases into prompt overrides, verify at runtime by prompting model for canary response. Requires conversation-level integration.
+- [ ] Phase 3g - Integrate Optional Clawback install module (https://github.com/LZong-tw/clawback)
 
 ---
 ### Milestone 3 Retro
@@ -340,6 +348,10 @@ Phase planning TODO. - MUST be at a state where EVERYTHING ABOVE WILL WORK ACROS
 This will be 1.0.0 everything after this shall then adhere to the strict semver and git strategy for dev and releases, no more work pushed directly to master.
 
 - **Verification dashboard:** Rich terminal output showing all patches, overrides, flags, and environment state in a single view.
+- **Full Documentation and branding:** As well as cleaning up any old tweakcc artifacts or docs
+- **Downstream Pipeline for dependencies:** Do we still pull and merge from TweakCC.
+- **Bug fixes:**
+  - Visual governance indicators: SOVEREIGN banner not showing at session start and statusline shows GOV:WARN when prompt overrides fail verification. The session-start hook emits a warning listing failing overrides instead of the green SOVEREIGN banner. Root cause is G5 (prompt override matching) — once overrides verify, status flips to SOVEREIGN and banner appears. But the degraded-state UX needs polish: WARN vs DEGRADED messaging, partial-pass display, clear next-steps for the user.
 
 ---
 ### Milestone 7 Retro
