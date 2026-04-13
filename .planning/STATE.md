@@ -16,7 +16,7 @@ and governance-specific `check` command added.
 - **Fork location:** `/Users/tom.kyser/dev/claude-code-patches/claude-governance/`
 - **Based on:** tweakcc 4.0.11 (full fork, fresh git)
 - **Config dir:** `~/.claude-governance/` (falls back to `~/.tweakcc/` for migration)
-- **Build:** `pnpm build` → 131KB (down from 231KB after Ink removal)
+- **Build:** `pnpm build` → 135KB (down from 231KB after Ink removal)
 - **Apply:** `node dist/index.mjs --apply` (or just `node dist/index.mjs`)
 - **Verify:** `node dist/index.mjs check`
 - **Restore:** `node dist/index.mjs --restore`
@@ -42,6 +42,7 @@ and governance-specific `check` command added.
 | `launch [-- args]` | Pre-flight verify + launch CC (wrapper mode) |
 | `--restore` | Restore binary to original state from backup |
 | `check` | Verify 13 governance signatures against extracted JS |
+| `modules` | List governance modules and their status |
 | `--list-patches` | List available governance patches |
 | `--list-system-prompts` | List available prompt overrides |
 | `unpack <path>` | Extract JS from native binary |
@@ -74,6 +75,7 @@ and governance-specific `check` command added.
 - **1a-verification-foundation:** COMPLETE — 13-entry registry, per-override verification, state.json
 - **1b:** COMPLETE — launch subcommand, pre-flight verification, process control
 - **1c:** COMPLETE — verification API extraction, hook rewrite, status line fix
-- **1d:** NEXT — modular architecture
+- **1d:** COMPLETE — module system, core + env-flags modules, modules CLI
+- **1e:** NEXT — CLI & distribution
 
 See `.planning/ROADMAP.md` for full details.

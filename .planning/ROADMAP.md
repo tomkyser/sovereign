@@ -59,6 +59,15 @@ Distributed as modular NPM packages — users choose what they want.
 - [x] Status line hooks fixed — config dir resolution, new field names, ISO timestamps
 - [x] Survives resumes, compacts, logins, subagent spawning via SessionStart + status line
 
+### Phase 1d: Modular Architecture
+- [x] Module interface (GovernanceModule) with verification entries, apply, getStatus
+- [x] Module registry — getEnabledModules, getVerificationRegistry, applyModules
+- [x] Core module — wraps existing 13 verification entries
+- [x] Env-flags module — 6 recommended CC env vars, apply to settings.json, health check
+- [x] `modules` subcommand — list modules with status
+- [x] Module-driven verification in check/apply/launch flows
+- [x] Config override: `{ "modules": { "env-flags": false } }`
+
 ### Embedded Search Tools
 - [x] Activation: `EMBEDDED_SEARCH_TOOLS=1` — bfs 4.1, ugrep 7.5.0, rg 14.1.1
 - [x] Verification hook: 8-point halt-and-catch-fire check
@@ -144,21 +153,15 @@ Standalone verification improvements — no dependency on 1b wrapper.
 - **Canary prompts:** Inject unique test phrases into prompt overrides, verify at runtime by prompting model for canary response. Requires conversation-level integration. May fit better in Phase 3 (System Prompt Control) or Phase 7 (Advanced Governance).
 - **Verification dashboard:** Rich terminal output showing all patches, overrides, flags, and environment state in a single view. May be better served by Phase 7 (context monitor) or 1d (modular architecture with pluggable status).
 
-### 1d: Modular Architecture
-- [ ] Plugin/module system — users opt into what they want
-- [ ] Core module: patching engine + wrapper (required)
-- [ ] Each feature is a separate installable module
-- [ ] Pluggable verification registry: modules declare their own verification contracts
-- [ ] Central config: what's enabled, what's not, user's choice
-- [ ] Include optional install of Clawback: https://github.com/LZong-tw/clawback
-- [ ] Include optional essential claude code env flags: 
-  - [ ] "CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING": 1,
-  - [ ] "MAX_THINKING_TOKENS": "128000",    
-  - [ ] "CLAUDE_CODE_EFFORT_LEVEL": "max",
-  - [ ] "DISABLE_AUTOUPDATER": "1",
-  - [ ] "ENABLE_LSP_TOOL": "1",
-  - [ ] "EMBEDDED_SEARCH_TOOLS": "1"
-      
+### 1d: Modular Architecture [COMPLETE]
+- [x] Plugin/module system — GovernanceModule interface, registry, barrel exports
+- [x] Core module: wraps existing 13 verification entries (required, always enabled)
+- [x] Pluggable verification registry: modules declare verificationEntries, collected by getVerificationRegistry()
+- [x] Central config: `config.json` `modules` map overrides defaults
+- [x] Env-flags module: 6 recommended CC env vars (DISABLE_ADAPTIVE_THINKING, MAX_THINKING_TOKENS, EFFORT_LEVEL, DISABLE_AUTOUPDATER, ENABLE_LSP_TOOL, EMBEDDED_SEARCH_TOOLS)
+- [x] `modules` subcommand: lists modules with status
+- [ ] *Deferred:* Optional Clawback install module (https://github.com/LZong-tw/clawback) — stub for 1e or Phase 2
+
 
 ### 1e: CLI & Distribution
 - [ ] NPX-runnable: `npx claude-governance apply`
