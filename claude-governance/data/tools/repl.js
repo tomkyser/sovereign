@@ -539,6 +539,13 @@ Use REPL when a task involves **3 or more tool operations**, or when you need:
 
 For simple single-file reads or one-off commands, use the individual tools directly.
 
+## When NOT to use REPL
+
+- **Single file read/edit** — bare Read and Edit have diff visibility and hook enforcement
+- **Safety-critical edits** — bare Edit shows diffs for user review; REPL edits are silent
+- **Exploratory debugging** — per-call error isolation is easier with individual tools
+- **One-off shell commands** — bare Bash is simpler for a single command
+
 ## Available Functions (all async — use await)
 
 ### File Operations
