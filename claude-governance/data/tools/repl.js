@@ -260,15 +260,23 @@ async function grep(pattern, searchPath, opts) {
 async function glob(pattern, opts) {
   checkAbort();
   const dir = (opts && opts.cwd) || '.';
-  const maxDepth = (opts && opts.maxDepth) ? `-maxdepth ${opts.maxDepth} ` : '';
-  const cmd = `find ${JSON.stringify(dir)} ${maxDepth}-name ${JSON.stringify(pattern)} -type f 2>/dev/null | sort`;
+  const parts = ['rg', '--files', '--glob', JSON.stringify(pattern),
+    '--sort=modified', '--no-ignore', '--hidden'];
+  if (opts && opts.maxDepth) parts.push('--max-depth', String(opts.maxDepth));
+  parts.push(JSON.stringify(dir));
+  const cmd = parts.join(' ');
   const args = { command: cmd };
 
   return tracked('glob', args, async () => {
     const tool = findTool('Bash');
     if (!tool) throw new Error('Bash tool not found in registry');
-    const result = await tool.call(args, currentContext, undefined, makeParentMessage());
-    return (result.data.stdout || '').trim();
+    try {
+      const result = await tool.call(args, currentContext, undefined, makeParentMessage());
+      return (result.data.stdout || '').trim();
+    } catch (e) {
+      if (e.message && e.message.includes('Shell command failed')) return '';
+      throw e;
+    }
   });
 }
 
@@ -545,7 +553,8 @@ For simple single-file reads or one-off commands, use the individual tools direc
   - opts: \`{ timeout, description }\`
 - \`grep(pattern, path?, opts?)\` → matching lines string
   - path defaults to \`'.'\`; opts: \`{ flags: '-rn' }\`
-- \`glob(pattern, opts?)\` → newline-separated file paths
+- \`glob(pattern, opts?)\` → newline-separated file paths (sorted by modification time)
+  - Supports full glob syntax including \`**\` recursion: \`'**/*.ts'\`, \`'src/**/*.js'\`
   - opts: \`{ cwd, maxDepth }\`
 
 ### Notebook
