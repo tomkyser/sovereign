@@ -202,8 +202,7 @@ binary patching of the tool registry.
 Runtime testing revealed gaps across binary management, Zod compatibility, shim reliability, and embedded tools verification.
 - [x] **G1: Binary vault architecture** — `src/binaryVault.ts`: XDG paths, GCS download, manifest.json SHA256, magic bytes, immutable locking, binary-safe copy
 - [x] **G2: Apply binary corruption** — `installationBackup.ts`: replaced fs.copyFile with binarySafeCopy
-- [ ] **G3: Tool input validation mismatch** — safeParse uses Agent schema, not passthrough (HIGH)
-- [ ] **G4: Zod passthrough shim** — borrow MCPTool passthrough, not Agent tool schema (HIGH)
+- [x] **G3+G4: Zod passthrough** — self-contained passthrough shim replaces Agent schema borrow
 - [ ] **G5: Prompt override verification** — 8 overrides not matching on fresh binary (MEDIUM)
 - [x] **G6: Auto-updater race condition** — binary fingerprint in state.json, pre-flight overwrite detection
 - [x] **G7: Installer UTF-8 corruption** — detectCorruption() scans for U+FFFD, size anomaly, warns in check/launch
