@@ -594,8 +594,10 @@ return { name: pkg.name, depCount: deps.length, deps };
         returnValue = await returnValue;
       }
     } catch (syncErr) {
-      // If it's a SyntaxError (likely `await` outside async), retry with IIFE
-      if (syncErr.name === 'SyntaxError' && /await/.test(script)) {
+      // If it's a SyntaxError, retry with async IIFE wrapper.
+      // Triggers on: `await` (outside async), `return` (outside function),
+      // or any other syntax only valid inside a function body.
+      if (syncErr.name === 'SyntaxError') {
         try {
           const wrappedScript = `(async () => { ${script} })()`;
           returnValue = await vm.runInContext(wrappedScript, ctx, {
