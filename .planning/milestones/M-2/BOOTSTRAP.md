@@ -16,14 +16,15 @@ cd /Users/tom.kyser/dev/claude-code-patches/claude-governance
 pnpm build && node dist/index.mjs check
 ```
 
-**Completed:** 2a (tool injection), 2a-gaps (12/12), 2b (clean-room REPL), 2b-gaps (14/14 + 2 post-testing fixes)
-**Next:** 2b-gaps-2 (G15 embedded search, G9/G11 prompt effectiveness)
-**Then:** 2c (Clean-Room Tungsten), 2d (Context Snipping Tool)
+**Completed:** 2a (tool injection), 2a-gaps (12/12), 2b (clean-room REPL), 2b-gaps (14/14 + 2 post-testing fixes), 2b-gaps-2 (G15 + G9/G11 tests)
+**Next:** 2c (Clean-Room Tungsten)
+**Then:** 2d (Context Snipping Tool)
 
 **CRITICAL — read before doing anything:**
 - `.planning/specs/tungsten-clean-room.md` — Tungsten design spec v0.2
+- `.planning/milestones/M-2/handoffs/HANDOFF-PHASE-2B-GAPS-2.md` — REPL production readiness (latest handoff)
 - `.planning/milestones/M-2/handoffs/HANDOFF-PHASE-2B-GAPS.md` — verification pattern that 2c MUST follow
-- `.planning/FINDINGS.md` — F1 (tool registry access), F10 (return shapes), F11 (delegation pattern) inform Tungsten
+- `.planning/FINDINGS.md` — F1 (tool registry access), F10 (return shapes), F11 (delegation pattern), F18 (shell snapshot) inform Tungsten
 
 **Key context for 2c:**
 - Auto-discovery loader handles tool deployment — just drop a `tungsten.js` in `data/tools/`

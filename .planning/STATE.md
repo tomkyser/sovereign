@@ -88,7 +88,7 @@ and governance-specific `check` command added.
 - **2a-gaps:** COMPLETE — 12/12 gaps closed. 15/15 SOVEREIGN on 2.1.101
 - **2b:** COMPLETE — clean-room REPL (auto-discovery loader, 9 handlers, coexist/replace modes). Post-testing fixes: replace mode stash, state persistence, IIFE fallback, defensive extraction.
 - **2b-gaps:** COMPLETE — 14/14 gaps + 2 post-testing fixes (parentMessage F17, IIFE script-source). User benchmark: 6.5/7 handlers functional.
-- **2b-gaps-2:** NEXT — G15 embedded search dispatch, G9/G11 prompt effectiveness testing
+- **2b-gaps-2:** COMPLETE — G15 already working (F18), G9-test/G11-test prompt effectiveness verified
 - **2c:** Planned — clean-room Tungsten (spec at specs/tungsten-clean-room.md)
 
 ### Binary Vault (from 2a-gaps)

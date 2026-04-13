@@ -261,12 +261,12 @@ Each tool phase must include:
 3. Session-start hook awareness (tool name in SOVEREIGN banner)
 4. Statusline segment showing tool status
 
-### Phase 2b-gaps-2: REPL Production Readiness
-Gaps surfaced during testing of 2b-gaps. Phase 2b-gaps is not complete until these are resolved.
+### Phase 2b-gaps-2: REPL Production Readiness [COMPLETE]
+Gaps surfaced during testing of 2b-gaps. All resolved.
 
-- [ ] **G15: Embedded search tool dispatch** — REPL's grep/glob route through Bash → system `/usr/bin/grep` and `/usr/bin/find`, NOT the embedded ugrep 7.5 / bfs 4.1 / rg 14.1 that CC uses natively. Embedded tools dispatch via argv[0] rewriting on the claude binary (multi-call binary pattern). Fix: invoke claude binary as ugrep/bfs, or find a way to access the shadow Glob/Grep implementations from the tool context.
-- [ ] **G9-test: Fetch prompt effectiveness** — verify model correctly understands that `fetch()` returns AI-summarized content and recommends `bash('curl ...')` for raw HTTP. Interactive observation test.
-- [ ] **G11-test: Persistence prompt effectiveness** — verify model correctly understands persistence nuances: `return`/`await` trigger wrapping, `state` object for cross-call persistence, bare expressions. Interactive observation test.
+- [x] **G15: Embedded search tool dispatch** — RESOLVED: Already working. REPL's grep/glob delegate to the Bash tool, which sources a shell snapshot containing `find→bfs` and `grep→ugrep` shell functions (argv0 dispatch to claude binary). Verified: `grep --version` = ugrep 7.5.0, `find --version` = bfs 4.1. No code changes needed. See F18.
+- [x] **G9-test: Fetch prompt effectiveness** — VERIFIED: Model correctly uses `bash('curl -s ...')` for raw HTTP and `fetch()` for summarized content. Tested with httpbin.org/json (JSON) and httpbin.org/html (HTML). fetch() returned AI summary ("This passage from Herman Melville's Moby-Dick..."), curl returned raw HTML.
+- [x] **G11-test: Persistence prompt effectiveness** — VERIFIED: Model correctly uses `var` for sync persistence, `state.x` for async persistence, and understands `const`/`let` in IIFE-wrapped scripts are function-scoped and lost. Three-scenario test: var survives, state.asyncValue survives, const correctly undefined.
 
 ### Phase 2c: Clean-Room Tungsten
 - [ ] Implement per spec: `specs/tungsten-clean-room.md`

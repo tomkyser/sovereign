@@ -334,3 +334,33 @@ because they either don't access parentMessage or tolerate its absence.
 **Lesson:** When delegating to CC tools, the call signature contract includes implicit
 field requirements that only surface when specific feature flags are active. Always
 test with the actual binary, not assumptions from source reading.
+
+---
+
+## F18: Bash Tool Shell Snapshot Shadows find/grep With Embedded Tools (2026-04-13)
+
+**Phase:** 2b-gaps-2 (G15) | **Impact:** G15 resolved — no code changes needed
+
+CC's Bash tool sources a "shell snapshot" (`~/.claude/shell-snapshots/snapshot-*.sh`)
+before every command execution. When `EMBEDDED_SEARCH_TOOLS=1`, the snapshot contains
+shell functions that shadow `find` and `grep`:
+
+- `find` → `ARGV0=bfs "$_cc_bin" -regextype findutils-default "$@"`
+- `grep` → `ARGV0=ugrep "$_cc_bin" -G --ignore-files --hidden -I --exclude-dir=.git... "$@"`
+
+The bun binary dispatches based on argv[0], running embedded bfs 4.1 or ugrep 7.5.0.
+
+**Why G15 was a false alarm:** REPL's `grep()` and `glob()` construct `grep`/`find`
+commands and delegate to `findTool('Bash').call()`. The Bash tool sources the snapshot,
+so the shell functions shadow the commands before execution. The REPL was already using
+embedded tools all along — the assumption that it used system binaries was never verified.
+
+**The `**` glob degradation** from the benchmark was a usage issue: `glob('**/*.ts')`
+constructs `find ... -name "**/*.ts"` which isn't valid find/bfs syntax. The correct
+pattern is `glob('*.ts', { cwd: 'dir' })` for recursive search.
+
+**Source:** `ShellSnapshot.ts:createFindGrepShellIntegration()` generates the functions.
+`bashProvider.ts:createBashShellProvider()` sources the snapshot via `createAndSaveSnapshot()`.
+
+**Lesson:** Verify assumptions empirically before filing gaps. `type find` inside a
+Bash tool call would have caught this immediately.
