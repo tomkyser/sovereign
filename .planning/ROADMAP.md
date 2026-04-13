@@ -390,6 +390,7 @@ Full extraction, editing, version control, and targeted degradation fixes.
 Phase planning TODO. - MUST be at a state where EVERYTHING ABOVE WILL WORK ACROSS NEWER VERSIONS - NOTHING CAN BE HARDCODED TO JUST 2.1.101 - Our strategy will be automate a test when a new claude code version drops (in a sandbox to keep my system clean) that test should assess what needs to be adjusted if anything - we will also need to wait for the upstream system prompts repo to be updated with latest prompt extractions - we should have a SOVREIGN /update command and a statusline visual.
 This will be 1.0.0 everything after this shall then adhere to the strict semver and git strategy for dev and releases, no more work pushed directly to master.
 
+- **Hooks module in setup/launch:** 4 standalone safety hooks (read-before-edit, commit-validate, repl-precheck, repl-safety) live at `data/hooks/` — manually deployed for now. Pre-M7, must be a claude-governance module: `setup` installs to `~/.claude/hooks/`, `launch` verifies registration in settings.json, `modules` shows status. Bridge between "works for Tom" and "works for everyone."
 - **Verification dashboard:** Rich terminal output showing all patches, overrides, flags, and environment state in a single view.
 - **Full Documentation and branding:** As well as cleaning up any old tweakcc artifacts or docs
 - **Downstream Pipeline for dependencies:** Do we still pull and merge from TweakCC.
