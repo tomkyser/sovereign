@@ -14,6 +14,15 @@ let currentContext = null;
 let operations = [];
 let selfRef = null; // Set after module.exports — holds ref to this tool object
 
+// CC's tools access parentMessage fields via optional chaining ($?.message.id,
+// $?.uuid). When $ is undefined, the chain short-circuits safely. But when $
+// is a non-null object missing .message, it crashes. We must provide all
+// fields that CC's tools may access.
+function makeParentMessage() {
+  const id = 'repl-' + Math.random().toString(36).substring(2, 15);
+  return { uuid: id, message: { id: id, role: 'assistant', content: [] } };
+}
+
 // ---------------------------------------------------------------------------
 // Config (read from ~/.claude-governance/config.json on first call)
 // ---------------------------------------------------------------------------
@@ -157,7 +166,7 @@ async function read(filePath, opts) {
   return tracked('read', args, async () => {
     const tool = findTool('Read');
     if (!tool) throw new Error('Read tool not found in registry');
-    const result = await tool.call(args, currentContext);
+    const result = await tool.call(args, currentContext, undefined, makeParentMessage());
     // Defensive extraction: primary path, fallback to raw
     try {
       if (result && result.data && result.data.file && result.data.file.content !== undefined) {
@@ -181,7 +190,7 @@ async function write(filePath, content) {
   return tracked('write', args, async () => {
     const tool = findTool('Write');
     if (!tool) throw new Error('Write tool not found in registry');
-    const result = await tool.call(args, currentContext);
+    const result = await tool.call(args, currentContext, undefined, makeParentMessage());
     try {
       return `${result.data.type}: ${result.data.filePath}`;
     } catch (e) {
@@ -198,7 +207,7 @@ async function edit(filePath, oldString, newString, opts) {
   return tracked('edit', args, async () => {
     const tool = findTool('Edit');
     if (!tool) throw new Error('Edit tool not found in registry');
-    const result = await tool.call(args, currentContext);
+    const result = await tool.call(args, currentContext, undefined, makeParentMessage());
     try {
       return `edited: ${result.data.filePath}`;
     } catch (e) {
@@ -216,7 +225,7 @@ async function bash(command, opts) {
   return tracked('bash', args, async () => {
     const tool = findTool('Bash');
     if (!tool) throw new Error('Bash tool not found in registry');
-    const result = await tool.call(args, currentContext);
+    const result = await tool.call(args, currentContext, undefined, makeParentMessage());
     try {
       let output = result.data.stdout || '';
       if (result.data.stderr) output += (output ? '\n' : '') + result.data.stderr;
@@ -238,7 +247,7 @@ async function grep(pattern, searchPath, opts) {
     const tool = findTool('Bash');
     if (!tool) throw new Error('Bash tool not found in registry');
     try {
-      const result = await tool.call(args, currentContext);
+      const result = await tool.call(args, currentContext, undefined, makeParentMessage());
       return result.data.stdout || '';
     } catch (e) {
       // grep returns exit 1 for no matches — not an error
@@ -258,7 +267,7 @@ async function glob(pattern, opts) {
   return tracked('glob', args, async () => {
     const tool = findTool('Bash');
     if (!tool) throw new Error('Bash tool not found in registry');
-    const result = await tool.call(args, currentContext);
+    const result = await tool.call(args, currentContext, undefined, makeParentMessage());
     return (result.data.stdout || '').trim();
   });
 }
@@ -282,7 +291,7 @@ async function notebook_edit(notebookPath, editOps) {
   return tracked('notebook_edit', args, async () => {
     const tool = findTool('NotebookEdit');
     if (!tool) throw new Error('NotebookEdit tool not found in registry');
-    const result = await tool.call(args, currentContext);
+    const result = await tool.call(args, currentContext, undefined, makeParentMessage());
     try {
       if (result.data && result.data.error) return 'Error: ' + result.data.error;
       return typeof result.data === 'string' ? result.data : JSON.stringify(result.data);
@@ -300,7 +309,7 @@ async function fetch_url(url, opts) {
   return tracked('fetch', args, async () => {
     const tool = findTool('WebFetch');
     if (!tool) throw new Error('WebFetch tool not found in registry');
-    const result = await tool.call(args, currentContext);
+    const result = await tool.call(args, currentContext, undefined, makeParentMessage());
     try {
       return typeof result.data === 'string' ? result.data : JSON.stringify(result.data);
     } catch (e) {
@@ -327,7 +336,7 @@ async function agent(prompt, opts) {
   return tracked('agent', args, async () => {
     const tool = findTool('Agent');
     if (!tool) throw new Error('Agent tool not found in registry');
-    const result = await tool.call(args, currentContext);
+    const result = await tool.call(args, currentContext, undefined, makeParentMessage());
     try {
       return typeof result.data === 'string' ? result.data : JSON.stringify(result.data);
     } catch (e) {
