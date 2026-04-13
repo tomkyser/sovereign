@@ -27,8 +27,25 @@ function loadConfig() {
     const fs = require('fs');
     const cfgPath = pathMod.join(os.homedir(), '.claude-governance', 'config.json');
     const raw = JSON.parse(fs.readFileSync(cfgPath, 'utf8'));
-    replConfig = raw.repl || {};
+    const cfg = raw.repl || {};
+    // G12: Validate config values — warn on invalid, fall through to defaults
+    if (cfg.mode && cfg.mode !== 'coexist' && cfg.mode !== 'replace') {
+      console.error('[REPL] Invalid repl.mode: "' + cfg.mode + '" — must be "coexist" or "replace"');
+      delete cfg.mode;
+    }
+    if (cfg.timeout !== undefined && (typeof cfg.timeout !== 'number' || cfg.timeout < 1000)) {
+      console.error('[REPL] Invalid repl.timeout: ' + cfg.timeout + ' — must be number >= 1000');
+      delete cfg.timeout;
+    }
+    if (cfg.maxResultSize !== undefined && (typeof cfg.maxResultSize !== 'number' || cfg.maxResultSize < 1000)) {
+      console.error('[REPL] Invalid repl.maxResultSize: ' + cfg.maxResultSize + ' — must be number >= 1000');
+      delete cfg.maxResultSize;
+    }
+    replConfig = cfg;
   } catch (e) {
+    if (e.message && e.message.includes('JSON')) {
+      console.error('[REPL] config.json parse error — using defaults');
+    }
     replConfig = {};
   }
   return replConfig;
