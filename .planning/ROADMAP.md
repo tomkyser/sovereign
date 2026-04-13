@@ -190,12 +190,14 @@ binary patching of the tool registry.
 - REPL design spec: `specs/repl-clean-room.md`
 - Tungsten design spec: `specs/tungsten-clean-room.md`
 
-### 2a: Tool Injection Mechanism
-- [ ] Patch `getAllBaseTools()` (minified `Ut()`) to load external tool definitions
-- [ ] Tool implementation directory: `~/.claude-governance/tools/`
-- [ ] Hot-loadable: update tool code without re-patching binary
-- [ ] Registration verification (tool appears in tool list)
-- [ ] Binary-patched reasoning block renderer (collapsible, dimmed)
+### 2a: Tool Injection Mechanism [COMPLETE]
+- [x] Patch `getAllBaseTools()` (minified `Ut()`) — structural pattern matching, version-resilient
+- [x] Tool implementation directory: `~/.claude-governance/tools/index.js`
+- [x] Hot-loadable: update tool code without re-patching binary (require() at runtime)
+- [x] Registration verification: `__claude_governance_tools__` signature, 14/14 SOVEREIGN
+- [x] Loader fills TOOL_DEFAULTS for missing methods, tools use inputJSONSchema (no Zod)
+- [x] Transparent claude shim: `~/.claude-governance/bin/claude` wraps every session
+- [ ] *Deferred:* Binary-patched reasoning block renderer (collapsible, dimmed)
 
 ### 2b: Clean-Room REPL
 - [ ] Implement per spec: `specs/repl-clean-room.md`

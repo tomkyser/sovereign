@@ -21,7 +21,7 @@ and governance-specific `check` command added.
 - **Verify:** `node dist/index.mjs check`
 - **Restore:** `node dist/index.mjs --restore`
 
-### What's Applied (Verified 13/13 via `check`)
+### What's Applied (Verified 14/14 via `check`)
 **Governance Patches (4 active):**
 - Disclaimer neutralization — replaces "may or may not be relevant" with directive framing
 - Context header reframing — replaces ambient "use the following context" with mandatory framing
@@ -30,6 +30,11 @@ and governance-specific `check` command added.
 
 **Gate Resolution:**
 - USE_EMBEDDED_TOOLS_FN ternaries resolved to ant branch (0 unresolved)
+
+**Tool Injection:**
+- getAllBaseTools() patched to load external tools from `~/.claude-governance/tools/index.js`
+- Loader fills TOOL_DEFAULTS, tools use inputJSONSchema (standard JSON Schema, no Zod)
+- Sample Ping tool deployed for runtime testing
 
 **Prompt Overrides (8 of 9 — output-efficiency removed by Anthropic):**
 - Agent Prompt: Explore, General Purpose
@@ -41,7 +46,7 @@ and governance-specific `check` command added.
 | `(default)` / `--apply` | Apply all governance patches + prompt overrides |
 | `launch [-- args]` | Pre-flight verify + launch CC (wrapper mode) |
 | `--restore` | Restore binary to original state from backup |
-| `check` | Verify 13 governance signatures against extracted JS |
+| `check` | Verify 14 governance signatures against extracted JS |
 | `modules` | List governance modules and their status |
 | `setup` | First-run wizard — module selection, apply, verify |
 | `--list-patches` | List available governance patches |
@@ -78,5 +83,8 @@ and governance-specific `check` command added.
 - **1c:** COMPLETE — verification API extraction, hook rewrite, status line fix
 - **1d:** COMPLETE — module system, core + env-flags modules, modules CLI
 - **1e:** COMPLETE — npm packaging, setup wizard, postinstall welcome
+- **M-1 Retro:** COMPLETE — 18 gaps fixed, canary→Phase 3, dashboard→deferred
+- **2a:** COMPLETE — tool injection patch, external tool loader, transparent claude shim
+- **2b:** NEXT — clean-room REPL
 
 See `.planning/ROADMAP.md` for full details.

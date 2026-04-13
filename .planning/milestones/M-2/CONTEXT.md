@@ -7,28 +7,81 @@
 Clean-room implementations of ant-only tools (REPL, Tungsten), injected into CC's tool registry via binary patching. Users get the tools that Anthropic restricts to internal use.
 
 **Location:** `/Users/tom.kyser/dev/claude-code-patches/claude-governance/`
-**Prereqs:** M-1 retrospective high-priority fixes (version coupling, dead code cleanup)
-
-## M-1 Foundation
-
-| Component | Location | Notes |
-|-----------|----------|-------|
-| Binary patching | `src/patches/governance.ts` | Find→replace pattern, signature-based |
-| Verification engine | `src/verification.ts` | `runVerification(js, registry)` — module-driven |
-| Module system | `src/modules/` | GovernanceModule interface, registry pattern |
-| Binary extraction | `src/nativeInstallationLoader.ts` | Extract JS from Mach-O binary |
-| Unpack/repack | `src/commands.ts` | `handleUnpack()`, `handleRepack()` |
-
-## Design Specs
-
-- REPL: `specs/repl-clean-room.md`
-- Tungsten: `specs/tungsten-clean-room.md`
-
-## External References
-
-- CC leaked source (tool registry, AgentTool, runAgent): `/Users/tom.kyser/dev/cc-source/`
-- CC source — getAllBaseTools(): must locate in minified JS
+**Build:** `pnpm build` → 145KB | **Verify:** `node dist/index.mjs check` → 14/14 SOVEREIGN
+**CC Version:** 2.1.101 (native, arm64-darwin, pinned via DISABLE_AUTOUPDATER=1)
 
 ## Current State
 
-*To be filled in when M-2 work begins.*
+| Phase | Status |
+|-------|--------|
+| 2a: Tool Injection Mechanism | COMPLETE |
+| 2b: Clean-Room REPL | NEXT |
+| 2c: Clean-Room Tungsten | Planned |
+| 2d: Context Snipping Tool | Planned |
+
+## What's Working (Phase 2a)
+
+**Tool injection patch** — `getAllBaseTools()` (minified `Ut()`) is patched to load external tools from `~/.claude-governance/tools/index.js` at runtime. The loader:
+- Reads tools via `require()` — hot-reloadable without re-patching
+- Fills TOOL_DEFAULTS for missing methods
+- Tools use `inputJSONSchema` (standard JSON Schema, no Zod)
+- Silent failure on missing tools dir
+
+**Transparent claude shim** — `~/.claude-governance/bin/claude` wraps every `claude` invocation through `claude-governance launch` for governance pre-flight. All args pass through.
+
+**Sample Ping tool** deployed at `~/.claude-governance/tools/index.js` for runtime testing. Not yet verified in a live CC session.
+
+## Tool Injection Contract
+
+External tools must provide at minimum:
+```javascript
+{
+  name: 'ToolName',
+  inputJSONSchema: { type: 'object', properties: {...}, required: [...] },
+  async prompt() { return 'Description for the model' },
+  async description() { return 'One-line description' },
+  async call(args, context) { return { data: 'result' } },
+}
+```
+
+The `call()` function receives:
+- `args` — parsed input matching the JSON schema
+- `context` — ToolUseContext with `abortController`, `getAppState()`, `messages`, `options.tools`
+
+Return `{ data: string }` for simple text results. The loader provides defaults for all other methods.
+
+## Key Files (claude-governance/)
+
+| File | Purpose |
+|------|---------|
+| `src/patches/governance.ts` | All patches incl. `writeToolInjection()` |
+| `src/patches/index.ts` | Patch orchestrator + definitions |
+| `src/shim.ts` | Claude wrapper shim generator |
+| `src/setup.ts` | First-run wizard with shim + module setup |
+| `src/modules/` | Module system — types, registry, core, env-flags |
+| `src/verification.ts` | Verification API — 14 entries |
+| `~/.claude-governance/tools/index.js` | External tool definitions (user space) |
+
+## Minified Binary Map (v2.1.101)
+
+| Symbol | Minified | Notes |
+|--------|----------|-------|
+| getAllBaseTools | `Ut()` | Patched — loads external tools |
+| buildTool | `lq()` | Tool factory |
+| TOOL_DEFAULTS | `LE4` | Default methods |
+| getTools | `xW()` | Permission filtering |
+| MCPTool base | `Kc6` | MCP tool template |
+| REPL gate | `qS()` | Returns false (dead code) |
+| REPL var | `jn_` | Always null in external build |
+
+## Design Specs
+
+- REPL: `/Users/tom.kyser/dev/claude-code-patches/specs/repl-clean-room.md`
+- Tungsten: `/Users/tom.kyser/dev/claude-code-patches/specs/tungsten-clean-room.md`
+
+## External References
+
+- CC leaked source: `/Users/tom.kyser/dev/cc-source/`
+- Tool.ts (types): `cc-source/.../src/Tool.ts`
+- tools.ts (registry): `cc-source/.../src/tools.ts`
+- MCP tool creation: `cc-source/.../src/services/mcp/client.ts`
