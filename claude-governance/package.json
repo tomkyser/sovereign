@@ -23,6 +23,7 @@
     "test": "vitest run",
     "test:dev": "vitest",
     "format": "prettier --write src",
+    "postinstall": "node scripts/postinstall.mjs",
     "prepare": "husky"
   },
   "keywords": [
@@ -73,5 +74,11 @@
   },
   "engines": {
     "node": ">=20.0.0"
-  }
+  },
+  "files": [
+    "dist/",
+    "data/prompts/prompts-2.1.9*.json",
+    "data/prompts/prompts-2.1.10*.json",
+    "scripts/"
+  ]
 }

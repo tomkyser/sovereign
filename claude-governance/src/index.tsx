@@ -54,6 +54,7 @@ import {
   type ModulesConfig,
   type ModuleContext,
 } from './modules';
+import { handleSetup } from './setup';
 
 // =============================================================================
 // Invocation Command Detection
@@ -263,6 +264,15 @@ const main = async () => {
       const options = program.opts();
       if (options.debug) enableDebug();
       await handleModules();
+    });
+
+  program
+    .command('setup')
+    .description('First-run setup — configure modules and apply governance patches')
+    .action(async () => {
+      const options = program.opts();
+      if (options.debug) enableDebug();
+      await handleSetup();
     });
 
   program
