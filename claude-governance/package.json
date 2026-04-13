@@ -1,0 +1,77 @@
+{
+  "name": "claude-governance",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Restore user authority over Claude Code. Governance patches, prompt overrides, and verification.",
+  "main": "dist/lib/index.mjs",
+  "types": "dist/lib/index.d.ts",
+  "bin": {
+    "claude-governance": "./dist/index.mjs"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/lib/index.d.ts",
+      "default": "./dist/lib/index.mjs"
+    }
+  },
+  "scripts": {
+    "build": "tsc --noEmit && tsdown --minify --dts src/index.tsx src/lib/index.ts",
+    "build:dev": "tsdown --dts src/index.tsx src/lib/index.ts",
+    "watch": "tsdown --watch --dts src/index.tsx src/lib/index.ts",
+    "start": "node dist/index.mjs",
+    "lint": "tsc --noEmit && eslint src",
+    "test": "vitest run",
+    "test:dev": "vitest",
+    "format": "prettier --write src",
+    "prepare": "husky"
+  },
+  "keywords": [
+    "cli",
+    "typescript",
+    "claude",
+    "claude-code",
+    "governance",
+    "system-prompts",
+    "binary-patching"
+  ],
+  "author": "Tom Kyser",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tomkyser/claude-governance.git"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.33.0",
+    "@types/node": "^20.19.10",
+"@types/which": "^3.0.4",
+    "eslint": "^9.33.0",
+    "eslint-plugin-react": "^7.37.5",
+    "globals": "^16.3.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
+    "prettier": "^3.6.2",
+    "tsdown": "^0.18.4",
+    "tsx": "^4.20.3",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.39.0",
+    "vitest": "^3.2.4"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": "prettier --write",
+    "*.{json,md}": "prettier --write"
+  },
+  "dependencies": {
+    "chalk": "^5.5.0",
+    "commander": "^14.0.0",
+    "diff": "^8.0.3",
+    "globby": "^14.1.0",
+    "gray-matter": "^4.0.3",
+    "node-lief": "^1.1.1",
+    "oxfmt": "^0.28.0",
+    "wasmagic": "^1.0.7",
+    "which": "^6.0.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
