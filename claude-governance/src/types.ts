@@ -189,6 +189,7 @@ export interface TweakccConfig {
   ccVersion: string;
   ccInstallationDir?: string | null; // Deprecated: only used for migration from old configs
   ccInstallationPath?: string | null;
+  targetVersion?: string | null; // User-specified CC version to target (vault)
   lastModified: string;
   changesApplied: boolean;
   settings: Settings;

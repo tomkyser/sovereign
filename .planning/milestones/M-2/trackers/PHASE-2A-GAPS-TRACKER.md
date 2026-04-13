@@ -1,7 +1,7 @@
 # Phase 2a-gaps Tracker — Tool Injection Hardening
 
-Status: PENDING
-Started: —
+Status: IN PROGRESS
+Started: 2026-04-13
 
 ## Scope
 
@@ -11,26 +11,24 @@ Fix every issue discovered during first live runtime test of tool injection. Bin
 
 | # | Gap | Severity | Status |
 |---|-----|----------|--------|
-| G1 | Binary vault architecture — download → verify → lock → work on copy | High | Pending |
-| G2 | Apply command binary corruption — Node.js fs ops corrupt Mach-O, must use /bin/cp | High | Pending |
+| G1 | Binary vault architecture — download → verify → lock → work on copy | High | Done |
+| G2 | Apply command binary corruption — Node.js fs ops corrupt Mach-O, must use /bin/cp | High | Done |
 | G3 | Tool input validation mismatch — Ping tool visible but validation uses Agent schema | High | Pending |
 | G4 | Zod passthrough shim completeness — borrowed schema from _b[0] may carry wrong validation | High | Pending |
 | G5 | Prompt override verification on fresh binary — 8 overrides not matching after re-download | Medium | Pending |
 | G6 | Auto-updater race condition — sessions without DISABLE_AUTOUPDATER overwrite patched binary | Medium | Pending |
 | G7 | Installer UTF-8 corruption — `claude.ai/install.sh` produces 304MB corrupted binary on macOS | Low | Pending |
+| G8 | Shim reliability — governance wrapper shim breaks CC launch when system is unhealthy | High | Pending |
 
 ## Gap Details
 
-### G1: Binary Vault Architecture
-**Problem:** No safe storage for clean binaries. The installed path (`~/.local/share/claude/versions/`) is constantly written by the auto-updater and CC processes.
-**Solution:** `~/.claude-governance/binaries/virgin-{version}.bin` — downloaded directly to safe name, verified (magic bytes), locked (immutable + read-only). All operations work on copies. Never touch the virgin.
-**Status:** Virgin vault manually created this session at `~/.claude-governance/binaries/virgin-2.1.101.bin`. Needs to be baked into the codebase (download command, apply integration).
+### G1: Binary Vault Architecture — DONE
+**Problem:** No safe storage for clean binaries.
+**Solution:** `src/binaryVault.ts` — full vault module with XDG-based path discovery (matching CC's own `xdg.ts`), GCS download with `manifest.json` SHA256 verification, magic byte checks, immutable locking, binary-safe copies via `/bin/cp` (unix) or `copy /b` (Windows). Musl detection for Linux. `fetchLatestVersion()` via GCS `latest` file. Cross-platform (darwin/linux/win32, arm64/x64).
 
-### G2: Apply Command Binary Corruption
-**Problem:** The `apply` flow calls `backupNativeBinary()` which uses `fs.copyFile()` internally. On Node.js v24 + macOS, this corrupts Mach-O binaries — non-UTF-8 bytes get replaced with U+FFFD (`ef bf bd`), bloating 201MB → 304MB.
-**Workaround found:** Pre-create backup with `/bin/cp` before running apply. Apply finds existing backup, skips creating one.
-**Root cause:** Likely Node.js v24 `fs.copyFile` or `fs.readFile`/`fs.writeFile` encoding behavior with binary data. Shell `/bin/cp` is binary-safe.
-**Fix:** Replace all Node.js binary file operations with `child_process.execSync('cp ...')` or use explicit `{encoding: null}` everywhere.
+### G2: Apply Command Binary Corruption — DONE
+**Problem:** `backupNativeBinary()` used `fs.copyFile()` which corrupts Mach-O on Node.js v24.
+**Fix:** `installationBackup.ts` — both `backupNativeBinary()` and `restoreNativeBinaryFromBackup()` now use `binarySafeCopy()` from the vault module instead of Node.js fs operations.
 
 ### G3: Tool Input Validation Mismatch
 **Problem:** Model sees Ping tool (API schema via `inputJSONSchema` works), but when it calls the tool, validation fails with `InputValidationError: Ping failed — description and prompt required`. Those are Agent tool params, not Ping tool params.
@@ -57,6 +55,11 @@ Fix every issue discovered during first live runtime test of tool injection. Bin
 **Root cause:** The install script likely pipes through a shell operation that treats the binary as text.
 **Workaround:** Download directly from GCS: `curl -fsSL -o $TARGET "$GCS_BUCKET/2.1.101/darwin-arm64/claude"`
 **GCS bucket:** `https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases`
+
+### G8: Shim Reliability
+**Problem:** The transparent claude shim at `~/.claude-governance/bin/claude` wraps every `claude` invocation through `claude-governance launch`. If the governance tool fails for ANY reason (bad build, missing deps, corrupted state, port exhaustion, etc.), the user cannot launch CC at all. Tom had to manually comment out the shim PATH entry and clean-install CC just to get a working session.
+**Root cause:** The shim is a hard gate with no bypass. If `claude-governance launch` errors, the error propagates and CC never starts.
+**Fix:** The shim must have a failsafe — if governance pre-flight fails, it should log a warning and fall through to launch CC directly. Never block the user from running CC. Options: (a) try-catch in shim with direct exec fallback, (b) timeout on governance check, (c) `--no-governance` flag that bypasses entirely.
 
 ## Current Binary State
 

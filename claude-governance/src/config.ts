@@ -78,6 +78,7 @@ export const NATIVE_BINARY_BACKUP_FILE = path.join(
 );
 export const SYSTEM_PROMPTS_DIR = path.join(CONFIG_DIR, 'system-prompts');
 export const PROMPT_CACHE_DIR = path.join(CONFIG_DIR, 'prompt-data-cache');
+export const BINARIES_DIR = path.join(CONFIG_DIR, 'binaries');
 
 /**
  * Checks for multiple config locations and warns user
@@ -122,6 +123,7 @@ export const warnAboutMultipleConfigs = (): void => {
 export const ensureConfigDir = async (): Promise<void> => {
   await fs.mkdir(CONFIG_DIR, { recursive: true });
   await fs.mkdir(SYSTEM_PROMPTS_DIR, { recursive: true });
+  await fs.mkdir(BINARIES_DIR, { recursive: true });
 
   // Ensure the preferred config dir exists so next session migrates off legacy path
   const preferredDir = path.join(os.homedir(), '.claude-governance');
@@ -141,6 +143,7 @@ export const ensureConfigDir = async (): Promise<void> => {
         [
           '.DS_Store',
           'prompt-data-cache',
+          'binaries',
           'cli.js.backup',
           'native-binary.backup',
           'native-claudejs-orig.js',

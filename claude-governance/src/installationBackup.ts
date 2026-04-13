@@ -8,6 +8,7 @@ import {
 } from './config';
 import { clearAllAppliedHashes } from './systemPromptHashIndex';
 import { debug, replaceFileBreakingHardLinks, doesFileExist } from './utils';
+import { binarySafeCopy } from './binaryVault';
 import { ClaudeCodeInstallationInfo } from './types';
 
 export const backupClijs = async (ccInstInfo: ClaudeCodeInstallationInfo) => {
@@ -38,7 +39,10 @@ export const backupNativeBinary = async (
 
   await ensureConfigDir();
   debug(`Backing up native binary to ${NATIVE_BINARY_BACKUP_FILE}`);
-  await fs.copyFile(
+  // CRITICAL: Use binary-safe copy, NOT Node.js fs.copyFile().
+  // Node.js v24 fs.copyFile() corrupts Mach-O binaries by replacing
+  // non-UTF-8 bytes with U+FFFD, bloating 201MB → 304MB.
+  binarySafeCopy(
     ccInstInfo.nativeInstallationPath,
     NATIVE_BINARY_BACKUP_FILE
   );
@@ -109,14 +113,11 @@ export const restoreNativeBinaryFromBackup = async (
     `Restoring native binary from backup to ${ccInstInfo.nativeInstallationPath}`
   );
 
-  // Read the backup content
-  const backupContent = await fs.readFile(NATIVE_BINARY_BACKUP_FILE);
-
-  // Replace the file, breaking hard links and preserving permissions
-  await replaceFileBreakingHardLinks(
-    ccInstInfo.nativeInstallationPath,
-    backupContent,
-    'restore'
+  // CRITICAL: Use binary-safe copy, NOT Node.js fs.readFile()+writeFile().
+  // Node.js v24 corrupts Mach-O binaries during read/write operations.
+  binarySafeCopy(
+    NATIVE_BINARY_BACKUP_FILE,
+    ccInstInfo.nativeInstallationPath
   );
 
   return true;
