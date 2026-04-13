@@ -12,6 +12,7 @@ const pathMod = require('path');
 let vmContext = null;
 let currentContext = null;
 let operations = [];
+let selfRef = null; // Set after module.exports — holds ref to this tool object
 
 // ---------------------------------------------------------------------------
 // Config (read from ~/.claude-governance/config.json on first call)
@@ -46,6 +47,14 @@ function getMaxResultSize() {
 // ---------------------------------------------------------------------------
 
 function findTool(name) {
+  // In replace mode, primitives are filtered from context.options.tools.
+  // The binary-patched loader stashes them on this tool object as _stashedTools.
+  // Check stashed tools first (replace mode), then registry (coexist mode).
+  if (selfRef && selfRef._stashedTools) {
+    for (let i = 0; i < selfRef._stashedTools.length; i++) {
+      if (selfRef._stashedTools[i].name === name) return selfRef._stashedTools[i];
+    }
+  }
   const tools = currentContext && currentContext.options && currentContext.options.tools;
   if (!tools) return null;
   for (let i = 0; i < tools.length; i++) {
@@ -94,8 +103,9 @@ function summarizeResult(toolName, result) {
   }
   if (toolName === 'write') return String(result);
   if (toolName === 'edit') return String(result);
+  if (result === undefined || result === null) return 'ok';
   if (typeof result === 'string') return result.substring(0, 80);
-  return JSON.stringify(result).substring(0, 80);
+  try { return JSON.stringify(result).substring(0, 80); } catch (e) { return String(result); }
 }
 
 async function tracked(toolName, args, fn) {
@@ -133,9 +143,16 @@ async function read(filePath, opts) {
     const result = await tool.call(args, currentContext);
     // Defensive extraction: primary path, fallback to raw
     try {
-      return result.data.file.content;
+      if (result && result.data && result.data.file && result.data.file.content !== undefined) {
+        return result.data.file.content;
+      }
+      // Notebook or other non-text Read results
+      if (result && result.data !== undefined) {
+        return typeof result.data === 'string' ? result.data : JSON.stringify(result.data, null, 2);
+      }
+      return String(result);
     } catch (e) {
-      return typeof result.data === 'string' ? result.data : JSON.stringify(result.data);
+      return String(result);
     }
   });
 }
@@ -562,3 +579,6 @@ return { name: pkg.name, depCount: deps.length, deps };
     return { data: formatResult(description, startTime, returnValue, error) };
   },
 };
+
+// Self-reference so findTool can access _stashedTools set by the binary-patched loader
+selfRef = module.exports;

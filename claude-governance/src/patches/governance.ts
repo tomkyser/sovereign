@@ -582,6 +582,9 @@ const TOOL_ZOD_SHIM_CODE = [
 // Replace mode: filter REPL_ONLY_TOOLS from _b when repl.mode is "replace".
 // Same tools Ant filters (tools.ts:314-321): Read, Write, Edit, Bash,
 // NotebookEdit, Agent. Glob/Grep already excluded by embedded tools gate.
+// In replace mode, filter primitives from _b BUT stash them on the REPL tool
+// so it can still delegate. Ant's getReplPrimitiveTools() does this by bypassing
+// getAllBaseTools() entirely — we stash on the tool object instead.
 const TOOL_REPLACE_FILTER_CODE = [
   `try{`,
   `var _cfgPath=require("node:path").join(`,
@@ -590,6 +593,15 @@ const TOOL_REPLACE_FILTER_CODE = [
   `var _cfg=JSON.parse(require("node:fs").readFileSync(_cfgPath,"utf8"));`,
   `if(_cfg.repl&&_cfg.repl.mode==="replace"){`,
   `var _replOnly={"Read":1,"Write":1,"Edit":1,"Bash":1,"NotebookEdit":1,"Agent":1};`,
+  // Stash filtered tools on the REPL tool object before removing them
+  `var _replTool=null;`,
+  `for(var _ri=0;_ri<${TOOL_LOADER_SIGNATURE}.length;_ri++){`,
+  `if(${TOOL_LOADER_SIGNATURE}[_ri].name==="REPL"){_replTool=${TOOL_LOADER_SIGNATURE}[_ri];break}`,
+  `}`,
+  `if(_replTool){`,
+  `_replTool._stashedTools=_b.filter(function(t){return!!_replOnly[t.name]})`,
+  `}`,
+  // Now filter primitives from the returned array
   `_b=_b.filter(function(t){return!_replOnly[t.name]})`,
   `}`,
   `}catch(_re){}`,
