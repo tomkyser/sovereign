@@ -199,6 +199,16 @@ binary patching of the tool registry.
 - [x] Transparent claude shim: `~/.claude-governance/bin/claude` wraps every session
 - [ ] *Deferred:* Binary-patched reasoning block renderer (collapsible, dimmed)
 
+### 2a-gaps: Tool Injection Hardening
+Runtime testing of tool injection revealed 7 gaps across binary management, Zod compatibility, and apply-flow corruption.
+- [ ] **G1: Binary vault architecture** — download → verify → lock → copy to work on (HIGH)
+- [ ] **G2: Apply binary corruption** — Node.js v24 fs ops corrupt Mach-O, must use /bin/cp (HIGH)
+- [ ] **G3: Tool input validation mismatch** — safeParse uses Agent schema, not passthrough (HIGH)
+- [ ] **G4: Zod passthrough shim** — borrow MCPTool passthrough, not Agent tool schema (HIGH)
+- [ ] **G5: Prompt override verification** — 8 overrides not matching on fresh binary (MEDIUM)
+- [ ] **G6: Auto-updater race condition** — sessions without DISABLE_AUTOUPDATER overwrite (MEDIUM)
+- [ ] **G7: Installer UTF-8 corruption** — install.sh produces corrupted binary (LOW)
+
 ### 2b: Clean-Room REPL
 - [ ] Implement per spec: `specs/repl-clean-room.md`
 - [ ] Node VM with persistent context across calls

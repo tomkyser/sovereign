@@ -15,9 +15,20 @@ Clean-room implementations of ant-only tools (REPL, Tungsten), injected into CC'
 | Phase | Status |
 |-------|--------|
 | 2a: Tool Injection Mechanism | COMPLETE |
-| 2b: Clean-Room REPL | NEXT |
+| 2a-gaps: Tool Injection Hardening | NEXT — 7 gaps (4 high, 2 medium, 1 low) |
+| 2b: Clean-Room REPL | Blocked on 2a-gaps |
 | 2c: Clean-Room Tungsten | Planned |
 | 2d: Context Snipping Tool | Planned |
+
+## Binary Vault (NEW — from 2a-gaps)
+
+Virgin binaries stored at `~/.claude-governance/binaries/virgin-{version}.bin`. Immutable, verified at download time. All operations work on copies made with `/bin/cp` (NOT Node.js `fs`).
+
+**Critical discovery:** Node.js v24 `fs.copyFile()` / `fs.writeFile()` corrupts Mach-O binaries — replaces non-UTF-8 bytes with U+FFFD, bloating 201MB → 304MB. Shell `/bin/cp` is binary-safe.
+
+**Apply workaround:** Pre-create `~/.claude-governance/native-binary.backup` with `/bin/cp` from virgin before running apply. Apply finds existing backup, skips creating one (avoids `fs.copyFile` corruption).
+
+**GCS download URL:** `https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases/{version}/darwin-arm64/claude`
 
 ## What's Working (Phase 2a)
 

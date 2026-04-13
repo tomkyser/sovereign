@@ -16,4 +16,9 @@ node dist/index.mjs check
 ```
 
 **Completed:** 2a (tool injection patch, external loader, claude shim)
-**Next:** 2b (Clean-Room REPL — Node VM with persistent context, inner tool handlers)
+**Next:** 2a-gaps (binary vault, apply corruption, Zod shim, prompt overrides — 7 gaps)
+**Then:** 2b (Clean-Room REPL — blocked on 2a-gaps)
+
+**CRITICAL — read before doing anything:**
+- `.planning/milestones/M-2/trackers/PHASE-2A-GAPS-TRACKER.md` — full gap list with root causes
+- `.planning/journals/session-2026-04-12-c.md` — session findings, binary corruption details

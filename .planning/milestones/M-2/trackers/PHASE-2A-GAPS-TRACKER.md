@@ -1,0 +1,66 @@
+# Phase 2a-gaps Tracker — Tool Injection Hardening
+
+Status: PENDING
+Started: —
+
+## Scope
+
+Fix every issue discovered during first live runtime test of tool injection. Binary management, Zod compatibility, input validation, prompt override verification, and apply-flow corruption.
+
+## Gaps (ordered by priority)
+
+| # | Gap | Severity | Status |
+|---|-----|----------|--------|
+| G1 | Binary vault architecture — download → verify → lock → work on copy | High | Pending |
+| G2 | Apply command binary corruption — Node.js fs ops corrupt Mach-O, must use /bin/cp | High | Pending |
+| G3 | Tool input validation mismatch — Ping tool visible but validation uses Agent schema | High | Pending |
+| G4 | Zod passthrough shim completeness — borrowed schema from _b[0] may carry wrong validation | High | Pending |
+| G5 | Prompt override verification on fresh binary — 8 overrides not matching after re-download | Medium | Pending |
+| G6 | Auto-updater race condition — sessions without DISABLE_AUTOUPDATER overwrite patched binary | Medium | Pending |
+| G7 | Installer UTF-8 corruption — `claude.ai/install.sh` produces 304MB corrupted binary on macOS | Low | Pending |
+
+## Gap Details
+
+### G1: Binary Vault Architecture
+**Problem:** No safe storage for clean binaries. The installed path (`~/.local/share/claude/versions/`) is constantly written by the auto-updater and CC processes.
+**Solution:** `~/.claude-governance/binaries/virgin-{version}.bin` — downloaded directly to safe name, verified (magic bytes), locked (immutable + read-only). All operations work on copies. Never touch the virgin.
+**Status:** Virgin vault manually created this session at `~/.claude-governance/binaries/virgin-2.1.101.bin`. Needs to be baked into the codebase (download command, apply integration).
+
+### G2: Apply Command Binary Corruption
+**Problem:** The `apply` flow calls `backupNativeBinary()` which uses `fs.copyFile()` internally. On Node.js v24 + macOS, this corrupts Mach-O binaries — non-UTF-8 bytes get replaced with U+FFFD (`ef bf bd`), bloating 201MB → 304MB.
+**Workaround found:** Pre-create backup with `/bin/cp` before running apply. Apply finds existing backup, skips creating one.
+**Root cause:** Likely Node.js v24 `fs.copyFile` or `fs.readFile`/`fs.writeFile` encoding behavior with binary data. Shell `/bin/cp` is binary-safe.
+**Fix:** Replace all Node.js binary file operations with `child_process.execSync('cp ...')` or use explicit `{encoding: null}` everywhere.
+
+### G3: Tool Input Validation Mismatch
+**Problem:** Model sees Ping tool (API schema via `inputJSONSchema` works), but when it calls the tool, validation fails with `InputValidationError: Ping failed — description and prompt required`. Those are Agent tool params, not Ping tool params.
+**Root cause:** The Zod passthrough schema borrowed from `_b[0]` (Agent tool) may be carrying the Agent tool's validation schema. The 10+ callsites that call `.inputSchema.safeParse()` parse against the Agent tool's schema instead of a true passthrough.
+**Fix:** Need a genuine `z.object({}).passthrough()` Zod schema, not a reference to a specific tool's schema. Options: (a) find the Zod library reference in the binary and create one, (b) find the MCPTool passthrough schema (`wj1()`) instead of using `_b[0]`.
+
+### G4: Zod Passthrough Shim Completeness
+**Problem:** The current shim borrows `inputSchema` from `_b[0]` (first tool in base array). This is the Agent tool, which has a complex typed schema — not a passthrough. The MCPTool base uses `z.object({}).passthrough()` which is what we actually need.
+**Fix:** Change the shim to find the MCPTool passthrough schema. Options:
+- Find `wj1()` (the lazy passthrough schema) by walking the tool array for `isMcp: true`
+- Or find a tool with `.inputSchema` that is a passthrough (check `.shape` is empty)
+- Or create one from the binary's Zod reference (`h.object({}).passthrough()` where `h` is Zod)
+
+### G5: Prompt Override Verification
+**Problem:** After fresh download + apply, 8 prompt overrides show as "replacement text not found" in check. The prompt pieces-based matching may depend on prompt data file hashes that differ between the previously-patched binary and this clean download.
+**Investigate:** Compare prompt data files, check if the pieces matching pipeline is version-sensitive.
+
+### G6: Auto-Updater Race Condition
+**Problem:** Running Claude sessions without `DISABLE_AUTOUPDATER=1` continuously re-download and overwrite the binary at `~/.local/share/claude/versions/2.1.101`. Race window between our write and their overwrite is sub-millisecond.
+**Fix:** Binary vault (G1) solves the source problem. For the installed path, consider locking after patching, or accepting that re-apply is needed when other sessions overwrite.
+
+### G7: Installer UTF-8 Corruption
+**Problem:** `curl -fsSL https://claude.ai/install.sh | bash -s -- 2.1.101` produces a 304MB binary with `ef bf bd` corruption. Direct `curl -o` to the GCS bucket URL produces a clean 201MB binary.
+**Root cause:** The install script likely pipes through a shell operation that treats the binary as text.
+**Workaround:** Download directly from GCS: `curl -fsSL -o $TARGET "$GCS_BUCKET/2.1.101/darwin-arm64/claude"`
+**GCS bucket:** `https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases`
+
+## Current Binary State
+
+- **Virgin:** `~/.claude-governance/binaries/virgin-2.1.101.bin` — 201MB, `cffaedfe`, immutable
+- **Installed:** `~/.local/share/claude/versions/2.1.101` — patched, 6/14 (governance + gate + tool injection)
+- **Prompt overrides:** 0/8 matching (G5)
+- **Tool injection:** Active, Zod shim present, but tool call validation fails (G3/G4)

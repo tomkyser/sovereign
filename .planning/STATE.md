@@ -85,6 +85,7 @@ and governance-specific `check` command added.
 - **1e:** COMPLETE — npm packaging, setup wizard, postinstall welcome
 - **M-1 Retro:** COMPLETE — 18 gaps fixed, canary→Phase 3, dashboard→deferred
 - **2a:** COMPLETE — tool injection patch, external tool loader, transparent claude shim
-- **2b:** NEXT — clean-room REPL
+- **2a-gaps:** NEXT — binary vault, apply corruption fix, Zod shim fix, prompt override verification
+- **2b:** PLANNED — clean-room REPL (blocked on 2a-gaps)
 
 See `.planning/ROADMAP.md` for full details.
