@@ -307,3 +307,30 @@ browser `fetch()` will get summarized text instead of raw data.
 
 **This is CC's design, not our bug.** But it needs documentation in the REPL prompt
 and user-facing docs. Users who need raw HTTP should use `bash('curl ...')` instead.
+
+---
+
+## F17: parentMessage Is Load-Bearing for Tool Delegation (2026-04-13)
+
+**Phase:** 2b-gaps testing | **Impact:** CRITICAL — Write/Edit/Read all crash without it
+
+CC's `tool.call()` takes 4 args: `(args, context, canUseTool, parentMessage)`. The
+4th arg (`parentMessage`, minified as `$`) is accessed via `$?.message.id` for file
+history tracking (`FilePersistence` feature, enabled in 2.1.101).
+
+**The trap:** When `$` is `undefined` (not passed at all), optional chaining
+`$?.message.id` short-circuits entirely to `undefined` — no crash. But when `$` is
+a non-null object missing `.message`, `$?.message` returns `undefined` and then
+`.id` throws `TypeError: undefined is not an object`.
+
+This means passing `{ uuid: '...' }` as parentMessage is WORSE than passing nothing.
+The mock must include `{ uuid, message: { id, role, content } }` at minimum.
+
+**Discovery:** User benchmark testing found Write and Edit completely non-functional
+(crash on every call). Read also crashed after the initial fix attempt added a
+parentMessage without the `message` field. Only Read, Bash, and Grep had been working
+because they either don't access parentMessage or tolerate its absence.
+
+**Lesson:** When delegating to CC tools, the call signature contract includes implicit
+field requirements that only surface when specific feature flags are active. Always
+test with the actual binary, not assumptions from source reading.
