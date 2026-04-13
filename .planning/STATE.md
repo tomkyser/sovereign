@@ -85,7 +85,7 @@ and governance-specific `check` command added.
 - **1e:** COMPLETE — npm packaging, setup wizard, postinstall welcome
 - **M-1 Retro:** COMPLETE — 18 gaps fixed, canary→Phase 3, dashboard→deferred
 - **2a:** COMPLETE — tool injection patch, external tool loader, transparent claude shim
-- **2a-gaps:** IN PROGRESS — 4/12 done (G1 vault, G2 backup fix, G8 shim failsafe, G10 observability). Next: G6+G7
+- **2a-gaps:** IN PROGRESS — 6/12 done (G1 vault, G2 backup fix, G6 overwrite detection, G7 corruption detection, G8 shim failsafe, G10 observability). Next: G3/G4 (Zod passthrough)
 - **2b:** PLANNED — clean-room REPL (blocked on 2a-gaps)
 
 ### Binary Vault (from 2a-gaps)

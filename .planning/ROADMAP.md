@@ -211,8 +211,8 @@ Runtime testing revealed gaps across binary management, Zod compatibility, shim 
 - [ ] **G3: Tool input validation mismatch** — safeParse uses Agent schema, not passthrough (HIGH)
 - [ ] **G4: Zod passthrough shim** — borrow MCPTool passthrough, not Agent tool schema (HIGH)
 - [ ] **G5: Prompt override verification** — 8 overrides not matching on fresh binary (MEDIUM)
-- [ ] **G6: Auto-updater race condition** — sessions without DISABLE_AUTOUPDATER overwrite (MEDIUM)
-- [ ] **G7: Installer UTF-8 corruption** — install.sh produces corrupted binary (LOW)
+- [x] **G6: Auto-updater race condition** — binary fingerprint in state.json, pre-flight overwrite detection
+- [x] **G7: Installer UTF-8 corruption** — detectCorruption() scans for U+FFFD, size anomaly, warns in check/launch
 - [x] **G8: Shim failsafe** — sentinel exit code 111, fallback to direct CC launch, XDG version scan
 - [ ] **G9: Dynamic tool injection** — survive CC updates, robust detection beyond hardcoded var names (MEDIUM)
 - [x] **G10: System observability** — shim-fallback.json marker, UNPROTECTED banner, GOVERNANCE CRITICAL stdout

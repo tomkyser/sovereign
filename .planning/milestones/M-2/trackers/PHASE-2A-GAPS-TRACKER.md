@@ -1,6 +1,6 @@
 # Phase 2a-gaps Tracker — Tool Injection Hardening
 
-Status: IN PROGRESS
+Status: IN PROGRESS — 6/12 done
 Started: 2026-04-13
 
 ## Scope
@@ -16,8 +16,8 @@ Fix every issue discovered during first live runtime test of tool injection. Bin
 | G3 | Tool input validation mismatch — Ping tool visible but validation uses Agent schema | High | Pending |
 | G4 | Zod passthrough shim completeness — borrowed schema from _b[0] may carry wrong validation | High | Pending |
 | G5 | Prompt override verification on fresh binary — 8 overrides not matching after re-download | Medium | Pending |
-| G6 | Auto-updater race condition — sessions without DISABLE_AUTOUPDATER overwrite patched binary | Medium | Pending |
-| G7 | Installer UTF-8 corruption — `claude.ai/install.sh` produces 304MB corrupted binary on macOS | Low | Pending |
+| G6 | Auto-updater race condition — sessions without DISABLE_AUTOUPDATER overwrite patched binary | Medium | Done |
+| G7 | Installer UTF-8 corruption — `claude.ai/install.sh` produces 304MB corrupted binary on macOS | Low | Done |
 | G8 | Shim reliability — governance wrapper shim breaks CC launch when system is unhealthy | High | Done |
 | G9 | Ensure that tool injection is dynamic** — this feature must survive Claude Code updates - detection must be more robust than just current binary extracted var and fn names. | Medium | Pending |
 | G10 | System Observability — IF governance wrapper or system breaks CC launch needs visual indication | High | Done |
@@ -50,15 +50,14 @@ Fix every issue discovered during first live runtime test of tool injection. Bin
 **Problem:** After fresh download + apply, 8 prompt overrides show as "replacement text not found" in check. The prompt pieces-based matching may depend on prompt data file hashes that differ between the previously-patched binary and this clean download.
 **Investigate:** Compare prompt data files, check if the pieces matching pipeline is version-sensitive.
 
-### G6: Auto-Updater Race Condition
-**Problem:** Running Claude sessions without `DISABLE_AUTOUPDATER=1` continuously re-download and overwrite the binary at `~/.local/share/claude/versions/2.1.101`. Race window between our write and their overwrite is sub-millisecond.
-**Fix:** Binary vault (G1) solves the source problem. For the installed path, consider locking after patching, or accepting that re-apply is needed when other sessions overwrite.
+### G6: Auto-Updater Race Condition — DONE
+**Problem:** Running Claude sessions without `DISABLE_AUTOUPDATER=1` continuously re-download and overwrite the binary at `~/.local/share/claude/versions/2.1.101`. The launch pre-flight checked state.json for version changes and SOVEREIGN status, but if the auto-updater overwrites with the same version, state.json still says SOVEREIGN — governance doesn't re-check.
+**Fix:** Binary fingerprint (size + mtimeMs) captured in state.json after every apply/check. `handleLaunch` pre-flight compares current binary fingerprint against stored — if size or mtime changed, forces live re-verification and reapply. Three-layer detection: (1) version change, (2) status degradation, (3) fingerprint mismatch. All `writeVerificationState` callsites updated to capture fingerprint. Functions: `getBinaryFingerprint()`, `fingerprintChanged()` in `binaryVault.ts`.
 
-### G7: Installer UTF-8 Corruption
+### G7: Installer UTF-8 Corruption — DONE
 **Problem:** `curl -fsSL https://claude.ai/install.sh | bash -s -- 2.1.101` produces a 304MB binary with `ef bf bd` corruption. Direct `curl -o` to the GCS bucket URL produces a clean 201MB binary.
-**Root cause:** The install script likely pipes through a shell operation that treats the binary as text.
-**Workaround:** Download directly from GCS: `curl -fsSL -o $TARGET "$GCS_BUCKET/2.1.101/darwin-arm64/claude"`
-**GCS bucket:** `https://storage.googleapis.com/claude-code-dist-86c565f3-f756-42ad-8dfa-d59b1c096819/claude-code-releases`
+**Root cause:** The install script pipes binary data through shell operations that treat it as text, replacing non-UTF-8 bytes with U+FFFD replacement characters.
+**Fix:** `detectCorruption()` in `binaryVault.ts` — two detection methods: (1) size heuristic (>30% larger than expected = likely inflated by replacement chars), (2) header scan for U+FFFD sequences in first 4KB (>10 occurrences = corrupted). Both `handleCheck` and `handleLaunch` pre-flight call this before extraction — user gets red CORRUPTED BINARY DETECTED warning with actionable fix instructions pointing to `claude-governance setup` or direct GCS download.
 
 ### G8: Shim Reliability — DONE
 **Problem:** Shim used hard `exec` — if governance failed, CC couldn't launch at all.

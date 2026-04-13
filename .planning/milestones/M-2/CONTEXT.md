@@ -15,7 +15,7 @@ Clean-room implementations of ant-only tools (REPL, Tungsten), injected into CC'
 | Phase | Status |
 |-------|--------|
 | 2a: Tool Injection Mechanism | COMPLETE |
-| 2a-gaps: Tool Injection Hardening | IN PROGRESS — 4/12 done, next G6+G7 |
+| 2a-gaps: Tool Injection Hardening | IN PROGRESS — 6/12 done, next G3/G4 |
 | 2b: Clean-Room REPL | Blocked on 2a-gaps |
 | 2c: Clean-Room Tungsten | Planned |
 | 2d: Context Snipping Tool | Planned |
