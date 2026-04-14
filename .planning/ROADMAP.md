@@ -414,6 +414,13 @@ Notes:
 ## Milestone 4.5: UDS Sockets: https://ccleaks.com/#feature-5
 - TBD
 
+---
+### Milestone 4.5 Retro
+- [ ] Commentary
+- [ ] Gap analysis
+- [ ] Housekeeping
+- [ ] Bootstrap Prompt
+---
 
 ## Milestone 5: HTTP Proxy Layer
 
@@ -457,6 +464,21 @@ Notes:
 - [ ] Bootstrap Prompt
 ---
 
+## 6.5: Extended Tool Suite 
+Phase planning TODO
+**References:** [ralphCC1], [cattusResearch1], [ceaksanResearch1] — see `.planning/REFERENCES.md`
+
+- [ ] Durable Cron, File Persistence, WebBrowser, Computer Use
+- [ ] Coordinator Mode, Daemon Mode, Reactive Compact
+
+---
+### 6.5 Retro
+- [ ] Commentary
+- [ ] Gap analysis
+- [ ] Housekeeping
+- [ ] Bootstrap Prompt
+---
+
 ## Milestone 7: Version Management
 
 **References:** [versionPinning1], [ccNativeMigration1], [ccCliFlags1] — see `.planning/REFERENCES.md`
@@ -481,11 +503,27 @@ Notes:
 - **Verification dashboard:** Rich terminal output showing all patches, overrides, flags, and environment state in a single view.
 - **Downstream Pipeline for dependencies:** Do we still pull and merge from TweakCC.
 
+---
+### Milestone 8 Retro
+- [ ] Commentary
+- [ ] Gap analysis
+- [ ] Housekeeping
+- [ ] Bootstrap Prompt
+---
+
 ## Milestone 9: Launch Preperation - Dynamism and Survivability
 - Full Planning TBD
 
 Post M1 through M8, we should be, though regardless, THIS MILESTONE REQUIRES us to be at a state where this can be used by others and it should be able to survive and fully function as expected on newer versions of claude code beyond 2.1.101
 Phase planning TODO. - MUST be at a state where EVERYTHING ABOVE WILL WORK ACROSS NEWER VERSIONS - NOTHING CAN BE HARDCODED TO JUST 2.1.101 - Our strategy will be automate a test when a new claude code version drops (in a sandbox to keep my system clean) that test should assess what needs to be adjusted if anything - we will also need to wait for the upstream system prompts repo to be updated with latest prompt extractions - we should have a  /update command and a statusline visual.
+
+---
+### Milestone 9 Retro
+- [ ] Commentary
+- [ ] Gap analysis
+- [ ] Housekeeping
+- [ ] Bootstrap Prompt
+---
 
 ## Milestone 10: Launch Preperation - Documentaton and Bug Fixes
 - Full Planning TBD
@@ -493,8 +531,28 @@ Phase planning TODO. - MUST be at a state where EVERYTHING ABOVE WILL WORK ACROS
 - **Full Documentation and branding:** As well as cleaning up any old tweakcc artifacts or docs
 - **Bug fixes:**
 
+---
+### Milestone 10 Retro
+- [ ] Commentary
+- [ ] Gap analysis
+- [ ] Housekeeping
+- [ ] Bootstrap Prompt
+---
+
 ## Milestone 11: Launch Preperation - Deployment and Publishing Pipeline, Preflight, Final Tests
 - Full Planning TBD
+- rename our clean room tools to my own names and showcase them
+- branding
+- demos
+- social posts etc etc
+
+---
+### Milestone 11 Retro
+- [ ] Commentary
+- [ ] Gap analysis
+- [ ] Housekeeping
+- [ ] Bootstrap Prompt
+---
 
 ## 1.0.0 - LAUNCH - Ready for Public Use
 This will be 1.0.0 everything after this shall then adhere to the strict semver and git strategy for dev and releases, no more work pushed directly to master.
@@ -515,21 +573,6 @@ This will be 1.0.0 everything after this shall then adhere to the strict semver 
 
 ---
 ## 1.1.0
-- [ ] Commentary
-- [ ] Gap analysis
-- [ ] Housekeeping
-- [ ] Bootstrap Prompt
----
-
-## 1.2.0: Extended Tool Suite 
-Phase planning TODO
-**References:** [ralphCC1], [cattusResearch1], [ceaksanResearch1] — see `.planning/REFERENCES.md`
-
-- [ ] Durable Cron, File Persistence, WebBrowser, Computer Use
-- [ ] Coordinator Mode, Daemon Mode, Reactive Compact
-
----
-### 1.2.0 Retro
 - [ ] Commentary
 - [ ] Gap analysis
 - [ ] Housekeeping
