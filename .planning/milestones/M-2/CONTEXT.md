@@ -19,7 +19,7 @@ Clean-room implementations of ant-only tools (REPL, Tungsten), injected into CC'
 | 2b: Clean-Room REPL | COMPLETE — auto-discovery loader, 9 handlers, coexist/replace modes |
 | 2b-gaps: REPL Hardening + Functional Verification | COMPLETE — 14/14 gaps + 2 post-testing fixes |
 | 2b-gaps-2: Production Readiness | COMPLETE — G15 already working (F18), G9/G11 prompt effectiveness verified |
-| 2b-gaps-3: REPL Coexist Hardening | NEXT — G16-G23: glob defaults, model behavior, hooks module, benchmark doc |
+| 2b-gaps-3: REPL Coexist Hardening | COMPLETE — 8/8 gaps: glob .gitignore, exclusion params, fallback prevention, Ping fix, defensive patterns, hooks design |
 | 2c: Clean-Room Tungsten | Planned |
 | 2d: Context Snipping Tool | Planned |
 

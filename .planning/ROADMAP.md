@@ -268,24 +268,17 @@ Gaps surfaced during testing of 2b-gaps. All resolved.
 - [x] **G9-test: Fetch prompt effectiveness** — VERIFIED: Model correctly uses `bash('curl -s ...')` for raw HTTP and `fetch()` for summarized content. Tested with httpbin.org/json (JSON) and httpbin.org/html (HTML). fetch() returned AI summary ("This passage from Herman Melville's Moby-Dick..."), curl returned raw HTML.
 - [x] **G11-test: Persistence prompt effectiveness** — VERIFIED: Model correctly uses `var` for sync persistence, `state.x` for async persistence, and understands `const`/`let` in IIFE-wrapped scripts are function-scoped and lost. Three-scenario test: var survives, state.asyncValue survives, const correctly undefined.
 
-### Phase 2b-gaps-3: REPL Coexist Hardening
-Surfaced during natural-language REPL testing. The tool works mechanically but the integration has gaps that prevent reliable autonomous use.
+### Phase 2b-gaps-3: REPL Coexist Hardening [COMPLETE]
+8/8 gaps resolved (6 implemented, 2 designed for pre-M7).
 
-**Glob Defaults:**
-- [ ] **G16: Glob ignores .gitignore** — `--no-ignore` flag causes glob to return node_modules, vendor, .venv, build artifacts. Must respect .gitignore by default (rg does this without `--no-ignore`). Make `--no-ignore` opt-in via parameter, not default. Match CC's native GlobTool semantics where `.gitignore` is respected unless explicitly overridden.
-- [ ] **G17: Glob missing exclusion configurability** — No way to pass custom exclusion patterns. CC's native GlobTool accepts ignore patterns from permission context. Design a clean API: `glob(pattern, { ignore: ['*.min.js'], noIgnore: true })`.
-
-**Model Behavior:**
-- [ ] **G18: Model falls back to bare tools on REPL error** — When REPL hits file size limits or other errors, model abandons REPL for Bash/Read instead of fixing the script. The binary patch gets it to START with REPL but doesn't prevent fallback. Investigate whether stronger "stay in REPL" guidance or error recovery examples in the prompt would help.
-- [ ] **G19: Unexplained Ping calls in fresh sessions** — Model calls Ping tool repeatedly after REPL errors. Investigate whether this is tool availability probing, model confusion, or a side effect of the tool injection loader.
-- [ ] **G20: File size limit cascading failures** — Large files (>10K tokens) cause read errors inside REPL batch scripts, which cascades to incomplete results and model bailout. Need graceful handling: try/catch with fallback to `bash('wc -l')` for stats, or chunked reads.
-
-**Hooks Integration:**
-- [ ] **G21: Hooks module for setup/launch** — 4 standalone safety hooks (read-before-edit, commit-validate, repl-precheck, repl-safety) manually deployed. Must be a claude-governance module for all users. Pinned pre-M7 but needs design work now.
-- [ ] **G22: Duplicate hooks (GSD + standalone)** — Both gsd-read-guard.js and read-before-edit.cjs fire. Need clean migration path: standalone replaces GSD, user config updated.
-
-**Benchmark Doc:**
-- [ ] **G23: REPL-BENCHMARK-RESULTS.md outdated** — Claims "REPL internal functions use system-level implementations" (false since F18). Claims glob `**` broken (fixed). Needs full rewrite reflecting current state.
+- [x] **G16: Glob respects .gitignore by default** — Removed `--no-ignore` and `--hidden` from rg defaults. Intentional deviation from CC's native GlobTool. 46 vs 10,388 files.
+- [x] **G17: Glob exclusion configurability** — Added `noIgnore`, `hidden`, `ignore[]` parameters.
+- [x] **G18: Model fallback prevention** — Error Recovery section in REPL prompt.
+- [x] **G19: Ping calls resolved** — Ping prompt changed to discourage general use.
+- [x] **G20: File size cascading failures** — Defensive batch pattern + error recovery guidance in prompt.
+- [x] **G21: Hooks module designed** — Full design in tracker. Implementation pinned pre-M7.
+- [x] **G22: Duplicate hooks migration planned** — Covered by G21 design.
+- [x] **G23: Benchmark doc rewritten** — False "system-level" claims removed, glob updated.
 
 ### Phase 2c: Clean-Room Tungsten
 - [ ] Implement per spec: `specs/tungsten-clean-room.md`
