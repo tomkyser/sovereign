@@ -306,6 +306,17 @@ Gaps surfaced during testing of 2b-gaps. All resolved.
 
 Full extraction, editing, version control, and targeted degradation fixes.
 
+**PINNED FOR FULL ASSESSMENT — Ant vs External Prompt Divergence:**
+[Haseeb-Qureshi analysis](https://gist.github.com/Haseeb-Qureshi/d0dc36844c19d26303ce09b42e7188c1#anthropics-internal-prompts-are-different-from-yours) documents that Anthropic uses `USER_TYPE === 'ant'` to deliver differentiated system prompts. Internal-only prompt additions include:
+- **Misconception correction:** "notice the user's request is based on a misconception, say so" — absent for external users
+- **Hallucination prevention:** "never claim 'all tests pass' when output shows failures" — anti-hallucination safeguard stripped from external
+- **Conciseness enforcement:** "keep text between tool calls to <=25 words" — backed by A/B research ("~1.2% output token reduction vs qualitative 'be concise'")
+- **Adversarial review:** Feature-flagged `VERIFICATION_AGENT` spawns sub-agent to review significant changes before completion
+- **Prompt A/B infrastructure:** `@[MODEL LAUNCH]` markers track prompt wording experiments (e.g., "capy v8 thoroughness counterweight (PR #24302)")
+- **`isUndercover()` mode:** Strips model identifiers from prompts to prevent internal naming conventions from leaking
+
+These are quality-of-output improvements that Anthropic withholds from paying users. Full assessment needed: which of these can we replicate via prompt overrides (M3), which require binary patching (M2/M4), and which inform new governance patches.
+
 **References:**
 - All CC prompts per version: https://github.com/Piebald-AI/claude-code-system-prompts/tree/main (updated within minutes of each CC release, includes CHANGELOG across 148+ versions)
 - Prompt leaks: https://ccleaks.com/

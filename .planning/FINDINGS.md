@@ -364,3 +364,60 @@ pattern is `glob('*.ts', { cwd: 'dir' })` for recursive search.
 
 **Lesson:** Verify assumptions empirically before filing gaps. `type find` inside a
 Bash tool call would have caught this immediately.
+
+## F19: FS9() Is Stubbed getClaudeTmuxEnv — bashProvider Plumbing Intact (2026-04-13)
+
+**Phase:** 2c research | **Impact:** CRITICAL — enables Tungsten environment persistence via single-function patch
+
+In the binary, `getClaudeTmuxEnv()` is minified to `FS9()` and stubbed: `function FS9(){return null}`.
+The bashProvider's `getEnvironmentOverrides()` calls it unconditionally:
+
+```javascript
+let z = FS9();        // always null (stubbed)
+if (z) w.TMUX = z;   // never true — but plumbing is intact
+```
+
+The entire tmuxSocket.ts initialization chain (ensureSocketInitialized, hasTmuxToolBeenUsed,
+markTmuxToolUsed, getClaudeSocketName) was DCE'd — zero occurrences. But FS9 survived as
+a stub because bashProvider calls it unconditionally (not gated on USER_TYPE).
+
+**Patch strategy:** Replace `function FS9(){return null}` with a function that reads socket
+info from our Tungsten tool (e.g., process.env or temp file). Once non-null, ALL Bash commands
+(including REPL's bash() delegation) inherit the tmux context automatically.
+
+**Unique signature for patching:** The function definition is uniquely identifiable in context.
+
+## F20: TungstenLiveMonitor DCE Left Render Tree Marker (2026-04-13)
+
+**Phase:** 2c research | **Impact:** Enables UI component injection via binary patching
+
+The DCE'd `{"external" === 'ant' && <TungstenLiveMonitor />}` compiled to `!1,null` in the
+React children array at byte offset 11998161. Unique signature:
+
+```
+cn7(O_)))),!1,null,b_.createElement(m,{flexGrow:1})
+```
+
+This is between the tool output rendering (toolJSX/I9) and the flex spacer before the spinner.
+Only 1 match in the entire 12.8MB JS file.
+
+**Injection strategy:** Replace `!1,null` (within the unique context) with a self-executing
+function that require()s our panel component and passes React primitives as props:
+- b_ = React (createElement, Fragment)
+- Y_ = useAppState (Zustand-like selector hook)
+- m = Box (Ink layout component)
+- L = Text (Ink text component)
+
+The component renders inside the existing AppStateProvider tree, so React hooks work.
+The tool writes to AppState via context.setAppState(), the component reads via useAppState.
+
+## F21: All Tungsten AppState Fields Survive as Writable (2026-04-13)
+
+**Phase:** 2c research | **Impact:** Tool-to-UI communication works despite DCE
+
+The typed AppState fields (tungstenActiveSession, tungstenLastCommand, tungstenPanelVisible,
+etc.) are all DCE'd as string literals — zero occurrences. But AppState is a plain JS object
+at runtime. Any key can be written via context.setAppState() and read via useAppState().
+
+The Zustand-like store (useSyncExternalStore) triggers re-renders on any state change,
+regardless of which keys changed. Our tool writes, our injected component reads.

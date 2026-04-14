@@ -47,7 +47,7 @@ docs/                    # Roadmap, state tracking, research findings
    or reimplementation loses exactly the parts you don't know you need. "Fork" means
    git fork — the entire repo, not cherry-picked functions.
 
-## Mandatory Verification — Do These EVERY Session
+## Mandatory Verification — Do These EVERY RESPONSE
 
 These checks prevent the kind of compounding errors that waste entire sessions.
 
@@ -101,6 +101,12 @@ These checks prevent the kind of compounding errors that waste entire sessions.
 7. **Are you deferring or skirting work?** Never acceptable outside of explicit user
    direction in this immediate conversation.
 8. **Are you making assumptions?** Never assume the user's intent. If unclear, ask.
+
+
+### Before Claiming Something Is Done
+**Is it tested? the full battery to, without a doubt, confirm that every single aspect of this is in fact feature complete, working as expected, no further gaps
+  discovered? You took no shortcuts? nothing was deferred or "simplified" or remarked as being good enough? Anyone could RELY on this right now in production? You
+  stand by that sentiment? because that's what the user infers when something is described as being done.**
 
 
 ### When Corrected
@@ -302,6 +308,29 @@ Key findings that inform all work:
 - https://gist.github.com/unkn0wncode/f87295d055dd0f0e8082358a0b5cc467 — CC internals research.
 - https://gist.github.com/mrcattusdev/53b046e56b5a0149bdb3c0f34b5f217a — CC research gist.
 - https://gist.github.com/ceaksan/57af569318917940c9e1e1160c02a982 — CC research gist.
+
+
+## REPL Tool Observation Directive — Mandatory
+
+**Every session, every agent, every REPL tool call.** This is a standing order.
+
+When you use the REPL tool (or observe an agent using it), log any improvement idea,
+friction point, missing capability, error handling gap, prompt deficiency, or
+enhancement opportunity to `.planning/REPL-IMPROVEMENTS.md`.
+
+### Rules
+1. **Do not filter.** Log everything that strikes you, no matter how minor. The user
+   will deliberate on value later. Your job is to capture raw signal.
+2. **Do not batch.** Log observations as they occur — append to the file during the
+   session, not at the end. Context decays; capture it fresh.
+3. **Do not editorialize.** State what happened or what you noticed. Skip the
+   "this might be useful because..." framing.
+4. **Include context.** What were you doing when you noticed it? What was the REPL
+   call trying to accomplish?
+5. **Applies to agents too.** When spawning subagents that will use REPL, include
+   this directive in their prompt. They must log to the same file.
+6. **Never skip this.** Even if the observation seems obvious or already logged,
+   add it. Duplicates signal importance.
 
 ## Local Files for Reference
 
