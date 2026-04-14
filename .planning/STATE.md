@@ -91,6 +91,7 @@ and governance-specific `check` command added.
 - **2b-gaps-2:** COMPLETE — G15 already working (F18), G9-test/G11-test prompt effectiveness verified
 - **2b-gaps-3:** COMPLETE — G16-G23 + replace mode hardening. Glob .gitignore fix, catch-all pattern fix, mode-aware prompts (coexist/replace), comprehensive replace prompt with primitive tool guidance, binary patch strengthened. Replace mode verified: Sonnet fresh session, single-prompt dashboard.
 - **2c:** COMPLETE — Clean-Room Tungsten. 6 deliverables: tungsten.js tool, FS9 binary patch, render tree injection, live panel, statusline TNG, REPL prompt update. 19/19 SOVEREIGN.
+- **2-PM-update:** COMPLETE — PM restructuring: REFERENCES.md, per-phase directories, IMPACT/FINDINGS/GAPS at milestone level, CLAUDE.md updated, retroactive M-1/M-2 restructure.
 
 ### Binary Vault (from 2a-gaps)
 - **Module:** `src/binaryVault.ts` — XDG path discovery, GCS download, SHA256 verification, immutable locking

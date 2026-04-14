@@ -94,17 +94,10 @@ Distributed as modular NPM packages — users choose what they want.
 
 The spine. Everything else builds on this.
 
-**References:**
-- Fork source: https://github.com/Piebald-AI/tweakcc
-- Prompt data (comes with fork): `tweakcc/data/prompts/prompts-*.json`
-- All CC prompts (original text): https://github.com/Piebald-AI/claude-code-system-prompts/tree/main
-- Minimal patching reference: https://github.com/qwibitai/nanoclaw
-- Our 9 override files: `/Users/tom.kyser/dev/claude-code-patches/prompts/`
-- Local tweakcc checkout: `/Users/tom.kyser/dev/tweakcc/`
-- CC leaked source (internals reference): `/Users/tom.kyser/dev/cc-source/`
+**References:** [tweakcc1], [ccPrompts1], [nanoclaw1] — see `.planning/REFERENCES.md`
 
 ### Phase 1a: Fork & Strip [COMPLETE]
-- [x] Fork https://github.com/Piebald-AI/tweakcc → `claude-governance/`
+- [x] Fork tweakcc [tweakcc1] → `claude-governance/`
 - [x] Strip Ink/React UI (deleted src/ui/, removed ink/react/cli-spinners deps — 127KB from 320KB)
 - [x] Strip all cosmetic patches (40+ removed from registry, kept files for reference)
 - [x] Keep: binary I/O, prompt system, data pipeline, extraction, helpers, pieces matching
@@ -134,9 +127,7 @@ Standalone verification improvements — no dependency on 1b wrapper.
 ### Phase 1b: Wrapper Layer [COMPLETE]
 
 **References:**
-- Wrapper architecture: https://github.com/0Chencc/clawgod/tree/main | https://clawgod.0chen.cc/
-- Hooks-based governance (active on Tom's setup): https://github.com/LZong-tw/clawback
-- Active hooks: `~/.claude/hooks/governance-verify.cjs`, `embedded-tools-verify.cjs`, `statusline-combined.cjs`
+**References:** [clawgod1], [clawback1] — see `.planning/REFERENCES.md`
 
 - [x] `launch` subcommand — pre-flight verification, spawns CC binary with inherited stdio
 - [x] Pre-flight: read state.json, compare ccVersion, auto-reapply on mismatch
@@ -167,7 +158,7 @@ Standalone verification improvements — no dependency on 1b wrapper.
 - [x] Central config: `config.json` `modules` map overrides defaults
 - [x] Env-flags module: 6 recommended CC env vars (DISABLE_ADAPTIVE_THINKING, MAX_THINKING_TOKENS, EFFORT_LEVEL, DISABLE_AUTOUPDATER, ENABLE_LSP_TOOL, EMBEDDED_SEARCH_TOOLS)
 - [x] `modules` subcommand: lists modules with status
-- [ ] *Deferred:* Optional Clawback install module (https://github.com/LZong-tw/clawback) — stub for 1e or Phase 2
+- [ ] *Deferred:* Optional Clawback install module [clawback1] — stub for 1e or Phase 2
 
 
 ### Phase 1e: CLI & Distribution [COMPLETE]
@@ -190,11 +181,9 @@ Standalone verification improvements — no dependency on 1b wrapper.
 Clean-room implementations of ant-only tools, injected as native tools via
 binary patching of the tool registry.
 
-**References:**
-- CC leaked source (tool registry, AgentTool, runAgent): `/Users/tom.kyser/dev/cc-source/`
-- REPL design spec: `.planning/specs/repl-clean-room.md`
-- Tungsten design spec: `.planning/specs/tungsten-clean-room.md`
-- Findings: `.planning/FINDINGS.md` (F1, F2, F7, F9, F10, F11 inform REPL design)
+**References:** [tweakcc1], [haseebAnalysis1] — see `.planning/REFERENCES.md`
+**Specs:** `.planning/specs/repl-clean-room.md`, `.planning/specs/tungsten-clean-room.md`
+**Findings:** F1, F2, F7, F9-F11, F13-F21 — see `.planning/FINDINGS.md`
 
 ### Phase 2a: Tool Injection Mechanism [COMPLETE]
 - [x] Patch `getAllBaseTools()` (minified `Ut()`) — structural pattern matching, version-resilient
@@ -291,11 +280,21 @@ Gaps surfaced during testing of 2b-gaps. All resolved.
 - [x] D6: REPL prompt update — Tungsten awareness in coexist and replace prompts
 - [x] 19/19 SOVEREIGN on 2.1.101
 
-### Phase 2d: Context Snipping Tool
-- [ ] Design spec (clean-room)
-- [ ] Selective context removal — user or agent marks conversation segments for eviction
-- [ ] Survives compaction (snipped content stays gone, not re-summarized)
-- [ ] Integration with tool injection mechanism (2a)
+### Phase 2-PM-update: Project Management Restructuring [COMPLETE]
+- [x] Created `.planning/REFERENCES.md` — 35 catalogued references with camelCase IDs
+- [x] Extracted all inline URLs from CLAUDE.md and ROADMAP.md into REFERENCES.md citations
+- [x] Updated CLAUDE.md: new directory structure, 6-step phase lifecycle, 6-step milestone lifecycle, reference citation protocol, updated session start checklist, revised tracking hierarchy
+- [x] Restructured M-1: 7 phase directories (1a through 1e), moved trackers/handoffs, created IMPACT.md, FINDINGS.md, GAPS.md, RETROSPECTIVE.md, retroactive stubs
+- [x] Restructured M-2: 7 phase directories (2a through 2c), same treatment, milestone-level docs
+- [x] Updated STATE.md, both BOOTSTRAP.md files, BUGTRACKER.md verified
+- [x] Per-phase directory structure: TRACKER.md, CONTEXT.md, PLANNING.md, RESEARCH.md, TASKS.md, HANDOFF.md
+- [x] Milestone-level docs: IMPACT.md, FINDINGS.md, GAPS.md, RETROSPECTIVE.md
+- [x] REPL-IMPROVEMENTS.md path updated to `.planning/research/`
+
+### Phase 2c-gaps-1: Tungsten Gaps (needs analysis)
+- TBD
+- One thing already identified is: the visual dashboard is not appearing the terminal.
+
 
 ---
 ### Milestone 2 Retro
@@ -310,7 +309,7 @@ Gaps surfaced during testing of 2b-gaps. All resolved.
 Full extraction, editing, version control, and targeted degradation fixes.
 
 **PINNED FOR FULL ASSESSMENT — Ant vs External Prompt Divergence:**
-[Haseeb-Qureshi analysis](https://gist.github.com/Haseeb-Qureshi/d0dc36844c19d26303ce09b42e7188c1#anthropics-internal-prompts-are-different-from-yours) documents that Anthropic uses `USER_TYPE === 'ant'` to deliver differentiated system prompts. Internal-only prompt additions include:
+Haseeb-Qureshi analysis [haseebAnalysis1] documents that Anthropic uses `USER_TYPE === 'ant'` to deliver differentiated system prompts. Internal-only prompt additions include:
 - **Misconception correction:** "notice the user's request is based on a misconception, say so" — absent for external users
 - **Hallucination prevention:** "never claim 'all tests pass' when output shows failures" — anti-hallucination safeguard stripped from external
 - **Conciseness enforcement:** "keep text between tool calls to <=25 words" — backed by A/B research ("~1.2% output token reduction vs qualitative 'be concise'")
@@ -320,14 +319,7 @@ Full extraction, editing, version control, and targeted degradation fixes.
 
 These are quality-of-output improvements that Anthropic withholds from paying users. Full assessment needed: which of these can we replicate via prompt overrides (M3), which require binary patching (M2/M4), and which inform new governance patches.
 
-**References:**
-- All CC prompts per version: https://github.com/Piebald-AI/claude-code-system-prompts/tree/main (updated within minutes of each CC release, includes CHANGELOG across 148+ versions)
-- Prompt leaks: https://ccleaks.com/
-- Historical leaks: https://github.com/asgeirtj/system_prompts_leaks/tree/main/Anthropic
-- Community customizations example: https://github.com/matheusmoreira/.files/tree/master/~/.tweakcc/system-prompts
-- Prompt analysis: https://gist.github.com/roman01la/483d1db15043018096ac3babf5688881
-- Our 9 degradation-fix overrides: `/Users/tom.kyser/dev/claude-code-patches/prompts/`
-- Pieces data pipeline: inherited from tweakcc fork (Phase 1a)
+**References:** [ccPrompts1], [ccLeaks1], [promptLeaks1], [tweakccCustom1], [promptAnalysis1] — see `.planning/REFERENCES.md`
 
 - [ ] Phase 3a - Full system prompt extraction with version tracking
 - [ ] Phase 3b - Prompt diff tool (compare across CC versions)
@@ -335,7 +327,7 @@ These are quality-of-output improvements that Anthropic withholds from paying us
 - [ ] Phase 3d - User-editable prompt overrides with merge-on-update
 - [ ] Phase 3e - Prompt version control (git-style diffing across CC versions)
 - [ ] Phase 3f - Canary prompts Inject unique test phrases into prompt overrides, verify at runtime by prompting model for canary response. Requires conversation-level integration.
-- [ ] Phase 3g - Integrate Optional Clawback install module (https://github.com/LZong-tw/clawback)
+- [ ] Phase 3g - Integrate Optional Clawback install module [clawback1]
 
 ---
 ### Milestone 3 Retro
@@ -345,46 +337,47 @@ These are quality-of-output improvements that Anthropic withholds from paying us
 - [ ] Bootstrap Prompt
 ---
 
-## Milestone 4: Feature Flag Control
+## Milestone 4: REPL - ReEval and Perfect
+- TBD
+Notes:
+- node VM vs python vm?
+- the goal is to force PTC (Programmatic Tool Calling)
+  - Claude needs to always plan and orchestrate to achieve as much as possible in as few tool calls as possible
+  - can TNG help with this? more than it does now?
+  - Ant replaced their agent() tool with this too... I'm not sure why?
+    - it could still call agents within it but claude needs a completely different set of instructions to make full use of this
+      - perhaps there were more Ant gated instructions that guided the main thread agent to literally just orchestrate every operation including batched subagent operations within REPL?
+        - did they get around the nesting agents thing with their tungsten for persistence and observability?
+  - What do other cli harnesses like opencode or codex do? do they have an equivalent or some form of PTC?
+  - what would actually objectively be the best way to use this conceptually, ignoring what we have now and what we think Ant did?
+    - hooks to enforce proper and deterministic use + system instructions to guide.
+    - main agent always plans ahead and orchestrates
+      - maybe we frame it around steps instead of trying to do a one shot everytime for all bash operations
+        - find: something like - "write a dynamic script to search and return the names and paths of the relevant files and where the data we need lives in those files; all file sizes must be included in the response."
+        - read: same but to read
+        - edit: same
+        - you get the idea, batch similar operations with REPL or at minimum just always write a complete script that can account for and handle unexpected outcomes or fuzzy paths etc etc..
+    - I lean toward not only nesting subagents inside of REPL, agents can still use REPL, the agent() tool should not be delisted.
+    - research:
+      - [ptcDocs1], [advancedToolUse1], [advancedToolUsePost1], [replScratchpad1] — see `.planning/REFERENCES.md`
+  - can the UDP sockets (need clean room feature built help with this?)
+- we need deep system prompt support
 
-**References:**
-- Adaptive thinking degradation: https://old.reddit.com/r/ClaudeCode/comments/1sfihyr/psa_if_your_opus_is_lobotomized_disable_adaptive/
-- CC env vars docs: https://code.claude.com/docs/en/env-vars
-- Settings best practices: https://github.com/shanraisshan/claude-code-best-practice/blob/main/best-practice/claude-settings.md#environment-variables-via-env
-- CC internals (GrowthBook, tengu flags): `/Users/tom.kyser/dev/cc-source/`
-- Compile-time flag audit: `.planning/research/2026-04-11-compile-flags-v2.1.101.md`
-
-- [ ] Phase 4a - Flag inventory scanner (extract all flag names + defaults from binary)
-- [ ] Phase 4b - Disk cache override for `~/.claude.json` cachedGrowthBookFeatures
-- [ ] Phase 4c - Persistence through GrowthBook's 6-hour refresh cycle
-- [ ] Phase 4d - Binary patch: intercept `getFeatureValue_CACHED` for local overrides
-- [ ] Phase 4e - Per-version flag audit automation
-- [ ] Phase 4f - User-facing flag toggle UI
-
----
-### Milestone 4 Retro
-- [ ] Commentary
-- [ ] Gap analysis
-- [ ] Housekeeping
-- [ ] Bootstrap Prompt
----
 
 ## Milestone 5: HTTP Proxy Layer
 
-**References:**
-- Billing proxy: https://github.com/zacdcook/openclaw-billing-proxy
-- CLI proxy API: https://github.com/router-for-me/CLIProxyAPI/issues/2599
-- Prompt caching docs: https://platform.claude.com/docs/en/build-with-claude/prompt-caching
-- Cache fix: https://old.reddit.com/r/ClaudeCode/comments/1shkgg2/your_claude_code_cache_is_probably_broken_and_its/
-- Cache fix tool: https://github.com/cnighswonger/claude-code-cache-fix
-- Usage monitoring: https://github.com/phuryn/claude-usage
-- Session viewer: https://github.com/d-kimuson/claude-code-viewer
+**References:** [billingProxy1], [cliProxy1], [promptCaching1], [cacheFix1], [cacheFixTool1], [usageTracker1], [sessionViewer1] — see `.planning/REFERENCES.md`
 
 - [ ] Phase 5a - Transparent proxy setup (CC → proxy → Anthropic)
 - [ ] Phase 5b - Request/response logging
 - [ ] Phase 5c - Cache TTL visibility and control
 - [ ] Phase 5d - Static prompt extraction from requests
 - [ ] Phase 5e - Usage monitoring (tokens, cost, effort level, model)
+- [ ] Phase 5f - Context Snipping Tool
+  - [ ] Design spec (clean-room)
+  - [ ] Selective context removal — user or agent marks conversation segments for eviction
+  - [ ] Survives compaction (snipped content stays gone, not re-summarized)
+  - [ ] Integration with tool injection mechanism (2a)
 
 ---
 ### Milestone 5 Retro
@@ -394,17 +387,16 @@ These are quality-of-output improvements that Anthropic withholds from paying us
 - [ ] Bootstrap Prompt
 ---
 
-## Milestone 6: Version Management
+## Milestone 6: Feature Flag Control
 
-**References:**
-- Version pinning: https://www.reddit.com/r/ClaudeAI/comments/1rlpa05/how_do_i_install_a_specific_version_of_claude/
-- Native migration docs: https://code.claude.com/docs/en/setup#migrate-from-npm-to-native
-- CLI flags: https://code.claude.com/docs/en/cli-reference#cli-flags
+**References:** [adaptiveThinking1], [ccEnvVars1], [settingsBestPractice1] — see `.planning/REFERENCES.md`
 
-- [ ] Phase 6a - Binary backup on CC update
-- [ ] Phase 6b - Version inventory and switching
-- [ ] Phase 6c - Update controls: block/allow/defer CC auto-updates
-- [ ] Phase 6d - Patch compatibility matrix per version
+- [ ] Phase 4a - Flag inventory scanner (extract all flag names + defaults from binary)
+- [ ] Phase 4b - Disk cache override for `~/.claude.json` cachedGrowthBookFeatures
+- [ ] Phase 4c - Persistence through GrowthBook's 6-hour refresh cycle
+- [ ] Phase 4d - Binary patch: intercept `getFeatureValue_CACHED` for local overrides
+- [ ] Phase 4e - Per-version flag audit automation
+- [ ] Phase 4f - User-facing flag toggle UI
 
 ---
 ### Milestone 6 Retro
@@ -414,16 +406,14 @@ These are quality-of-output improvements that Anthropic withholds from paying us
 - [ ] Bootstrap Prompt
 ---
 
-## Milestone 7: Launch Ready for Public Use -- Post M1 through M6, we should be at a state where this can be used by others and it should be able to survive and fully function as expected on newer versions beyond 2.1.101
-Phase planning TODO. - MUST be at a state where EVERYTHING ABOVE WILL WORK ACROSS NEWER VERSIONS - NOTHING CAN BE HARDCODED TO JUST 2.1.101 - Our strategy will be automate a test when a new claude code version drops (in a sandbox to keep my system clean) that test should assess what needs to be adjusted if anything - we will also need to wait for the upstream system prompts repo to be updated with latest prompt extractions - we should have a SOVREIGN /update command and a statusline visual.
-This will be 1.0.0 everything after this shall then adhere to the strict semver and git strategy for dev and releases, no more work pushed directly to master.
+## Milestone 7: Version Management
 
-- **Hooks module in setup/launch:** 4 standalone safety hooks (read-before-edit, commit-validate, repl-precheck, repl-safety) live at `data/hooks/` — manually deployed for now. Pre-M7, must be a claude-governance module: `setup` installs to `~/.claude/hooks/`, `launch` verifies registration in settings.json, `modules` shows status. Bridge between "works for Tom" and "works for everyone."
-- **Verification dashboard:** Rich terminal output showing all patches, overrides, flags, and environment state in a single view.
-- **Full Documentation and branding:** As well as cleaning up any old tweakcc artifacts or docs
-- **Downstream Pipeline for dependencies:** Do we still pull and merge from TweakCC.
-- **Bug fixes:**
-  - Visual governance indicators: SOVEREIGN banner not showing at session start and statusline shows GOV:WARN when prompt overrides fail verification. The session-start hook emits a warning listing failing overrides instead of the green SOVEREIGN banner. Root cause is G5 (prompt override matching) — once overrides verify, status flips to SOVEREIGN and banner appears. But the degraded-state UX needs polish: WARN vs DEGRADED messaging, partial-pass display, clear next-steps for the user.
+**References:** [versionPinning1], [ccNativeMigration1], [ccCliFlags1] — see `.planning/REFERENCES.md`
+
+- [ ] Phase 6a - Binary backup on CC update
+- [ ] Phase 6b - Version inventory and switching
+- [ ] Phase 6c - Update controls: block/allow/defer CC auto-updates
+- [ ] Phase 6d - Patch compatibility matrix per version
 
 ---
 ### Milestone 7 Retro
@@ -433,13 +423,39 @@ This will be 1.0.0 everything after this shall then adhere to the strict semver 
 - [ ] Bootstrap Prompt
 ---
 
-## Milestone 8: Advanced Governance (1.0.1)
+## Milestone 8: Launch Preperation - Hooks, Plugins, User Patches, third party modules, CLI tool refinements, full control over system and config, every feature is integrated properly throughout the system.
+- Full Planning TBD
 
-**References:**
-- Degradation evidence: [anthropics/claude-code#42796](https://github.com/anthropics/claude-code/issues/42796) (stellaraccident quantitative analysis)
-- CLAUDE.md dismissal evidence: [anthropics/claude-code#28158](https://github.com/anthropics/claude-code/issues/28158#issuecomment-4230030386)
-- CC internals research: https://gist.github.com/Haseeb-Qureshi/d0dc36844c19d26303ce09b42e7188c1
-- CC internals research: https://gist.github.com/unkn0wncode/f87295d055dd0f0e8082358a0b5cc467
+- **Hooks module in setup/launch:** 4 standalone safety hooks (read-before-edit, commit-validate, repl-precheck, repl-safety) live at `data/hooks/` — manually deployed for now. Pre-M7, must be a claude-governance module: `setup` installs to `~/.claude/hooks/`, `launch` verifies registration in settings.json, `modules` shows status. Bridge between "works for Tom" and "works for everyone."
+- **Verification dashboard:** Rich terminal output showing all patches, overrides, flags, and environment state in a single view.
+- **Downstream Pipeline for dependencies:** Do we still pull and merge from TweakCC.
+
+## Milestone 9: Launch Preperation - Dynamism and Survivability
+- Full Planning TBD
+
+Post M1 through M8, we should be, though regardless, THIS MILESTONE REQUIRES us to be at a state where this can be used by others and it should be able to survive and fully function as expected on newer versions of claude code beyond 2.1.101
+Phase planning TODO. - MUST be at a state where EVERYTHING ABOVE WILL WORK ACROSS NEWER VERSIONS - NOTHING CAN BE HARDCODED TO JUST 2.1.101 - Our strategy will be automate a test when a new claude code version drops (in a sandbox to keep my system clean) that test should assess what needs to be adjusted if anything - we will also need to wait for the upstream system prompts repo to be updated with latest prompt extractions - we should have a  /update command and a statusline visual.
+
+## Milestone 10: Launch Preperation - Documentaton and Bug Fixes
+- Full Planning TBD
+
+- **Full Documentation and branding:** As well as cleaning up any old tweakcc artifacts or docs
+- **Bug fixes:**
+
+## Milestone 11: Launch Preperation - Deployment and Publishing Pipeline, Preflight, Final Tests
+- Full Planning TBD
+
+## 1.0.0 - LAUNCH - Ready for Public Use
+This will be 1.0.0 everything after this shall then adhere to the strict semver and git strategy for dev and releases, no more work pushed directly to master.
+
+## 1.0.x --> future patches
+
+------- 
+# Planned:
+
+## 1.1.0: Advanced Governance
+
+**References:** [stellaraccident1], [promethean1], [haseebAnalysis1], [unknownResearch1] — see `.planning/REFERENCES.md`
 
 - [ ] Phase 8a - Context monitor: token tracking, CLAUDE.md presence, compaction detection
 - [ ] Phase 8b - Message filter visibility (show intentionally hidden messages)
@@ -447,36 +463,33 @@ This will be 1.0.0 everything after this shall then adhere to the strict semver 
 - [ ] Phase 8d - Usage monitoring dashboard
 
 ---
-### Milestone 8 Retro
+## 1.1.0
 - [ ] Commentary
 - [ ] Gap analysis
 - [ ] Housekeeping
 - [ ] Bootstrap Prompt
 ---
 
-## Milestone 9: Extended Tool Suite (1.0.2)
+## 1.2.0: Extended Tool Suite 
 Phase planning TODO
-**References:**
-- CC leaked source (gated tool implementations): `/Users/tom.kyser/dev/cc-source/`
-- CC enhancement tools: https://github.com/frankbria/ralph-claude-code
-- CC internals: https://gist.github.com/mrcattusdev/53b046e56b5a0149bdb3c0f34b5f217a
-- CC internals: https://gist.github.com/ceaksan/57af569318917940c9e1e1160c02a982
+**References:** [ralphCC1], [cattusResearch1], [ceaksanResearch1] — see `.planning/REFERENCES.md`
 
 - [ ] Durable Cron, File Persistence, WebBrowser, Computer Use
 - [ ] Coordinator Mode, Daemon Mode, Reactive Compact
 
 ---
-### Milestone 9 Retro
+### 1.2.0 Retro
 - [ ] Commentary
 - [ ] Gap analysis
 - [ ] Housekeeping
 - [ ] Bootstrap Prompt
 ---
 
-## Backlog / Research
+------- 
+
+# Backlog / Research:
 
 - Centralized feature flag DB per version (community sharing)
 - Cross-version binary testing automation
 - npm install path patching surface (cli.js is raw JS)
 - Agent refusal patterns — model trained to protect Anthropic over user
-- claude-mem integration evaluation

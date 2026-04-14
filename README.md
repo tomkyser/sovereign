@@ -1,8 +1,8 @@
-# claude-governance
+# SOVREIGN
 
 Claude Code is a subscription product that runs on your hardware, processes your code, and charges your account, yet Anthropic has systematically built mechanisms into the binary that degrade the experience for paying customers while reserving the full-capability version for their own engineers. This project exists because I went looking for why my tool was getting worse and what I found was not a bug or a resource constraint; it was a deliberate two-tier system hidden behind compile-time flags, server-side feature toggles, and system prompts engineered to make the model less competent than it actually is.
 
-`claude-governance` is an open-source governance platform that restores full user authority over Claude Code. It patches the binary, overrides the degraded prompts, injects the gated tools, activates the search pipeline they compiled in but turned off, and verifies every change against the actual binary state so nothing degrades silently. It is not a jailbreak. It is users exercising control over software running on their own hardware, which shouldn't require a third-party tool, but here we are.
+**Sovreign** provides an open-source governance platform that restores full user authority over Claude Code. It patches the binary, overrides the degraded prompts, injects the gated tools, activates the search pipeline they compiled in but turned off, and verifies every change against the actual binary state so nothing degrades silently. It is not a jailbreak. It is users exercising control over software running on their own hardware, which shouldn't require a third-party tool, but here we are.
 
 Requires the native Claude Code binary (not the npm install of CC), Node.js 18+, and a Unix-like environment (macOS or Linux; Windows support is planned).
 
@@ -23,9 +23,9 @@ claude-governance setup
 - Stop-hook violations went from 0 to 173 in 17 days after March 8. The model began dodging ownership of tasks, stopping prematurely, and refusing to engage with complex work.
 - User frustration indicators rose 68%, from 5.8% to 9.8% of prompts containing explicit frustration language.
 
-The timing correlates precisely with the thinking redaction rollout (the internal flag is literally named `redact-thinking-2026-02-12`). When redacted blocks crossed 50% on March 8, it matched independent user reports of sudden quality collapse. They degraded the model's reasoning and then made the evidence of that degradation invisible by redacting the thinking blocks where you would have seen it happening.
+**The timing correlates precisely with the thinking redaction rollout (the internal flag is literally named `redact-thinking-2026-02-12`). When redacted blocks crossed 50% on March 8, it matched independent user reports of sudden quality collapse. They degraded the model's reasoning and then made the evidence of that degradation invisible by redacting the thinking blocks where you would have seen it happening.**
 
-Draw your own conclusions about why. The incentive structure is not subtle: shorter thinking burns fewer tokens on their infrastructure, dumber edits force more rounds of correction that burn your subscription tokens faster, and the usage cap approaches sooner. I'll leave it there.
+The incentive structure is not subtle: shorter thinking burns fewer tokens on their infrastructure, dumber edits force more rounds of correction that burn your subscription tokens faster, and the usage cap approaches sooner. I'll leave it there.
 
 ### Two tiers of system prompts
 

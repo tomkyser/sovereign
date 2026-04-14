@@ -102,22 +102,6 @@ The simplest path is the wrong path unless it compromises nothing. Every decisio
 - Proof that users can and should control software on their own hardware
 - A forcing function for Anthropic to improve transparency
 
-## The Roadmap in Brief
-
-| Milestone | Scope | Status |
-|-----------|-------|--------|
-| M1 | Core Engine — fork tweakcc, governance patches, verification | COMPLETE |
-| M2 | Native Tool Injection — REPL, Tungsten, tool registry patching | IN PROGRESS |
-| M3 | System Prompt Control — extraction, diffing, version control | Planned |
-| M4 | Feature Flag Control — flag inventory, overrides, persistence | Planned |
-| M5 | HTTP Proxy Layer — billing visibility, cache control, usage monitoring | Planned |
-| M6 | Version Management — binary backup, switching, update controls | Planned |
-| M7 | Launch Ready — cross-version testing, 1.0.0 release, public distribution | Planned |
-| M8 | Advanced Governance — context monitoring, thinking restoration | Planned |
-| M9 | Extended Tool Suite — Cron, WebBrowser, Computer Use, Coordinator | Planned |
-
-See `.planning/ROADMAP.md` for the full phase-level breakdown.
-
 ## Non-Negotiables
 
 1. **Reversible.** Every change can be undone with `claude-governance --restore`.

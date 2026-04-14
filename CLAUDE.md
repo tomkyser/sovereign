@@ -58,14 +58,13 @@ These checks prevent the kind of compounding errors that waste entire sessions.
 2. **Read the project state.** `.planning/STATE.md` is the source of truth for where we are at overall.
 3. **Read the roadmap.** `.planning/ROADMAP.md` is the source of truth for what's complete
    and what's next. If the compaction summary disagrees, the roadmap wins.
-4. **Read CONTEXT.md.** `.planning/milestones/M-{n}/CONTEXT.md` has shared state.
-5. **Read the latest handoff.** The handoff for the most recently completed phase
-   (listed in `BOOTSTRAP.md`) has what was built, key decisions, and gotchas.
+4. **Read CONTEXT.md.** The active phase's `CONTEXT.md` (at `.planning/milestones/M-{n}/{phaseName}/CONTEXT.md`) has shared state. If starting a new phase, read the milestone-level `IMPACT.md` instead.
+5. **Read the latest handoff.** The previous phase's `HANDOFF.md` (at `.planning/milestones/M-{n}/{phaseName}/HANDOFF.md`, listed in `BOOTSTRAP.md`) has what was built, key decisions, and gotchas.
 6. **Verify before building.** If the roadmap says something is "COMPLETE," verify it
    actually exists and works before building on top of it. Check git history, run the
    tool, inspect the output. Claims of completion are hypotheses until verified.
-7. **Read findings.** `.planning/FINDINGS.md` has architecture-informing discoveries
-   from prior sessions. These are facts that shape decisions — check before designing.
+7. **Read findings.** `.planning/FINDINGS.md` (project-level) and milestone `FINDINGS.md` have architecture-informing discoveries. Check before designing.
+8. **Read references.** `.planning/REFERENCES.md` has the canonical external resource index. Use identifiers when citing in planning docs.
 
 ### On Every Decision
 1. **Align with the vision.** Does this decision serve the project intent described in
@@ -75,7 +74,7 @@ These checks prevent the kind of compounding errors that waste entire sessions.
 3. **Cross-reference STATE and CONTEXT.** Is this consistent with current project state?
    Does it account for what's already built and what's planned?
 4. **Check for existing solutions.** Before writing new code, check if the capability
-   already exists in a tool we're forking or a reference project listed below.
+   already exists in a tool we're forking or a reference project in `.planning/REFERENCES.md`.
 5. **Take terms literally.** "Fork" means git fork. "Bundle" means include in the
    package. "Extract" means pull from the binary. Do not reinterpret standard SWE
    vocabulary into something easier to implement.
@@ -150,80 +149,114 @@ This process is mandatory. Every phase, every session, every agent. No shortcuts
 
 ```
 .planning/
-  ROADMAP.md                          # Global roadmap — always current
+  ROADMAP.md                          # Global roadmap — living doc, updated per phase
   STATE.md                            # Global state — folds in from phase trackers
-  FINDINGS.md                         # Notable discoveries — goldmine moments, architecture-informing facts
-  journals/                           # Session journals — named session-YYYY-MM-DD[-suffix].md
+  FINDINGS.md                         # Project-level discoveries — goldmine moments
+  REFERENCES.md                       # All external references — cite by ID
+  BUGTRACKER.md                       # Minor deferrals — user-directed only, NOT gaps
+  journals/                           # Session journals — session-YYYY-MM-DD[-suffix].md
   reports/                            # Research reports, analysis docs
-  research/                           # Dated research findings
+  research/                           # Dated research findings, REPL improvements
   specs/                              # Design specs
   milestones/
     M-{n}/                            # One directory per milestone
-      CONTEXT.md                      # Shared state — read by every agent, updated continuously (the live bridge between agents and the main session)
-      BOOTSTRAP.md                    # Bootstrap prompt — scoped to milestone, updated in-place
-      handoffs/                       # Per-phase handoff docs (generated at phase end)
-        HANDOFF-PHASE-{id}.md
-      trackers/                       # Per-phase state trackers
-        PHASE-{id}-TRACKER.md
-      retrospectives/                 # End-of-milestone retrospective
-        RETRO-M-{n}.md
+      BOOTSTRAP.md                    # Bootstrap prompt — scoped to milestone
+      IMPACT.md                       # Milestone-scoped impact: research, reference cross-refs, phase impact tracking
+      FINDINGS.md                     # Milestone-scoped findings (like project-level but local)
+      RETROSPECTIVE.md                # End-of-milestone retrospective
+      GAPS.md                         # End-of-milestone gap analysis
+      {phaseName}/                    # One directory per phase (e.g., 2b-gaps-3/)
+        TRACKER.md                    # Phase PM only — decisions, blockers, status
+        CONTEXT.md                    # Phase-scoped shared state (live bridge for agents)
+        PLANNING.md                   # Pre-work plan (scope, approach, risks)
+        RESEARCH.md                   # Phase-scoped research with REFERENCES.md citations
+        TASKS.md                      # Task breakdown
+        HANDOFF.md                    # Phase handoff (generated at phase end)
 ```
 
-### Per-Phase Checklist (Mandatory — No Exceptions)
+### Mandatory Phase Lifecycle (No Exceptions)
 
-**On phase start:**
-1. Read `VISION.md` — ground yourself in the project intent
-2. Create phase tracker in `trackers/PHASE-{id}-TRACKER.md`
-3. Create tasks via TaskCreate tool for each work item
-4. Read `CONTEXT.md` — update if stale
-5. Read `STATE.md` — verify global state is current
-6. Read `ROADMAP.md` — confirm phase scope
-7. Read latest handoff in `handoffs/` — understand what the previous phase delivered
+Every phase follows this sequence. Steps are not optional.
 
-**During phase:**
-8. Update task status (in_progress → completed) as work progresses
-9. Atomic git commits at each completed task
-10. Update phase tracker with decisions, issues found, and step completions
-11. Keep `CONTEXT.md` current — update after every significant decision or finding
-12. **Record findings.** When you discover something architecture-informing, surprising,
-    or goldmine-level useful — add it to `.planning/FINDINGS.md` with date, phase, and
-    impact. These persist across sessions and inform future design decisions.
+**1. Research**
+- Read `VISION.md` — ground yourself in the project intent
+- Read milestone `IMPACT.md` — understand milestone scope and cross-phase effects
+- Read `REFERENCES.md` — identify relevant external resources
+- Read `STATE.md` and `ROADMAP.md` — verify global state and phase scope
+- Read previous phase's `HANDOFF.md` — understand what was delivered
+- Create `{phaseName}/RESEARCH.md` — phase-scoped findings, cite references by ID
 
-**On phase end:**
-13. Mark all tasks completed or delete stale ones
-14. Update phase tracker status to COMPLETE
-15. Generate handoff doc in `handoffs/HANDOFF-PHASE-{id}.md`
-16. Update `ROADMAP.md` — mark phase complete in both active and completed sections
-17. Update `STATE.md` — fold phase tracker into global state
-18. Update `CONTEXT.md` — refresh current state for next phase/agent
-19. Update `BOOTSTRAP.md` — point to next phase AND include path to latest handoff
-20. Commit all doc updates atomically
+**2. Planning**
+- Create `{phaseName}/PLANNING.md` — scope, approach, risks, dependencies
+- Create `{phaseName}/TASKS.md` — task breakdown
+- Create `{phaseName}/TRACKER.md` — PM tracking (status, decisions, blockers)
+- Create `{phaseName}/CONTEXT.md` — initial shared state for agents
+- Create tasks via TaskCreate tool for each work item
+- Copy phase outline from ROADMAP.md into TRACKER.md as starting point
+- Update ROADMAP.md with refined task list from planning
 
-### On Milestone End (After All Phases in M-{n})
+**3. Act**
+- Update task status (in_progress → completed) as work progresses
+- Atomic git commits at each completed task
+- Update TRACKER.md with decisions, issues found, step completions
+- Keep phase CONTEXT.md current — update after every significant decision
+- Record milestone-scoped findings to milestone `FINDINGS.md`
+- Record project-level findings to `.planning/FINDINGS.md`
 
-21. Re-read `VISION.md` — verify milestone outcome aligns with project intent
-22. Generate retrospective in `retrospectives/RETRO-M-{n}.md`
-23. Evaluate pinned retro items from roadmap
-24. Update `STATE.md` — milestone-level state summary
-25. Create next milestone directory `M-{n+1}/` with empty CONTEXT.md
+**4. Verify**
+- Confirm deliverables work end-to-end against reality, not just compilation
+- Run verification suite where applicable
+
+**5. Gap Analysis**
+- Identify remaining gaps, untested paths, known limitations
+- Decide: plan a gap-closing phase or accept and document
+
+**6. Housekeeping & Bootstrap**
+- Mark all tasks completed or delete stale ones
+- Update TRACKER.md status to COMPLETE
+- Generate `{phaseName}/HANDOFF.md`
+- Update `ROADMAP.md` — mark phase complete, update task lists
+- Update `STATE.md` — fold phase state into global state
+- Update milestone CONTEXT.md (if milestone-level, for backward compat)
+- Update `BOOTSTRAP.md` — point to next phase with latest handoff path
+- Commit all doc updates atomically
+
+### Mandatory Milestone Lifecycle
+
+**1. Research** — Scope impact to project and vision. Create `IMPACT.md`.
+**2. Phase Planning** — Break milestone into phases in ROADMAP.md.
+**3. Execute Phases** — Run each phase through the phase lifecycle above.
+**4. Gap Analysis** — Generate `GAPS.md` at milestone root.
+**5. Retrospective** — Generate `RETROSPECTIVE.md`. Evaluate pinned retro items.
+**6. Housekeeping** — Update STATE.md, create next `M-{n+1}/`, update BOOTSTRAP.md.
 
 ### Agent Context Protocol
 
-**CONTEXT.md is mandatory for all agents.** When spawning subagents:
-- Always include the path to CONTEXT.md in the agent prompt
+**Phase CONTEXT.md is mandatory for all agents.** When spawning subagents:
+- Include the path to the active phase's CONTEXT.md in the agent prompt
 - Instruct the agent to read it before doing any work
 - Any findings the agent produces that affect shared state must be noted in CONTEXT.md
+
+### Reference Citation Protocol
+
+Planning docs (RESEARCH.md, IMPACT.md, PLANNING.md) reference external resources
+by identifier from `.planning/REFERENCES.md` — e.g., `[tweakcc1]`, `[stellaraccident1]`.
+Never inline raw URLs in planning docs. This keeps docs clean, deduplicates references,
+and makes it easy to update URLs in one place.
 
 ### Tracking Hierarchy
 
 | Tool | Scope | Persistence |
 |------|-------|-------------|
 | TaskCreate/TaskUpdate | Current phase, current session | Ephemeral (session only) |
-| Phase Tracker | Single phase, across sessions | `.planning/milestones/M-{n}/trackers/` |
+| Phase TRACKER.md | Single phase, across sessions | `.planning/milestones/M-{n}/{phaseName}/` |
+| Milestone FINDINGS.md | Milestone-scoped discoveries | `.planning/milestones/M-{n}/` |
 | STATE.md | Global project state | `.planning/STATE.md` |
 | ROADMAP.md | All phases, all milestones | `.planning/ROADMAP.md` |
 
-Phase trackers fold UP into STATE.md. ROADMAP.md is the source of truth for what's done and what's next.
+Phase trackers fold UP into STATE.md. ROADMAP.md is the living source of truth —
+it carries the top-level task list per phase, updated during planning and on completion.
+Phase trackers track PM concerns only (decisions, blockers, status) — no redundancy with ROADMAP.
 
 ### Journals
 
@@ -267,48 +300,18 @@ Key findings that inform all work:
 
 ## External References
 
-### Core Projects — Fork Targets & Governance Tools
-- https://github.com/Piebald-AI/tweakcc — **THE FORK TARGET.** Binary patching tool for CC. Has prompt extraction, pieces-based matching, data pipeline. We fork this entire repo.
-- https://github.com/Piebald-AI/claude-code-system-prompts/tree/main — All CC prompt text, updated per release. Source of truth for what Anthropic ships. Maintained by same team as tweakcc.
-- https://github.com/0Chencc/clawgod/tree/main | https://clawgod.0chen.cc/ — Wrapper approach for CC. Architectural reference for Phase 1b (wrapper layer).
-- https://github.com/LZong-tw/clawback — Hooks-based governance. Currently active on Tom's setup.
-- https://github.com/qwibitai/nanoclaw — Minimal CC patching tool. Reference implementation.
+All external references (repos, gists, docs, URLs) are in `.planning/REFERENCES.md`.
+Cite by identifier (e.g., `[tweakcc1]`, `[stellaraccident1]`) — never inline raw URLs
+in planning docs. Per-milestone and per-phase RESEARCH.md files cross-reference from
+REFERENCES.md for their scoped context.
 
-### System Prompt Leaks & Extraction
-- https://ccleaks.com/ — Aggregated CC system prompt leaks.
-- https://github.com/asgeirtj/system_prompts_leaks/tree/main/Anthropic — Historical prompt leaks.
-- https://github.com/matheusmoreira/.files/tree/master/~/.tweakcc/system-prompts — Example tweakcc prompt customizations by a community user.
-- https://gist.github.com/roman01la/483d1db15043018096ac3babf5688881 — CC prompt analysis gist.
-
-### Billing, Proxy & Usage Monitoring
-- https://github.com/zacdcook/openclaw-billing-proxy — HTTP proxy for CC billing visibility. Reference for Phase 5.
-- https://github.com/router-for-me/CLIProxyAPI/issues/2599 — CLI proxy API discussion.
-- https://github.com/d-kimuson/claude-code-viewer — CC session viewer.
-- https://github.com/phuryn/claude-usage — CC usage tracking.
-- https://github.com/frankbria/ralph-claude-code — CC enhancement tool.
-
-### Cache, Performance & Configuration
-- https://old.reddit.com/r/ClaudeCode/comments/1shkgg2/your_claude_code_cache_is_probably_broken_and_its/ — Cache fix discovery post.
-- https://github.com/cnighswonger/claude-code-cache-fix — Cache fix tool.
-- https://old.reddit.com/r/ClaudeCode/comments/1sfihyr/psa_if_your_opus_is_lobotomized_disable_adaptive/ — Adaptive thinking degradation fix.
-- https://github.com/shanraisshan/claude-code-best-practice/blob/main/best-practice/claude-settings.md#environment-variables-via-env — Settings best practices.
-
-### Official Anthropic Docs
-- https://github.com/anthropics/claude-code — Official CC repo.
-- https://github.com/anthropics/claude-code/issues/42796 — Stellaraccident degradation analysis (quantitative).
-- https://github.com/anthropics/claude-code/issues/28158#issuecomment-4230030386 — Promethean CLAUDE.md dismissal evidence.
-- https://code.claude.com/docs/en/env-vars — Official env var documentation.
-- https://code.claude.com/docs/en/cli-reference#cli-flags — Official CLI flags.
-- https://code.claude.com/docs/en/setup#migrate-from-npm-to-native — Native install migration.
-- https://platform.claude.com/docs/en/build-with-claude/prompt-caching — Prompt caching docs.
-- https://www.reddit.com/r/ClaudeAI/comments/1rlpa05/how_do_i_install_a_specific_version_of_claude/ — Version pinning guide.
-
-### Research & Analysis Gists
-- https://gist.github.com/Haseeb-Qureshi/d0dc36844c19d26303ce09b42e7188c1 — CC analysis.
-- https://gist.github.com/unkn0wncode/f87295d055dd0f0e8082358a0b5cc467 — CC internals research.
-- https://gist.github.com/mrcattusdev/53b046e56b5a0149bdb3c0f34b5f217a — CC research gist.
-- https://gist.github.com/ceaksan/57af569318917940c9e1e1160c02a982 — CC research gist.
-
+**Local paths:**
+- Project root: `/Users/tom.kyser/dev/claude-code-patches`
+- The product: `/Users/tom.kyser/dev/claude-code-patches/claude-governance`
+- Prompt overrides: `/Users/tom.kyser/dev/claude-code-patches/prompts`
+- Fork source (local): `/Users/tom.kyser/dev/tweakcc`
+- CC leaked source: `/Users/tom.kyser/dev/cc-source`
+- Clawback hooks: `/Users/tom.kyser/dev/clawback`
 
 ## REPL Tool Observation Directive — Mandatory
 
@@ -316,7 +319,7 @@ Key findings that inform all work:
 
 When you use the REPL tool (or observe an agent using it), log any improvement idea,
 friction point, missing capability, error handling gap, prompt deficiency, or
-enhancement opportunity to `.planning/REPL-IMPROVEMENTS.md`.
+enhancement opportunity to `.planning/research/REPL-IMPROVEMENTS.md`.
 
 ### Rules
 1. **Do not filter.** Log everything that strikes you, no matter how minor. The user
@@ -332,14 +335,3 @@ enhancement opportunity to `.planning/REPL-IMPROVEMENTS.md`.
 6. **Never skip this.** Even if the observation seems obvious or already logged,
    add it. Duplicates signal importance.
 
-## Local Files for Reference
-
-**In this repo:**
-- `/Users/tom.kyser/dev/claude-code-patches` — Project root.
-- `/Users/tom.kyser/dev/claude-code-patches/claude-governance` — The product (tweakcc fork).
-- `/Users/tom.kyser/dev/claude-code-patches/prompts` — 9 degradation-fix prompt overrides.
-
-**External references (not in repo — one level up):**
-- `/Users/tom.kyser/dev/tweakcc` — Local tweakcc checkout. The fork source.
-- `/Users/tom.kyser/dev/cc-source` — Leaked CC source code. Reference for internals.
-- `/Users/tom.kyser/dev/clawback` — Clawback hooks project. Active on Tom's setup.
