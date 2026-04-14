@@ -58,7 +58,7 @@ These checks prevent the kind of compounding errors that waste entire sessions.
 2. **Read the project state.** `.planning/STATE.md` is the source of truth for where we are at overall.
 3. **Read the roadmap.** `.planning/ROADMAP.md` is the source of truth for what's complete
    and what's next. If the compaction summary disagrees, the roadmap wins.
-4. **Read CONTEXT.md.** The active phase's `CONTEXT.md` (at `.planning/milestones/M-{n}/{phaseName}/CONTEXT.md`) has shared state. If starting a new phase, read the milestone-level `IMPACT.md` instead.
+4. **Read phase CONTEXT.md.** The active phase's `CONTEXT.md` (at `.planning/milestones/M-{n}/{phaseName}/CONTEXT.md`) has shared state. If starting a new phase, read the milestone `IMPACT.md` instead.
 5. **Read the latest handoff.** The previous phase's `HANDOFF.md` (at `.planning/milestones/M-{n}/{phaseName}/HANDOFF.md`, listed in `BOOTSTRAP.md`) has what was built, key decisions, and gotchas.
 6. **Verify before building.** If the roadmap says something is "COMPLETE," verify it
    actually exists and works before building on top of it. Check git history, run the
@@ -158,19 +158,20 @@ This process is mandatory. Every phase, every session, every agent. No shortcuts
   reports/                            # Research reports, analysis docs
   research/                           # Dated research findings, REPL improvements
   specs/                              # Design specs
+  artifacts/                          # Retired docs preserved by origin (e.g., M-1-CONTEXT.md)
   milestones/
     M-{n}/                            # One directory per milestone
       BOOTSTRAP.md                    # Bootstrap prompt — scoped to milestone
-      IMPACT.md                       # Milestone-scoped impact: research, reference cross-refs, phase impact tracking
+      IMPACT.md                       # Milestone-scoped impact: created after research, updated on cross-phase impact
       FINDINGS.md                     # Milestone-scoped findings (like project-level but local)
       RETROSPECTIVE.md                # End-of-milestone retrospective
       GAPS.md                         # End-of-milestone gap analysis
       {phaseName}/                    # One directory per phase (e.g., 2b-gaps-3/)
         TRACKER.md                    # Phase PM only — decisions, blockers, status
         CONTEXT.md                    # Phase-scoped shared state (live bridge for agents)
-        PLANNING.md                   # Pre-work plan (scope, approach, risks)
+        PLANNING.md                   # Pre-work plan — bidirectional: phase ↔ milestone ↔ project scope
         RESEARCH.md                   # Phase-scoped research with REFERENCES.md citations
-        TASKS.md                      # Task breakdown
+        TASKS.md                      # Task breakdown — persistent backing store for TaskCreate
         HANDOFF.md                    # Phase handoff (generated at phase end)
 ```
 
@@ -187,21 +188,29 @@ Every phase follows this sequence. Steps are not optional.
 - Create `{phaseName}/RESEARCH.md` — phase-scoped findings, cite references by ID
 
 **2. Planning**
-- Create `{phaseName}/PLANNING.md` — scope, approach, risks, dependencies
-- Create `{phaseName}/TASKS.md` — task breakdown
+- Create `{phaseName}/PLANNING.md` — scope, approach, risks, dependencies.
+  This is the dedicated home for planning that replaces what was previously inline
+  in trackers. Frame bidirectionally: phase scope ↔ milestone scope ↔ project scope.
+  The goal is not to overload each session but to ensure agents pay attention to the
+  intent and impact of their work across scopes.
+- Create `{phaseName}/TASKS.md` — task breakdown. This is the persistent backing
+  store for tasks. TaskCreate entries must mirror TASKS.md exactly — same tasks,
+  same status. TASKS.md survives sessions and feeds ROADMAP updates for global tracking.
 - Create `{phaseName}/TRACKER.md` — PM tracking (status, decisions, blockers)
 - Create `{phaseName}/CONTEXT.md` — initial shared state for agents
-- Create tasks via TaskCreate tool for each work item
+- Create tasks via TaskCreate for each item in TASKS.md (keep in sync)
 - Copy phase outline from ROADMAP.md into TRACKER.md as starting point
 - Update ROADMAP.md with refined task list from planning
 
 **3. Act**
 - Update task status (in_progress → completed) as work progresses
+- Keep TASKS.md and TaskCreate in sync — same tasks, same status
 - Atomic git commits at each completed task
 - Update TRACKER.md with decisions, issues found, step completions
 - Keep phase CONTEXT.md current — update after every significant decision
 - Record milestone-scoped findings to milestone `FINDINGS.md`
 - Record project-level findings to `.planning/FINDINGS.md`
+- Update milestone `IMPACT.md` when something impacts beyond this phase's scope
 
 **4. Verify**
 - Confirm deliverables work end-to-end against reality, not just compilation
@@ -213,19 +222,22 @@ Every phase follows this sequence. Steps are not optional.
 
 **6. Housekeeping & Bootstrap**
 - Mark all tasks completed or delete stale ones
+- Sync final TASKS.md state (all completed/deleted)
 - Update TRACKER.md status to COMPLETE
 - Generate `{phaseName}/HANDOFF.md`
 - Update `ROADMAP.md` — mark phase complete, update task lists
 - Update `STATE.md` — fold phase state into global state
-- Update milestone CONTEXT.md (if milestone-level, for backward compat)
 - Update `BOOTSTRAP.md` — point to next phase with latest handoff path
 - Commit all doc updates atomically
 
 ### Mandatory Milestone Lifecycle
 
-**1. Research** — Scope impact to project and vision. Create `IMPACT.md`.
+**1. Research** — Scope impact to project and vision. Create `IMPACT.md` with initial
+   research and reference cross-refs. This is the first write — not the last.
 **2. Phase Planning** — Break milestone into phases in ROADMAP.md.
 **3. Execute Phases** — Run each phase through the phase lifecycle above.
+   Update `IMPACT.md` whenever progress reveals cross-phase impact or scope changes.
+   This can happen during any phase step or any subsequent milestone step.
 **4. Gap Analysis** — Generate `GAPS.md` at milestone root.
 **5. Retrospective** — Generate `RETROSPECTIVE.md`. Evaluate pinned retro items.
 **6. Housekeeping** — Update STATE.md, create next `M-{n+1}/`, update BOOTSTRAP.md.
@@ -248,8 +260,9 @@ and makes it easy to update URLs in one place.
 
 | Tool | Scope | Persistence |
 |------|-------|-------------|
-| TaskCreate/TaskUpdate | Current phase, current session | Ephemeral (session only) |
+| TASKS.md + TaskCreate | Current phase, synced | TASKS.md persists across sessions; TaskCreate mirrors it in-session |
 | Phase TRACKER.md | Single phase, across sessions | `.planning/milestones/M-{n}/{phaseName}/` |
+| Milestone IMPACT.md | Cross-phase impact | `.planning/milestones/M-{n}/` — updated whenever scope shifts |
 | Milestone FINDINGS.md | Milestone-scoped discoveries | `.planning/milestones/M-{n}/` |
 | STATE.md | Global project state | `.planning/STATE.md` |
 | ROADMAP.md | All phases, all milestones | `.planning/ROADMAP.md` |

@@ -1,5 +1,11 @@
 # Phase 1b Context — Wrapper Layer
 
-Retroactively created during Phase 2-PM-update.
-See `TRACKER.md` in this directory for the original phase tracking records.
-See `../CONTEXT.md` for the milestone-level shared context that was active during this phase.
+*Retroactively created during Phase 2-PM-update.*
+
+This phase predates the per-phase CONTEXT.md convention. Shared state during
+this phase was maintained in the milestone-level CONTEXT.md (now archived at
+`.planning/artifacts/M-1-CONTEXT.md`).
+
+For the authoritative record of what happened during this phase, see:
+- `TRACKER.md` — decisions, status changes, blockers
+- `HANDOFF.md` — what was delivered and what the next phase needs to know
