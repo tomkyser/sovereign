@@ -37,3 +37,6 @@ In replace mode, REPL handles everything — file reads, searches, shell command
 Used fetch() to grab the Haseeb gist. Got a useful AI summary. But if you need exact quotes or specific sections, the summarization lossy-compresses them. The prompt documents this and suggests bash('curl -s ...') for raw HTTP, but in practice the summarized version was sufficient. The fetch/curl distinction is well-documented but could be more prominent in the replace prompt.
 
 
+
+**2026-04-14 | REPL agent() → subagent bash() fails with "O is not a function"** | bug, agent-spawning
+Testing Tungsten tmux environment propagation through various tool/agent paths. REPL's own bash() works fine. Top-level Agent tool spawning subagents that call bash() works fine. But REPL's agent() function spawning a subagent that then calls bash() hits a runtime error: "O is not a function" — likely a minification artifact where a dependency isn't properly resolved in the subagent's tool runtime when spawned through REPL's agent() path. The subagent ran (3 tool calls, ~49K tokens) but couldn't execute any bash commands. The REPL-to-agent-to-bash path has a tool runtime initialization issue that doesn't exist in the top-level Agent-to-bash path.
