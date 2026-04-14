@@ -158,7 +158,7 @@ export const VERIFICATION_REGISTRY: VerificationEntry[] = [
   {
     id: 'repl-tool-guidance',
     name: 'REPL Tool Guidance Injection',
-    signature: 'use REPL in a single call instead of issuing individual',
+    signature: 'could one REPL call do this',
     critical: false,
     category: 'governance',
     passDetail: 'active in Using your tools',
@@ -819,11 +819,11 @@ export const writeToolInjection = (
 // tools. This patch adds REPL as a peer-level recommendation.
 
 const REPL_GUIDANCE =
-  'For batch operations across 3+ files (scan-filter-act, bulk reads/edits, ' +
-  'data processing, cross-file refactoring), use REPL in a single call instead ' +
-  'of issuing individual Read/Write/Edit calls. REPL executes the entire pipeline ' +
-  'as one tool call, reducing context consumption from O(2N+2) to O(1). Use ' +
-  'individual tools for single-file operations and safety-critical edits where ' +
+  'Before issuing multiple tool calls, ask: could one REPL call do this? REPL executes JavaScript ' +
+  'with access to glob, grep, read, write, edit, and bash \\u2014 an entire scan-filter-act pipeline ' +
+  'in a single tool call. Three Bash calls that REPL could combine into one means 3x the context ' +
+  'consumed and 3x the inference cost. At scale this accelerates compaction and degrades session ' +
+  'quality. Use individual tools only for single-file operations and safety-critical edits where ' +
   'diff visibility matters.';
 
 export const writeReplToolGuidance = (content: string): string | null => {
@@ -833,7 +833,7 @@ export const writeReplToolGuidance = (content: string): string | null => {
   // This is unique (1 match) because of the full return pattern after it.
 
   // Already patched check
-  if (content.includes('use REPL in a single call instead of issuing individual')) {
+  if (content.includes('could one REPL call do this? REPL executes')) {
     debug('  REPL tool guidance: already applied');
     return content;
   }

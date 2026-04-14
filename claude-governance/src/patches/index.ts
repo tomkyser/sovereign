@@ -705,7 +705,7 @@ export const applyCustomization = async (
     },
     'repl-tool-guidance': {
       fn: c => writeReplToolGuidance(c),
-      signature: 'use REPL in a single call instead of issuing individual',
+      signature: 'could one REPL call do this',
     },
   };
 
