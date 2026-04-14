@@ -21,3 +21,9 @@ See `.planning/FINDINGS.md` F1-F21 for all findings discovered during M-2 phases
 | F19 | 2c research | FS9() is stubbed getClaudeTmuxEnv — bashProvider plumbing intact |
 | F20 | 2c research | TungstenLiveMonitor DCE left render tree marker |
 | F21 | 2c research | All Tungsten AppState fields survive as writable |
+| F22 | 2c-gaps-1 | setAppState requires updater function (prev => newState), not bare objects — CC's Tool.ts interface |
+| F23 | 2c-gaps-1 | Tungsten enables nested Claude instances — full SOVEREIGN sessions spawnable in tmux sessions |
+| F24 | 2c-gaps-1 | FS9 propagation verified across 5 paths: Tungsten send, Bash, REPL bash(), Agent→Bash, Agent→REPL→bash() |
+| F25 | 2c-gaps-1 | REPL agent() → subagent bash() fails with "O is not a function" — minification artifact in subagent tool runtime |
+| F26 | 2c-gaps-2 research | CC Channels API (notifications/claude/channel) provides native inbound message delivery — solves inter-session communication without binary patching |
+| F27 | 2c-gaps-2 research | dynamo Wire service implements typed envelope protocol with urgency routing, session registry, and disconnect buffering over Channels + HTTP relay |

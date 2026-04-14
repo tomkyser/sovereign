@@ -310,7 +310,8 @@ Gaps surfaced during testing of 2b-gaps. All resolved.
 --> one definite goal: Claude needs to be instructed to use and understand tungsten and we need to enforce it with hooks.
 ----> What is the best way to generally leverage it by default?
 -----> ensure that it is used for proper persistence including within tools and other agents or subagents.
-------> Clear indication that it is in use in status line vs not in use.
+
+**PINNED:** User toggle to show/hide Tungsten panel UI (keyboard shortcut or config flag)
 
 ---
 ### Milestone 2 Retro
@@ -394,12 +395,27 @@ Notes:
     - I lean toward not only nesting subagents inside of REPL, agents can still use REPL, the agent() tool should not be delisted.
     - research:
       - [ptcDocs1], [advancedToolUse1], [advancedToolUsePost1], [replScratchpad1] — see `.planning/REFERENCES.md`
-  - can the UDP sockets (need clean room feature built help with this?)
+  - Wire (M-4.5) inter-session communication for agent coordination
 - we need deep system prompt support
 
 
-## Milestone 4.5: UDS Sockets: https://ccleaks.com/#feature-5
-- TBD
+## Milestone 4.5: Wire — Inter-Session Communication
+
+Replaces original UDS Sockets plan (https://ccleaks.com/#feature-5) with Wire,
+a superior implementation already built in dynamo (`/Users/tom.kyser/Library/Mobile Documents/com~apple~CloudDocs/dev/dynamo/core/services/wire/`).
+
+Wire uses CC's native Channels API (`notifications/claude/channel`) for inbound message
+delivery — no binary patching needed. Typed envelopes with urgency routing, session
+registry with capabilities/permissions, disconnect buffering with TTL reconnect,
+dual transport (Channels for low-latency, HTTP relay for bulk). Architecturally
+superior to Anthropic's UDS Inbox: networkable, resilient, typed, permissioned.
+
+**Integration with Tungsten:** Spawn Claude instances in Tungsten sessions, register
+with Wire, communicate via structured messages instead of screen scraping. Combined
+with REPL and tool injection, this completes the distributed agent platform.
+
+**Source:** dynamo Wire service (7 files: wire, protocol, registry, transport, relay-server, channel-server, channels-transport)
+**Approach:** Port/adapt from dynamo into claude-governance module system — TBD in phase planning
 
 ---
 ### Milestone 4.5 Retro
