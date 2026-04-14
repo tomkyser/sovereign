@@ -1,46 +1,34 @@
 # Phase 2c-gaps-2 Context — Tungsten Adoption
 
-## Phase Scope
+**Status:** COMPLETE — 20/20 SOVEREIGN
 
-Three pillars:
-1. **Guidance injection** — PATCH 11 in governance.ts, injecting Tungsten guidance into "Using your tools" array (same approach as PATCH 8 REPL guidance)
-2. **Tool prompt expansion** — tungsten.js prompt() expanded with FS9 propagation, any-language REPL, multi-session, anti-patterns, panel, cross-tool interactions
-3. **Hook enforcement** — tungsten-verify.cjs SessionStart hook checking tmux, tool deployment, patch presence
+## What Was Built
 
-## Current Tungsten Infrastructure (from 2c-gaps-1)
+**Tungsten-first execution posture** — Claude defaults to persistent execution context, not optional tool awareness.
 
-**Patches applied (in VERIFICATION_REGISTRY):**
-- `tungsten-fs9`: FS9() reads `__CLAUDE_GOVERNANCE_TMUX_ENV` → bashProvider sets TMUX env
-- `tungsten-panel`: `__tungsten_panel__` IIFE in React render tree
-- `repl-tool-guidance`: PATCH 8, `could one REPL call do this` in "Using your tools"
+**PATCH 11 (v2):** Directive injected into "Using your tools" — "A Tungsten session is established at the start of every work session. Once active, all Bash and REPL commands automatically operate within this persistent context via FS9." Includes v1→v2 upgrade path.
 
-**Tool:**
-- `data/tools/tungsten.js` — 6 actions, PID-isolated tmux socket, AppState for panel, state file for hooks
-- Deployed via tool loader (`__claude_governance_tools__` signature in binary)
+**Tool prompt reframe:** "Tungsten send vs Bash" — complementary layers, not alternatives. Session Lifecycle section (create first, kill last). FS9 Environment Propagation, any-language REPL, multi-session orchestration, anti-patterns.
 
-**FS9 chain (verified 2c-gaps-1):**
-Tungsten `discoverSocketInfo()` → `process.env.__CLAUDE_GOVERNANCE_TMUX_ENV` → FS9() patch in binary → bashProvider `getEnvironmentOverrides()` → `env.TMUX` on all Bash child processes → REPL `bash()` inherits → Agents inherit via `process.env`
+**Lifecycle hooks:**
+- `tungsten-verify.cjs` (SessionStart) — 5 checks, stdout directive to create session
+- `tungsten-session-end.cjs` (Stop) — kills tmux server, cleans state files
 
-**Verification baseline:** 19/19 SOVEREIGN on CC 2.1.101
+## Key Decision
 
-## Key Files
+Tungsten is the **environment layer**, not a Bash replacement. The stack:
+```
+Tungsten (creates persistent tmux context)
+  → FS9 (bridges env to bashProvider)
+    → Bash/REPL/Agents (operate inside that context automatically)
+```
+Bash doesn't decrease — it gets more powerful because cd, export, running processes all persist.
 
-| File | Role |
-|------|------|
-| `claude-governance/src/patches/governance.ts` | PATCH 11 injection + VERIFICATION_REGISTRY |
-| `claude-governance/data/tools/tungsten.js` | Tool prompt expansion |
-| `~/.claude/hooks/tungsten-verify.cjs` | New SessionStart hook |
-| `~/.claude/hooks/governance-verify.cjs` | Reference hook pattern |
-| `~/.claude/hooks/embedded-tools-verify.cjs` | Reference hook pattern |
+## Verification Baseline
 
-## Technical Constraints
+20/20 SOVEREIGN on CC 2.1.101 (was 19/19)
 
-- PATCH 11 must detect post-PATCH-8 state (REPL element already in the array)
-- Patches apply sequentially in `applyPatchImplementations` — PATCH 8 runs before PATCH 11
-- Hook execution order is alphabetical: governance-verify < tungsten-verify (correct dependency order)
-- tungsten-verify reads governance state.json — must degrade gracefully if absent
-
-## What This Phase Does NOT Cover
+## What This Phase Did NOT Cover
 
 - User toggle for panel visibility (PINNED in ROADMAP — future work)
 - REPL `agent()` runtime bug ("O is not a function" — REPL gap, not Tungsten)

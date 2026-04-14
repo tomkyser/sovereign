@@ -305,11 +305,13 @@ Gaps surfaced during testing of 2b-gaps. All resolved.
 - [x] **G40: Panel setAppState fix** — `setAppState` requires function form `(prev) => newState`, not bare objects. Silent TypeError was swallowed by try/catch. Panel now renders in live TUI (58cf589)
 
 
-### Phase 2c-gaps-2: Tungsten further gap discovery and analysis
--> TBD
---> one definite goal: Claude needs to be instructed to use and understand tungsten and we need to enforce it with hooks.
-----> What is the best way to generally leverage it by default?
------> ensure that it is used for proper persistence including within tools and other agents or subagents.
+### Phase 2c-gaps-2: Tungsten Adoption [COMPLETE]
+- [x] PATCH 11 (v2): Tungsten-first directive in "Using your tools" — session established at start, Bash/REPL inherit via FS9
+- [x] Tool prompt reframe: "Tungsten send vs Bash" complementary layers, Session Lifecycle, FS9 propagation, anti-patterns
+- [x] SessionStart hook: tungsten-verify.cjs — 5 checks + create-session directive
+- [x] Stop hook: tungsten-session-end.cjs — kill tmux server, clean state files
+- [x] VERIFICATION_REGISTRY: tungsten-tool-guidance entry, 20/20 SOVEREIGN
+- [x] Prompt override review: no changes needed (system-level coverage sufficient)
 
 **PINNED:** User toggle to show/hide Tungsten panel UI (keyboard shortcut or config flag)
 

@@ -1,58 +1,46 @@
 # Phase 2c-gaps-2 Tasks — Tungsten Adoption
 
 ## T1: Tungsten guidance injection — PATCH 11
-**Status:** TODO
+**Status:** COMPLETE
 **Files:** `claude-governance/src/patches/governance.ts`
+**Commit:** 6b6aace
 
-Write `writeTungstenToolGuidance` function following PATCH 8 pattern. Inject Tungsten guidance into "Using your tools" array. Must detect post-PATCH-8 state (REPL element already inserted). Add VERIFICATION_REGISTRY entry `tungsten-tool-guidance`. Register in `applyPatchImplementations`.
-
-Guidance text: when to use Tungsten (persistent state, long-running processes, stateful shell), environment inheritance to Bash/REPL/agents, session lifecycle.
+Wrote `writeTungstenToolGuidance` with v1→v2 upgrade path. Directive framing: "A Tungsten session is established at the start of every work session." v1 was "use Tungsten instead of Bash" (incorrect framing — Tungsten is the environment layer, not a Bash alternative). v2 establishes Tungsten-first posture with FS9 inheritance explanation. Includes regex-based v1 upgrade path for binaries with stale guidance.
 
 ## T2: Expand tungsten.js tool prompt
-**Status:** TODO
+**Status:** COMPLETE
 **Files:** `claude-governance/data/tools/tungsten.js`
+**Commit:** 6b6aace
 
-Add to prompt():
-- FS9 environment propagation explanation (Tungsten → FS9 → bashProvider → Bash/REPL/agents)
-- Any-language REPL pattern (python3, psql, node in persistent sessions)
-- Multi-session orchestration pattern (named sessions, monitoring workflow)
-- Anti-patterns section (no one-shot, no session accumulation, no capture-before-send, use Bash for exit codes)
-- Panel mention (TUI panel when session active)
-- Cross-tool interaction notes (agents inherit tmux env)
+Reframed from "When to Use Tungsten vs Bash" to "Tungsten send vs Bash" — complementary layers, not alternatives. Added: Session Lifecycle (create first, kill last), FS9 Environment Propagation, Any-language REPL pattern, Multi-session orchestration, Anti-patterns (session accumulation, capture-before-send, exit codes, skip session creation), panel mention, agent inheritance.
 
-## T3: Tungsten verification hook
-**Status:** TODO
-**Files:** `~/.claude/hooks/tungsten-verify.cjs` (new)
+## T3: Tungsten verification hook + lifecycle hooks
+**Status:** COMPLETE
+**Files:** `~/.claude/hooks/tungsten-verify.cjs`, `~/.claude/hooks/tungsten-session-end.cjs`, `~/.claude/settings.json`
+**Commit:** 6b6aace
 
-SessionStart hook checking:
-1. tmux availability
-2. tungsten.js deployment
-3. FS9 patch presence (from governance state.json)
-4. Panel patch presence (from governance state.json)
-5. Tool guidance patch presence (from governance state.json)
-
-State → `~/.claude-governance/tungsten-verify.json`. Banner to stderr, warning to stdout on failure. Graceful degradation if governance state.json absent.
+SessionStart hook: 5 checks (tmux, tungsten.js, FS9/panel/guidance patches), graceful degradation when state.json absent (skips patch checks, still verifies tmux+tool). Stdout directive to Claude: create session as first action. Stop hook: kills tmux server via socket name from tungsten-state.json, cleans state files. Both registered in settings.json.
 
 ## T4: Verification registry update
-**Status:** TODO
-**Files:** `claude-governance/src/patches/governance.ts`
+**Status:** COMPLETE (merged into T1)
+**Files:** `claude-governance/src/patches/governance.ts`, `claude-governance/src/patches/index.ts`
+**Commit:** 6b6aace
 
-Add `tungsten-tool-guidance` entry to VERIFICATION_REGISTRY. Verify existing `tungsten-fs9` and `tungsten-panel` entries still match after changes. Ensure `check` command reports all Tungsten entries.
+Added `tungsten-tool-guidance` to VERIFICATION_REGISTRY (signature: "Tungsten session is established at the start of every work session"), PATCH_DEFINITIONS, and patchImplementations. Existing `tungsten-fs9` and `tungsten-panel` entries verified unchanged.
 
 ## T5: Integration testing
-**Status:** TODO
-**Files:** various
+**Status:** COMPLETE
 
-Verify end-to-end:
-- `pnpm build` succeeds in claude-governance
-- `claude-governance check` reports 20/20 (or n+1) SOVEREIGN
-- `claude-governance apply` injects Tungsten guidance into binary
-- Hook fires on session start and renders banner
-- Tool prompt visible in session (tool description shows full content)
-- No regressions on existing 19/19 checks
+- `pnpm build` — clean (170KB)
+- `claude-governance check` — 20/20 SOVEREIGN
+- `claude-governance --apply` on clean binary — all 20 patches applied
+- SessionStart hook: stderr "Tungsten: READY (5/5)", stdout directive to create session
+- Stop hook: tested with real tmux session, kills server, cleans state files
+- Graceful degradation: 2/2 without state.json (patch checks skipped)
+- v1→v2 upgrade: old guidance replaced in-place
+- No regressions on existing 19 checks
 
 ## T6: Prompt override file review
-**Status:** TODO
-**Files:** `prompts/` directory
+**Status:** COMPLETE — no changes needed
 
-Review existing 9 prompt override files. Determine if any need Tungsten-related updates (e.g., `system-prompt-doing-tasks-no-additions.md` or `agent-prompt-general-purpose.md`). If Tungsten guidance is fully handled by PATCH 11 injection + tool prompt, no override changes needed. Document decision.
+Reviewed all 9 prompt override files. Only `system-prompt-agent-thread-notes.md` mentions Bash (line 9: "Bash tool resets to cwd between calls") — factually accurate, not conflicting. PATCH 11 guidance + expanded tool prompt provide complete coverage for all agents via system prompt inheritance.

@@ -21,12 +21,13 @@ and governance-specific `check` command added.
 - **Verify:** `node dist/index.mjs check`
 - **Restore:** `node dist/index.mjs --restore`
 
-### What's Applied (Verified 19/19 via `check`)
-**Governance Patches (4 active):**
+### What's Applied (Verified 20/20 via `check`)
+**Governance Patches (5 active):**
 - Disclaimer neutralization — replaces "may or may not be relevant" with directive framing
 - Context header reframing — replaces ambient "use the following context" with mandatory framing
 - Subagent CLAUDE.md restoration — flips `tengu_slim_subagent_claudemd` to false
 - System-reminder authority fix — replaces "bear no direct relation" with CLAUDE.md directive framing
+- Tungsten tool guidance — Tungsten-first execution posture directive in "Using your tools"
 
 **Gate Resolution:**
 - USE_EMBEDDED_TOOLS_FN ternaries resolved to ant branch (0 unresolved)
@@ -61,6 +62,8 @@ and governance-specific `check` command added.
 |------|------|---------|
 | governance-verify.cjs | SessionStart | SOVEREIGN banner + degradation warning (reads state.json, version-change detection, live fallback) |
 | embedded-tools-verify.cjs | SessionStart | 8-point embedded tools verification |
+| tungsten-verify.cjs | SessionStart | Tungsten readiness (5 checks: tmux, tool, FS9/panel/guidance patches) + create-session directive |
+| tungsten-session-end.cjs | Stop | Kill tmux server, clean tungsten state files |
 | statusline-combined.cjs | StatusLine | GOV + EMB + GSD segments (config dir resolution, new state.json format) |
 
 ### Environment Variables (in settings.json env)
@@ -93,6 +96,7 @@ and governance-specific `check` command added.
 - **2c:** COMPLETE — Clean-Room Tungsten. 6 deliverables: tungsten.js tool, FS9 binary patch, render tree injection, live panel, statusline TNG, REPL prompt update. 19/19 SOVEREIGN.
 - **2-PM-update:** COMPLETE — PM restructuring + project rename. REFERENCES.md (35 refs), per-phase directories (14 phases), milestone docs (IMPACT/FINDINGS/GAPS/RETROSPECTIVE), CLAUDE.md lifecycle (6-step phase + milestone), TASKS.md sync protocol, PLANNING.md bidirectional scope, milestone CONTEXT.md archived to artifacts. Project renamed to claude-governance, GitHub repo renamed.
 - **2c-gaps-1:** COMPLETE — 11 gaps (G29-G40) closed. Panel crash fix, restore/apply vault wiring, verification honesty, FS9 verified, tungsten.js robustness, panel setAppState fix. All verified in live TUI session. 19/19 SOVEREIGN.
+- **2c-gaps-2:** COMPLETE — Tungsten-first execution posture. PATCH 11 (v2) directive in "Using your tools", tool prompt reframe (complementary layers + lifecycle), SessionStart/Stop lifecycle hooks. 20/20 SOVEREIGN.
 
 ### Binary Vault (from 2a-gaps)
 - **Module:** `src/binaryVault.ts` — XDG path discovery, GCS download, SHA256 verification, immutable locking
