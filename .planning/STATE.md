@@ -97,6 +97,7 @@ and governance-specific `check` command added.
 - **2-PM-update:** COMPLETE — PM restructuring + project rename. REFERENCES.md (35 refs), per-phase directories (14 phases), milestone docs (IMPACT/FINDINGS/GAPS/RETROSPECTIVE), CLAUDE.md lifecycle (6-step phase + milestone), TASKS.md sync protocol, PLANNING.md bidirectional scope, milestone CONTEXT.md archived to artifacts. Project renamed to claude-governance, GitHub repo renamed.
 - **2c-gaps-1:** COMPLETE — 11 gaps (G29-G40) closed. Panel crash fix, restore/apply vault wiring, verification honesty, FS9 verified, tungsten.js robustness, panel setAppState fix. All verified in live TUI session. 19/19 SOVEREIGN.
 - **2c-gaps-2:** COMPLETE — Tungsten-first execution posture. PATCH 11 (v2) directive in "Using your tools", tool prompt reframe (complementary layers + lifecycle), SessionStart/Stop lifecycle hooks. 20/20 SOVEREIGN.
+- **M-2 Retro:** COMPLETE — 10 phases evaluated. 13 outstanding gaps catalogued (GAPS.md). Key outcome: GP3 (Ant vs External divergence) defines M-3 scope. Phase 3prelim (codebase reorg) recommended first.
 
 ### Binary Vault (from 2a-gaps)
 - **Module:** `src/binaryVault.ts` — XDG path discovery, GCS download, SHA256 verification, immutable locking

@@ -316,11 +316,11 @@ Gaps surfaced during testing of 2b-gaps. All resolved.
 **PINNED:** User toggle to show/hide Tungsten panel UI (keyboard shortcut or config flag)
 
 ---
-### Milestone 2 Retro
-- [ ] Commentary
-- [ ] Gap analysis
-- [ ] Housekeeping
-- [ ] Bootstrap Prompt
+### Milestone 2 Retro [COMPLETE]
+- [x] Commentary — RETROSPECTIVE.md: timeline, decisions, what worked/didn't, findings impact
+- [x] Gap analysis — GAPS.md: 13 outstanding gaps catalogued with disposition
+- [x] Housekeeping
+- [x] Bootstrap Prompt
 ---
 
 ## Milestone 3: System Prompt Control

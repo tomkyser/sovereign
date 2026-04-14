@@ -1,4 +1,4 @@
-# Milestone 2 Bootstrap — Paste After Compaction
+# Milestone 2 Bootstrap — Native Tool Injection
 
 ---
 
@@ -6,7 +6,8 @@ Read these files in order:
 
 1. `.planning/VISION.md` — Project intent
 2. `.planning/milestones/M-2/IMPACT.md` — Milestone scope
-3. `.planning/milestones/M-2/2c-gaps-2/HANDOFF.md` — Last completed phase handoff
+3. `.planning/milestones/M-2/RETROSPECTIVE.md` — Milestone retrospective
+4. `.planning/milestones/M-2/GAPS.md` — Outstanding gaps
 
 Quick verify:
 ```bash
@@ -14,12 +15,12 @@ cd /Users/tom.kyser/dev/claude-code-patches/claude-governance
 pnpm build && node dist/index.mjs check
 ```
 
-**Phase:** 2c-gaps-2 COMPLETE — 20/20 SOVEREIGN
-**Previous:** 2c-gaps-1 COMPLETE — 19/19 SOVEREIGN
-**Next:** M-2 Retrospective — milestone is feature-complete
-**Baseline:** 20/20 SOVEREIGN on CC 2.1.101
+**Status:** COMPLETE — 20/20 SOVEREIGN on CC 2.1.101
+**Retro:** COMPLETE — 10 phases, 40+ gaps closed, 13 outstanding (see GAPS.md)
+**Next:** Milestone 3 — System Prompt Control (see ROADMAP.md)
 
-**PINNED items for retro:**
-- User toggle for Tungsten panel (keyboard shortcut/config)
-- REPL agent() runtime bug ("O is not a function")
-- Ant vs External prompt divergence assessment (M-3 scoping)
+**Key retro outcomes:**
+- GP3 (Ant vs External divergence) is M-3's core research question
+- Phase 3prelim (codebase reorganization) should run first
+- Prompt testing infrastructure needed for M-3's behavioral verification
+- Hooks module (G21) needed before public release
