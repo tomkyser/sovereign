@@ -174,7 +174,7 @@ const PATCH_DEFINITIONS = [
     name: 'Tungsten Live Panel',
     group: PatchGroup.GOVERNANCE,
     description:
-      'Injects live terminal panel component into CC render tree at DCE\'d TungstenLiveMonitor site',
+      "Injects live terminal panel component into CC render tree at DCE'd TungstenLiveMonitor site",
   },
 ] as const;
 
@@ -298,7 +298,9 @@ const TOOLS_DIR = path.join(CONFIG_DIR, 'tools');
 const deployTools = async (): Promise<number> => {
   const srcDir = path.resolve(
     path.dirname(new URL(import.meta.url).pathname),
-    '..', 'data', 'tools'
+    '..',
+    'data',
+    'tools'
   );
 
   if (!fsSync.existsSync(srcDir)) {
@@ -341,7 +343,9 @@ const UI_DIR = path.join(CONFIG_DIR, 'ui');
 const deployUiComponents = async (): Promise<number> => {
   const srcDir = path.resolve(
     path.dirname(new URL(import.meta.url).pathname),
-    '..', 'data', 'ui'
+    '..',
+    'data',
+    'ui'
   );
 
   if (!fsSync.existsSync(srcDir)) {
@@ -482,7 +486,7 @@ export interface FunctionalProbeResult {
 }
 
 export const runFunctionalProbe = async (
-  binaryPath: string,
+  binaryPath: string
 ): Promise<FunctionalProbeResult> => {
   const { execFileSync } = await import('node:child_process');
   const marker = 'governance-verify';
@@ -497,7 +501,7 @@ export const runFunctionalProbe = async (
         cwd: fsSync.existsSync('/tmp') ? '/tmp' : undefined,
         env: { ...process.env, DISABLE_AUTOUPDATER: '1' },
         stdio: ['pipe', 'pipe', 'pipe'],
-      },
+      }
     );
 
     if (output.includes(marker)) {
@@ -549,7 +553,9 @@ export const runFunctionalProbe = async (
 const deployPromptOverrides = async (): Promise<number> => {
   const overridesDir = path.resolve(
     path.dirname(new URL(import.meta.url).pathname),
-    '..', 'data', 'overrides'
+    '..',
+    'data',
+    'overrides'
   );
 
   if (!fsSync.existsSync(overridesDir)) {
@@ -609,10 +615,14 @@ export const applyCustomization = async (
     // detection in the governance patch loop handles it.
     if (backupExists) {
       debug('Checking backup for governance contamination...');
-      const probe = await extractClaudeJsFromNativeInstallation(NATIVE_BINARY_BACKUP_FILE);
+      const probe = await extractClaudeJsFromNativeInstallation(
+        NATIVE_BINARY_BACKUP_FILE
+      );
       if (probe && isContentPatched(probe.toString('utf8'))) {
         console.log(
-          chalk.yellow('⚠ Backup is contaminated (contains governance patches). Removing stale backup.')
+          chalk.yellow(
+            '⚠ Backup is contaminated (contains governance patches). Removing stale backup.'
+          )
         );
         await fs.unlink(NATIVE_BINARY_BACKUP_FILE);
         backupExists = false;
@@ -676,7 +686,9 @@ export const applyCustomization = async (
   // ==========================================================================
   const overridesDeployed = await deployPromptOverrides();
   if (overridesDeployed > 0) {
-    debug(`Deployed ${overridesDeployed} prompt override(s) to ${SYSTEM_PROMPTS_DIR}`);
+    debug(
+      `Deployed ${overridesDeployed} prompt override(s) to ${SYSTEM_PROMPTS_DIR}`
+    );
   }
 
   // ==========================================================================
@@ -725,11 +737,14 @@ export const applyCustomization = async (
   const enableIsMetaRemoval =
     (govConfig?.enableIsMetaRemoval as boolean) ?? false;
 
-  const disclaimerSig = (govConfig?.disclaimerText as string | undefined) ??
+  const disclaimerSig =
+    (govConfig?.disclaimerText as string | undefined) ??
     GOVERNANCE_DEFAULTS.disclaimerReplacement;
-  const headerSig = (govConfig?.headerText as string | undefined) ??
+  const headerSig =
+    (govConfig?.headerText as string | undefined) ??
     GOVERNANCE_DEFAULTS.headerReplacement;
-  const reminderSig = (govConfig?.reminderFramingText as string | undefined) ??
+  const reminderSig =
+    (govConfig?.reminderFramingText as string | undefined) ??
     GOVERNANCE_DEFAULTS.reminderFramingReplacement;
 
   const patchImplementations: Record<PatchId, PatchImplementation> = {

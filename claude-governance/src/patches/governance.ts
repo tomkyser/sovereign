@@ -42,7 +42,8 @@ export const VERIFICATION_REGISTRY: VerificationEntry[] = [
     id: 'header',
     name: 'Context Header Reframing',
     signature: GOVERNANCE_DEFAULTS.headerReplacement,
-    antiSignature: "As you answer the user's questions, you can use the following context:",
+    antiSignature:
+      "As you answer the user's questions, you can use the following context:",
     critical: true,
     category: 'governance',
   },
@@ -244,7 +245,9 @@ export const writeDisclaimerNeutralization = (
         const m = js.match(
           /IMPORTANT:\s*this context may or may not be relevant to your tasks\.\s*You should not respond to this context unless it is highly relevant to your task\./
         );
-        return m ? { match: m, detector: 'exact-disclaimer-text', confidence: 'high' } : null;
+        return m
+          ? { match: m, detector: 'exact-disclaimer-text', confidence: 'high' }
+          : null;
       },
     },
     {
@@ -253,7 +256,9 @@ export const writeDisclaimerNeutralization = (
         const m = js.match(
           /may or may not be relevant[^]*?(?=<\/system-reminder>)/
         );
-        return m ? { match: m, detector: 'fuzzy-may-or-may-not', confidence: 'medium' } : null;
+        return m
+          ? { match: m, detector: 'fuzzy-may-or-may-not', confidence: 'medium' }
+          : null;
       },
     },
     {
@@ -262,7 +267,13 @@ export const writeDisclaimerNeutralization = (
         const m = js.match(
           /(?:should not respond|not respond to this|may not be relevant|might not be relevant|not necessarily relevant)[^<]*<\/system-reminder>/i
         );
-        return m ? { match: m, detector: 'hedging-before-close-tag', confidence: 'medium' } : null;
+        return m
+          ? {
+              match: m,
+              detector: 'hedging-before-close-tag',
+              confidence: 'medium',
+            }
+          : null;
       },
     },
     {
@@ -271,7 +282,13 @@ export const writeDisclaimerNeutralization = (
         const m = js.match(
           /IMPORTANT:[^<]{20,200}(?:relevant|respond|context)[^<]*<\/system-reminder>/
         );
-        return m ? { match: m, detector: 'important-disclaimer-in-reminder', confidence: 'low' } : null;
+        return m
+          ? {
+              match: m,
+              detector: 'important-disclaimer-in-reminder',
+              confidence: 'low',
+            }
+          : null;
       },
     },
   ]);
@@ -292,8 +309,7 @@ export const writeContextHeaderReframing = (
   content: string,
   replacementText?: string
 ): string | null => {
-  const replacement =
-    replacementText ?? GOVERNANCE_DEFAULTS.headerReplacement;
+  const replacement = replacementText ?? GOVERNANCE_DEFAULTS.headerReplacement;
 
   const detection = runDetectors(content, [
     {
@@ -302,7 +318,9 @@ export const writeContextHeaderReframing = (
         const m = js.match(
           /As you answer the user's questions, you can use the following context:/
         );
-        return m ? { match: m, detector: 'exact-header-text', confidence: 'high' } : null;
+        return m
+          ? { match: m, detector: 'exact-header-text', confidence: 'high' }
+          : null;
       },
     },
     {
@@ -311,7 +329,9 @@ export const writeContextHeaderReframing = (
         const m = js.match(
           /As you answer the user\\?'s questions, you can use the following context:/
         );
-        return m ? { match: m, detector: 'escaped-header-text', confidence: 'high' } : null;
+        return m
+          ? { match: m, detector: 'escaped-header-text', confidence: 'high' }
+          : null;
       },
     },
     {
@@ -320,7 +340,13 @@ export const writeContextHeaderReframing = (
         const m = js.match(
           /(?:answer|answering)[^<]{0,40}(?:question|queries)[^<]{0,40}(?:context|information):/i
         );
-        return m ? { match: m, detector: 'fuzzy-answer-questions-context', confidence: 'medium' } : null;
+        return m
+          ? {
+              match: m,
+              detector: 'fuzzy-answer-questions-context',
+              confidence: 'medium',
+            }
+          : null;
       },
     },
   ]);
@@ -344,21 +370,35 @@ export const writeSubagentClaudeMdRestoration = (
       name: 'exact-flag-true',
       fn: js => {
         const m = js.match(/tengu_slim_subagent_claudemd",\s*!0\)/);
-        return m ? { match: m, detector: 'exact-flag-true', confidence: 'high' } : null;
+        return m
+          ? { match: m, detector: 'exact-flag-true', confidence: 'high' }
+          : null;
       },
     },
     {
       name: 'exact-flag-true-unminified',
       fn: js => {
         const m = js.match(/tengu_slim_subagent_claudemd",\s*true\)/);
-        return m ? { match: m, detector: 'exact-flag-true-unminified', confidence: 'high' } : null;
+        return m
+          ? {
+              match: m,
+              detector: 'exact-flag-true-unminified',
+              confidence: 'high',
+            }
+          : null;
       },
     },
     {
       name: 'flag-name-any-default',
       fn: js => {
         const m = js.match(/tengu_slim_subagent_claudemd"[^)]{0,10}\)/);
-        return m ? { match: m, detector: 'flag-name-any-default', confidence: 'medium' } : null;
+        return m
+          ? {
+              match: m,
+              detector: 'flag-name-any-default',
+              confidence: 'medium',
+            }
+          : null;
       },
     },
   ]);
@@ -399,7 +439,13 @@ export const writeReminderAuthorityFix = (
         const m = js.match(
           /bear no direct relation to the specific tool results/
         );
-        return m ? { match: m, detector: 'bear-no-relation-clause', confidence: 'high' } : null;
+        return m
+          ? {
+              match: m,
+              detector: 'bear-no-relation-clause',
+              confidence: 'high',
+            }
+          : null;
       },
     },
     {
@@ -408,7 +454,9 @@ export const writeReminderAuthorityFix = (
         const m = js.match(
           /Tool results and user messages may include <system-reminder> tags[^.]*\.[^.]*bear no direct relation[^.]*\./
         );
-        return m ? { match: m, detector: 'exact-full-sentence', confidence: 'high' } : null;
+        return m
+          ? { match: m, detector: 'exact-full-sentence', confidence: 'high' }
+          : null;
       },
     },
     {
@@ -417,7 +465,13 @@ export const writeReminderAuthorityFix = (
         const m = js.match(
           /system-reminder>?\s*(?:tags?\s+)?(?:contain|include)[^.]*bear no direct/i
         );
-        return m ? { match: m, detector: 'escaped-system-reminder-desc', confidence: 'medium' } : null;
+        return m
+          ? {
+              match: m,
+              detector: 'escaped-system-reminder-desc',
+              confidence: 'medium',
+            }
+          : null;
       },
     },
   ]);
@@ -480,17 +534,17 @@ export const writeEmbeddedToolsGateResolution = (
 
   // Pattern 2: Full-name boolean ternaries (find, grep)
   // find${USE_EMBEDDED_TOOLS_FN?", grep":""}
-  js = js.replace(
-    /\$\{USE_EMBEDDED_TOOLS_FN\?",\s*grep":""\}/g,
-    () => { changed = true; return ', grep'; }
-  );
+  js = js.replace(/\$\{USE_EMBEDDED_TOOLS_FN\?",\s*grep":""\}/g, () => {
+    changed = true;
+    return ', grep';
+  });
 
   // Pattern 3: Minified function-call ternaries (short grep form)
   // find${H?", grep":""}
-  js = js.replace(
-    /find\$\{[$\w]+\?",\s*grep":""\}/g,
-    () => { changed = true; return 'find, grep'; }
-  );
+  js = js.replace(/find\$\{[$\w]+\?",\s*grep":""\}/g, () => {
+    changed = true;
+    return 'find, grep';
+  });
 
   // Pattern 4: Minified function-call ternaries (longer branches)
   // ${H()?"ant text":"ext text"} — heuristic: ant branch mentions cwd/relative/cd/grep
@@ -500,9 +554,12 @@ export const writeEmbeddedToolsGateResolution = (
       const antLower = antBranch.toLowerCase();
       const extLower = extBranch.toLowerCase();
       const isEmbeddedToolsGate =
-        (antLower.includes('cwd') || antLower.includes('relative') ||
-         antLower.includes('cd') || antLower.includes('grep')) ||
-        (extLower.includes('absolute') || extLower.includes('reset'));
+        antLower.includes('cwd') ||
+        antLower.includes('relative') ||
+        antLower.includes('cd') ||
+        antLower.includes('grep') ||
+        extLower.includes('absolute') ||
+        extLower.includes('reset');
       if (isEmbeddedToolsGate) {
         changed = true;
         return antBranch.replace(/`/g, '\\`');
@@ -513,10 +570,10 @@ export const writeEmbeddedToolsGateResolution = (
 
   // Pattern 5: Minified boolean ternary for grep
   // ${l8?", grep":""}
-  js = js.replace(
-    /\$\{[$\w]+\?",\s*grep":""\}/g,
-    () => { changed = true; return ', grep'; }
-  );
+  js = js.replace(/\$\{[$\w]+\?",\s*grep":""\}/g, () => {
+    changed = true;
+    return ', grep';
+  });
 
   if (!changed) return null;
 
@@ -528,26 +585,28 @@ export const writeEmbeddedToolsGateResolution = (
 // PATCH 5: isMeta Flag Removal (OPTIONAL)
 // =============================================================================
 
-export const writeIsMetaFlagRemoval = (
-  content: string
-): string | null => {
+export const writeIsMetaFlagRemoval = (content: string): string | null => {
   const detection = runDetectors(content, [
     {
       name: 'ismeta-after-system-reminder',
       fn: js => {
-        const m = js.match(
-          /<\/system-reminder>\s*\\n`,\s*isMeta:\s*!0/
-        );
-        return m ? { match: m, detector: 'ismeta-after-system-reminder', confidence: 'high' } : null;
+        const m = js.match(/<\/system-reminder>\s*\\n`,\s*isMeta:\s*!0/);
+        return m
+          ? {
+              match: m,
+              detector: 'ismeta-after-system-reminder',
+              confidence: 'high',
+            }
+          : null;
       },
     },
     {
       name: 'ismeta-near-reminder',
       fn: js => {
-        const m = js.match(
-          /system-reminder>[^}]{0,30}isMeta:\s*!0/
-        );
-        return m ? { match: m, detector: 'ismeta-near-reminder', confidence: 'medium' } : null;
+        const m = js.match(/system-reminder>[^}]{0,30}isMeta:\s*!0/);
+        return m
+          ? { match: m, detector: 'ismeta-near-reminder', confidence: 'medium' }
+          : null;
       },
     },
   ]);
@@ -657,7 +716,10 @@ function findArrayEnd(content: string, startIdx: number): number {
   let depth = 1;
   for (let i = startIdx; i < content.length && i < startIdx + 8000; i++) {
     if (content[i] === '[') depth++;
-    else if (content[i] === ']') { depth--; if (depth === 0) return i; }
+    else if (content[i] === ']') {
+      depth--;
+      if (depth === 0) return i;
+    }
   }
   return -1;
 }
@@ -705,17 +767,21 @@ function detectToolArray(content: string): ToolArrayDetection | null {
         const prefix = `${fnName}=()=>[`;
         const prefixIdx = content.indexOf(prefix);
         if (prefixIdx === -1) return null;
-        const declStart = content.lastIndexOf(content[prefixIdx - 1] === '=' ? 'var ' : 'const ', prefixIdx);
+        const declStart = content.lastIndexOf(
+          content[prefixIdx - 1] === '=' ? 'var ' : 'const ',
+          prefixIdx
+        );
         const arrayStart = prefixIdx + prefix.length;
         const arrayEnd = findArrayEnd(content, arrayStart);
         if (arrayEnd === -1) return null;
         const arrayContent = content.substring(arrayStart, arrayEnd);
         const spreads = (arrayContent.match(/\.\.\./g) || []).length;
         if (spreads < 10) return null;
-        const fullDeclPrefix = content.substring(
-          declStart === -1 ? prefixIdx : declStart,
-          prefixIdx
-        ) + prefix;
+        const fullDeclPrefix =
+          content.substring(
+            declStart === -1 ? prefixIdx : declStart,
+            prefixIdx
+          ) + prefix;
         return {
           fnName,
           fnDeclStart: fullDeclPrefix,
@@ -736,9 +802,7 @@ function detectToolArray(content: string): ToolArrayDetection | null {
           Math.max(0, sigMatch.index - 3000),
           sigMatch.index
         );
-        const fnMatch = nearby.match(
-          /function ([$\w]+)\(\)\{return\[/
-        );
+        const fnMatch = nearby.match(/function ([$\w]+)\(\)\{return\[/);
         const arrowMatch = nearby.match(
           /(?:var |let |const )([$\w]+)=\(\)=>\[/
         );
@@ -746,7 +810,9 @@ function detectToolArray(content: string): ToolArrayDetection | null {
         if (!match) return null;
         const fnName = match[1];
         const isArrow = !fnMatch;
-        const prefix = isArrow ? `${fnName}=()=>[` : `function ${fnName}(){return[`;
+        const prefix = isArrow
+          ? `${fnName}=()=>[`
+          : `function ${fnName}(){return[`;
         const prefixIdx = content.indexOf(prefix);
         if (prefixIdx === -1) return null;
         const arrayStart = prefixIdx + prefix.length;
@@ -774,7 +840,9 @@ function detectToolArray(content: string): ToolArrayDetection | null {
     try {
       const result = fn();
       if (result) {
-        debug(`  tool injection: strategy "${name}" matched — ${result.fnName}() with ${result.spreads} spreads`);
+        debug(
+          `  tool injection: strategy "${name}" matched — ${result.fnName}() with ${result.spreads} spreads`
+        );
         return result;
       }
     } catch (err) {
@@ -785,9 +853,7 @@ function detectToolArray(content: string): ToolArrayDetection | null {
   return null;
 }
 
-export const writeToolInjection = (
-  content: string
-): string | null => {
+export const writeToolInjection = (content: string): string | null => {
   const detection = detectToolArray(content);
 
   if (!detection) {
@@ -859,12 +925,16 @@ export const writeReplToolGuidance = (content: string): string | null => {
   const detection = runDetectors(content, [
     {
       name: 'using-your-tools-array-close',
-      fn: (js) => {
+      fn: js => {
         const m = js.match(
           /sequentially instead\."\]\.filter\(\([$\w]+\)=>[$\w]+!==null\);return\["# Using your tools"/
         );
         return m
-          ? { match: m, detector: 'using-your-tools-array-close', confidence: 'high' }
+          ? {
+              match: m,
+              detector: 'using-your-tools-array-close',
+              confidence: 'high',
+            }
           : null;
       },
     },
@@ -909,7 +979,9 @@ export const writeTungstenFs9Patch = (content: string): string | null => {
       name: 'exact-fs9-stub',
       fn: js => {
         const m = js.match(/function FS9\(\)\{return null\}/);
-        return m ? { match: m, detector: 'exact-fs9-stub', confidence: 'high' } : null;
+        return m
+          ? { match: m, detector: 'exact-fs9-stub', confidence: 'high' }
+          : null;
       },
     },
     {
@@ -924,10 +996,16 @@ export const writeTungstenFs9Patch = (content: string): string | null => {
         if (!m) return null;
         const fnName = m[1];
         const stubMatch = js.match(
-          new RegExp(`function ${fnName.replace(/\$/g, '\\$')}\\(\\)\\{return null\\}`)
+          new RegExp(
+            `function ${fnName.replace(/\$/g, '\\$')}\\(\\)\\{return null\\}`
+          )
         );
         return stubMatch
-          ? { match: stubMatch, detector: 'pattern-tmux-env-stub', confidence: 'medium' }
+          ? {
+              match: stubMatch,
+              detector: 'pattern-tmux-env-stub',
+              confidence: 'medium',
+            }
           : null;
       },
     },
@@ -941,9 +1019,8 @@ export const writeTungstenFs9Patch = (content: string): string | null => {
   if (!fnNameMatch) return null;
   const fnName = fnNameMatch[1];
 
-  const replacement = fnName === 'FS9'
-    ? FS9_REPLACEMENT
-    : FS9_REPLACEMENT.replace('FS9', fnName);
+  const replacement =
+    fnName === 'FS9' ? FS9_REPLACEMENT : FS9_REPLACEMENT.replace('FS9', fnName);
 
   const result = content.replace(original, replacement);
   return result !== content ? result : null;
@@ -963,13 +1040,17 @@ const PANEL_INJECTION_CODE = [
   '(function(){',
   `var ${PANEL_INJECTION_SIGNATURE}=1;`,
   'try{',
+  'if(!globalThis.__tungstenPanel){',
   'var _p=require("node:path").join(',
   'require("node:os").homedir(),".claude-governance","ui","tungsten-panel.js"',
   ');',
   'var _f=require(_p);',
   'if(typeof _f==="function"){',
-  'var _C=_f({R:b_,S:Y_,B:m,T:L});',
-  'return b_.createElement(_C,null)',
+  'globalThis.__tungstenPanel=_f({R:b_,S:Y_,B:m,T:L})',
+  '}',
+  '}',
+  'if(globalThis.__tungstenPanel){',
+  'return b_.createElement(globalThis.__tungstenPanel,null)',
   '}',
   '}catch(_){}',
   'return null',
@@ -989,7 +1070,13 @@ export const writeTungstenPanelInjection = (content: string): string | null => {
         const m = js.match(
           /cn7\([$\w]+\)\)\)\),!1,null,[$\w]+\.createElement\([$\w]+,\{flexGrow:1\}\)/
         );
-        return m ? { match: m, detector: 'dce-render-tree-marker', confidence: 'high' } : null;
+        return m
+          ? {
+              match: m,
+              detector: 'dce-render-tree-marker',
+              confidence: 'high',
+            }
+          : null;
       },
     },
     {
@@ -998,7 +1085,13 @@ export const writeTungstenPanelInjection = (content: string): string | null => {
         const m = js.match(
           /!1,null,[$\w]+\.createElement\([$\w]+,\{flexGrow:1\}\)/
         );
-        return m ? { match: m, detector: 'false-null-before-flexgrow', confidence: 'medium' } : null;
+        return m
+          ? {
+              match: m,
+              detector: 'false-null-before-flexgrow',
+              confidence: 'medium',
+            }
+          : null;
       },
     },
   ]);

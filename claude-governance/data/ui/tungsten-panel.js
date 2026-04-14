@@ -13,55 +13,50 @@ module.exports = function createTungstenPanel(props) {
   const { useState, useEffect, useRef, useCallback } = R;
 
   function TungstenPanel() {
-    const appState = S(function (s) {
-      return {
-        session: s.tungstenActiveSession,
-        lastCmd: s.tungstenLastCommand,
-        visible: s.tungstenPanelVisible,
-        autoHidden: s.tungstenPanelAutoHidden,
-      };
-    });
+    var session = S(function (s) { return s.tungstenActiveSession; });
+    var lastCmd = S(function (s) { return s.tungstenLastCommand; });
+    var visible = S(function (s) { return s.tungstenPanelVisible; });
+    var autoHidden = S(function (s) { return s.tungstenPanelAutoHidden; });
 
     const [content, setContent] = useState('');
     const captureRef = useRef(null);
     const intervalRef = useRef(null);
+    var sessionRef = useRef(session);
+    sessionRef.current = session;
 
-    const doCapture = useCallback(function () {
-      if (!appState.session) return;
+    var doCapture = useCallback(function () {
+      var s = sessionRef.current;
+      if (!s) return;
       var now = Date.now();
-      // Debounce: skip if captured within last 500ms
       if (captureRef.current && now - captureRef.current < 500) return;
       captureRef.current = now;
 
       try {
         var execFileSync = require('child_process').execFileSync;
         var output = execFileSync('tmux', [
-          '-L', appState.session.socketName,
-          'capture-pane', '-t', appState.session.target,
+          '-L', s.socketName,
+          'capture-pane', '-t', s.target,
           '-p', '-S', '-20',
         ], {
           encoding: 'utf-8',
           stdio: ['pipe', 'pipe', 'pipe'],
           timeout: 3000,
         });
-        // Trim trailing blanks
         setContent(output.replace(/\n+$/, '') || '');
       } catch (_) {
         setContent('[capture unavailable]');
       }
-    }, [appState.session]);
+    }, []);
 
     useEffect(function () {
-      if (!appState.session || appState.visible === false) {
+      if (!session || visible === false) {
         if (intervalRef.current) {
           clearInterval(intervalRef.current);
           intervalRef.current = null;
         }
         return;
       }
-      // Initial capture
       doCapture();
-      // Poll every 2 seconds
       intervalRef.current = setInterval(doCapture, 2000);
       return function () {
         if (intervalRef.current) {
@@ -69,17 +64,16 @@ module.exports = function createTungstenPanel(props) {
           intervalRef.current = null;
         }
       };
-    }, [appState.session, appState.visible, doCapture]);
+    }, [session, visible, doCapture]);
 
-    // Render nothing if no active session or hidden
-    if (!appState.session) return null;
-    if (appState.visible === false) return null;
-    if (appState.autoHidden === true) return null;
+    if (!session) return null;
+    if (visible === false) return null;
+    if (autoHidden === true) return null;
     if (!content) return null;
 
-    var header = 'Tungsten: ' + appState.session.sessionName;
-    if (appState.lastCmd && appState.lastCmd.command) {
-      header += ' | ' + appState.lastCmd.command;
+    var header = 'Tungsten: ' + session.sessionName;
+    if (lastCmd && lastCmd.command) {
+      header += ' | ' + lastCmd.command;
     }
 
     return R.createElement(B, {
