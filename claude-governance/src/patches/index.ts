@@ -41,6 +41,7 @@ import {
   writeToolInjection,
   writeReplToolGuidance,
   writeTungstenFs9Patch,
+  writeTungstenPanelInjection,
   GOVERNANCE_DEFAULTS,
   isContentPatched,
   VERIFICATION_REGISTRY,
@@ -167,6 +168,13 @@ const PATCH_DEFINITIONS = [
     group: PatchGroup.GOVERNANCE,
     description:
       'Patches FS9() stub so Bash commands inherit tmux environment after Tungsten creates a session',
+  },
+  {
+    id: 'tungsten-panel',
+    name: 'Tungsten Live Panel',
+    group: PatchGroup.GOVERNANCE,
+    description:
+      'Injects live terminal panel component into CC render tree at DCE\'d TungstenLiveMonitor site',
   },
 ] as const;
 
@@ -318,6 +326,49 @@ const deployTools = async (): Promise<number> => {
       await fs.writeFile(dstPath, srcContent, 'utf8');
       deployed++;
       debug(`deployTools: deployed ${file}`);
+    }
+  }
+
+  return deployed;
+};
+
+// =============================================================================
+// UI Component Deployment
+// =============================================================================
+
+const UI_DIR = path.join(CONFIG_DIR, 'ui');
+
+const deployUiComponents = async (): Promise<number> => {
+  const srcDir = path.resolve(
+    path.dirname(new URL(import.meta.url).pathname),
+    '..', 'data', 'ui'
+  );
+
+  if (!fsSync.existsSync(srcDir)) {
+    debug(`deployUiComponents: source dir not found at ${srcDir}`);
+    return 0;
+  }
+
+  await fs.mkdir(UI_DIR, { recursive: true });
+
+  const files = fsSync.readdirSync(srcDir).filter(f => f.endsWith('.js'));
+  let deployed = 0;
+
+  for (const file of files) {
+    const srcPath = path.join(srcDir, file);
+    const dstPath = path.join(UI_DIR, file);
+    const srcContent = fsSync.readFileSync(srcPath, 'utf8');
+
+    let needsCopy = true;
+    if (fsSync.existsSync(dstPath)) {
+      const dstContent = fsSync.readFileSync(dstPath, 'utf8');
+      if (srcContent === dstContent) needsCopy = false;
+    }
+
+    if (needsCopy) {
+      await fs.writeFile(dstPath, srcContent, 'utf8');
+      deployed++;
+      debug(`deployUiComponents: deployed ${file}`);
     }
   }
 
@@ -613,6 +664,14 @@ export const applyCustomization = async (
   }
 
   // ==========================================================================
+  // Deploy UI components to config dir before applying
+  // ==========================================================================
+  const uiDeployed = await deployUiComponents();
+  if (uiDeployed > 0) {
+    debug(`Deployed ${uiDeployed} UI component(s) to ${UI_DIR}`);
+  }
+
+  // ==========================================================================
   // Deploy governance prompt overrides to config dir before applying
   // ==========================================================================
   const overridesDeployed = await deployPromptOverrides();
@@ -718,6 +777,10 @@ export const applyCustomization = async (
     'tungsten-fs9': {
       fn: c => writeTungstenFs9Patch(c),
       signature: '__CLAUDE_GOVERNANCE_TMUX_ENV',
+    },
+    'tungsten-panel': {
+      fn: c => writeTungstenPanelInjection(c),
+      signature: '__tungsten_panel__',
     },
   };
 
