@@ -419,22 +419,33 @@ module.exports = {
   async prompt() {
     return `# Tungsten — Persistent Execution Context
 
-Tungsten provides persistent terminal sessions via tmux. Unlike the Bash tool which spawns a fresh shell per invocation, Tungsten sessions retain environment variables, working directory, running processes, and shell state across tool calls.
+Tungsten provides persistent terminal sessions via tmux. A session is established at the start of every work session — create one as your first action. Once active, all Bash and REPL commands automatically inherit the persistent environment via FS9. Environment variables, working directory, and running processes survive between tool calls.
 
-## When to Use Tungsten vs Bash
+## Tungsten send vs Bash
 
-**Use Tungsten for:**
-- Long-running processes (dev servers, file watchers, test runners)
-- Stateful shell work (cd, export, source that must persist)
-- Interactive debuggers and REPLs
-- Multiple concurrent processes in named sessions
-- Checking on background processes without restarting them
+Both execute shell commands within the persistent environment. The difference is state modification vs read operations:
+
+**Use Tungsten send to:**
+- Modify session state (cd, export, source, nvm use)
+- Start long-running processes (dev servers, file watchers, test runners)
+- Run interactive REPLs (python3, psql, node, irb, sqlite3)
+- Manage concurrent workstreams in named sessions
+- Check on background processes (capture)
 
 **Use Bash for:**
-- One-shot commands (ls, git status, grep)
 - Commands where you need the exit code
-- Simple file operations
-- Commands that complete quickly and don't need persistence
+- Quick read-only operations (ls, git status, grep)
+- Simple file operations that don't modify session state
+
+Both benefit from the persistent context — Bash inherits the working directory, env vars, and TMUX environment set via Tungsten.
+
+## Session Lifecycle
+
+1. **Start of session:** \`Tungsten({action: "create"})\` — establish persistent context as your first action
+2. **During work:** Use Tungsten send for state changes and long-running processes, Bash for reads and exit codes
+3. **End of session:** \`Tungsten({action: "kill"})\` — clean up resources when done
+
+Sessions are also cleaned up automatically when Claude exits.
 
 ## Actions
 
@@ -489,11 +500,45 @@ Tungsten({action: "send", command: "make -j8 all"})
 Tungsten({action: "capture", lines: 100})  // check progress
 \`\`\`
 
+### Any-language REPL
+\`\`\`
+Tungsten({action: "send", command: "python3", session: "py"})
+Tungsten({action: "send", command: "import pandas as pd; df = pd.read_csv('data.csv')", session: "py"})
+Tungsten({action: "send", command: "df.describe()", session: "py"})
+// Also works with: psql, node, irb, sqlite3, lua, etc.
+\`\`\`
+
+### Multi-session orchestration
+\`\`\`
+Tungsten({action: "send", command: "npm run dev", session: "server"})
+Tungsten({action: "send", command: "npm run worker", session: "worker"})
+Tungsten({action: "send", command: "npm test -- --watch", session: "tests"})
+// Monitor all:
+Tungsten({action: "capture", session: "server"})
+Tungsten({action: "capture", session: "worker"})
+Tungsten({action: "capture", session: "tests"})
+\`\`\`
+
+## Environment Propagation (FS9)
+Once any Tungsten session is created, the tmux socket info is written to \`process.env\`. The FS9 binary patch reads this and passes it to bashProvider, which sets \`TMUX\` in the environment for all child processes. This means:
+- Bash tool commands inherit the tmux environment automatically
+- REPL's \`bash()\` function inherits via the same path
+- Spawned agents inherit via \`process.env\`
+- State set in Tungsten (env vars, running servers, working directory) is visible to all subsequent tool calls
+
+## Anti-Patterns
+- **Don't accumulate sessions.** Kill sessions when done. Each session holds a tmux pane and process tree.
+- **Don't capture before sending.** A new session's terminal is empty — capture immediately after create returns nothing useful.
+- **Don't use Tungsten send when you need exit codes.** Tungsten captures output text, not exit status. Use Bash when the exit code matters.
+- **Don't skip session creation.** Bash inherits the persistent environment only after a Tungsten session exists. Create one first.
+
 ## Notes
 - Sessions are isolated per Claude process — they don't interfere with your tmux sessions
 - Sessions are cleaned up automatically when Claude exits
 - After Tungsten is used, Bash commands also inherit the tmux environment
-- If tmux is not installed, the tool returns an actionable error message`;
+- If tmux is not installed, the tool returns an actionable error message
+- When a session is active, a panel appears in the TUI showing session state
+- Agents spawned during a Tungsten session inherit the tmux environment via process.env`;
   },
 
   async description() {

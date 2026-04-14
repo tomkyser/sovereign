@@ -42,6 +42,7 @@ import {
   writeReplToolGuidance,
   writeTungstenFs9Patch,
   writeTungstenPanelInjection,
+  writeTungstenToolGuidance,
   GOVERNANCE_DEFAULTS,
   isContentPatched,
   VERIFICATION_REGISTRY,
@@ -182,6 +183,13 @@ const PATCH_DEFINITIONS = [
     group: PatchGroup.GOVERNANCE,
     description:
       "Injects live terminal panel component into CC render tree at DCE'd TungstenLiveMonitor site",
+  },
+  {
+    id: 'tungsten-tool-guidance',
+    name: 'Tungsten Tool Guidance',
+    group: PatchGroup.GOVERNANCE,
+    description:
+      'Injects Tungsten guidance into the Using your tools section (after REPL guidance)',
   },
 ] as const;
 
@@ -897,6 +905,11 @@ export const applyCustomization = async (
     'tungsten-panel': {
       fn: c => writeTungstenPanelInjection(c),
       signature: '__tungsten_panel__',
+    },
+    'tungsten-tool-guidance': {
+      fn: c => writeTungstenToolGuidance(c),
+      signature:
+        'Tungsten session is established at the start of every work session',
     },
   };
 

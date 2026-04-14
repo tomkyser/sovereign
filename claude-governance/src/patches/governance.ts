@@ -182,6 +182,14 @@ export const VERIFICATION_REGISTRY: VerificationEntry[] = [
     category: 'tool-injection',
     passDetail: 'present (requires live session to verify rendering)',
   },
+  {
+    id: 'tungsten-tool-guidance',
+    name: 'Tungsten: Tool Guidance Injection',
+    signature: 'Tungsten session is established at the start of every work session',
+    critical: false,
+    category: 'governance',
+    passDetail: 'active in Using your tools',
+  },
 ];
 
 // =============================================================================
@@ -1100,6 +1108,77 @@ export const writeTungstenPanelInjection = (content: string): string | null => {
 
   const original = detection.match[0];
   const replacement = original.replace('!1,null', PANEL_INJECTION_CODE);
+  const result = content.replace(original, replacement);
+  return result !== content ? result : null;
+};
+
+// =============================================================================
+// PATCH 11: Tungsten Tool Guidance Injection
+// =============================================================================
+// Establishes Tungsten as the default execution posture in "Using your tools".
+// Runs AFTER PATCH 8 (REPL guidance) in applyPatchImplementations. Detects
+// post-PATCH-8 state for fresh injection, or upgrades from v1 guidance.
+// The directive tells the model that a Tungsten session is the persistent
+// environment layer — Bash and REPL operate within it via FS9.
+
+const TUNGSTEN_GUIDANCE =
+  'A Tungsten session is established at the start of every work session. ' +
+  'Once active, all Bash and REPL commands automatically operate within this persistent ' +
+  'context via FS9 \\u2014 environment variables, working directory, and running processes ' +
+  'survive between tool calls. Use Tungsten send to modify session state and start ' +
+  'long-running processes. Kill the session when your work is complete.';
+
+const TUNGSTEN_GUIDANCE_SIGNATURE =
+  'Tungsten session is established at the start of every work session';
+
+const TUNGSTEN_GUIDANCE_V1_MARKER =
+  'use Tungsten instead of Bash. Tungsten retains';
+
+export const writeTungstenToolGuidance = (content: string): string | null => {
+  if (content.includes(TUNGSTEN_GUIDANCE_SIGNATURE)) {
+    debug('  Tungsten tool guidance: already applied');
+    return content;
+  }
+
+  // Upgrade path: v1 guidance present — replace with v2
+  if (content.includes(TUNGSTEN_GUIDANCE_V1_MARKER)) {
+    debug('  Tungsten tool guidance: upgrading from v1');
+    const oldPattern = /,"For stateful shell work[^"]*spawned agents\."/;
+    const escapedGuidance = TUNGSTEN_GUIDANCE.replace(/"/g, '\\"');
+    const result = content.replace(oldPattern, `,"${escapedGuidance}"`);
+    return result !== content ? result : null;
+  }
+
+  // Fresh injection — detect post-PATCH-8 state (REPL guidance present).
+  // After PATCH 8, the array ends: ...diff visibility matters."].filter(...)
+  // We inject after the REPL element, before the "].filter(" closing.
+  const detection = runDetectors(content, [
+    {
+      name: 'post-repl-array-close',
+      fn: js => {
+        const m = js.match(
+          /diff visibility matters\."\]\.filter\(\([$\w]+\)=>[$\w]+!==null\);return\["# Using your tools"/
+        );
+        return m
+          ? {
+              match: m,
+              detector: 'post-repl-array-close',
+              confidence: 'high',
+            }
+          : null;
+      },
+    },
+  ]);
+
+  if (!detection) return null;
+
+  const original = detection.match[0];
+  const escapedGuidance = TUNGSTEN_GUIDANCE.replace(/"/g, '\\"');
+  const replacement = original.replace(
+    'diff visibility matters."]',
+    `diff visibility matters.","${escapedGuidance}"]`
+  );
+
   const result = content.replace(original, replacement);
   return result !== content ? result : null;
 };
