@@ -653,7 +653,13 @@ Falling back to individual Read/Write/Edit calls after a REPL error wastes the b
 - \`return\` a value to include it in the response
 - Use \`try/catch\` inside scripts to handle errors gracefully
 - \`require()\` is available for: path, url, querystring, crypto, util, os
-- All I/O goes through CC's permission system — writes will prompt for approval when configured`;
+- All I/O goes through CC's permission system — writes will prompt for approval when configured
+
+## Tungsten Integration
+- REPL's \`bash()\` runs one-shot commands — state is lost between calls
+- For persistent processes (dev servers, watchers, debuggers), use the Tungsten tool instead
+- After Tungsten creates a session, Bash commands automatically inherit the tmux environment
+- Use REPL for batch computation; use Tungsten for long-running processes`;
 }
 
 function replacePrompt() {
@@ -806,7 +812,13 @@ When a script fails, fix it and retry. Common fixes:
 - Use \`try/catch\` inside scripts to handle errors gracefully
 - \`require()\` is available for: path, url, querystring, crypto, util, os
 - All I/O goes through CC's permission system \u2014 writes will prompt for approval when configured
-- All paths are relative to the current working directory`;
+- All paths are relative to the current working directory
+
+## Tungsten Integration
+- REPL's \`bash()\` runs one-shot commands \u2014 state is lost between calls
+- For persistent processes (dev servers, watchers, debuggers), use the Tungsten tool instead
+- After Tungsten creates a session, Bash commands automatically inherit the tmux environment
+- Use REPL for batch computation; use Tungsten for long-running processes`;
 }
 // ---------------------------------------------------------------------------
 // Tool Definition
