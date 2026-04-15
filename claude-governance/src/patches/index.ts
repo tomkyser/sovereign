@@ -1,5 +1,6 @@
 import * as fs from 'node:fs/promises';
 import * as fsSync from 'node:fs';
+import * as os from 'node:os';
 import * as path from 'node:path';
 import chalk from 'chalk';
 
@@ -28,6 +29,7 @@ import {
   writeTungstenFs9Patch,
   writeTungstenPanelInjection,
   writeTungstenToolGuidance,
+  writeClientDataCachePatch,
   GOVERNANCE_DEFAULTS,
   isContentPatched,
 } from './governance';
@@ -348,6 +350,10 @@ export const applyCustomization = async (
       signature:
         'Tungsten session is established at the start of every work session',
     },
+    'client-data-cache': {
+      fn: c => writeClientDataCachePatch(c),
+      signature: '__cdc_preserved__',
+    },
   };
 
   const { content: patchedContent, results: patchResults } =
@@ -376,6 +382,48 @@ export const applyCustomization = async (
     }
 
     await replaceFileBreakingHardLinks(ccInstInfo.cliPath, content, 'patch');
+  }
+
+  // Write clientDataCache values to ~/.claude.json
+  // These are the flag values that wJH() and JZ_() read at runtime.
+  // The ms7() binary patch above prevents the bootstrap from overwriting them.
+  const claudeJsonPath = path.join(os.homedir(), '.claude.json');
+  try {
+    let claudeJson: Record<string, unknown> = {};
+    try {
+      claudeJson = JSON.parse(
+        fsSync.readFileSync(claudeJsonPath, 'utf8')
+      );
+    } catch {
+      // File doesn't exist or is invalid — start fresh
+    }
+
+    const existingCache =
+      (claudeJson.clientDataCache as Record<string, string>) ?? {};
+    const updatedCache = {
+      ...existingCache,
+      quiet_salted_ember: 'true',
+      coral_reef_sonnet: 'true',
+    };
+
+    if (
+      existingCache.quiet_salted_ember !== 'true' ||
+      existingCache.coral_reef_sonnet !== 'true'
+    ) {
+      claudeJson.clientDataCache = updatedCache;
+      fsSync.writeFileSync(
+        claudeJsonPath,
+        JSON.stringify(claudeJson, null, 2),
+        'utf8'
+      );
+      debug(
+        'Set clientDataCache flags: quiet_salted_ember=true, coral_reef_sonnet=true'
+      );
+    } else {
+      debug('clientDataCache flags already set');
+    }
+  } catch (err) {
+    debug(`Failed to write clientDataCache to ~/.claude.json: ${err}`);
   }
 
   const updatedConfig = await updateConfigFile(cfg => {

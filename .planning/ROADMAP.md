@@ -19,7 +19,7 @@ Cross-references: `extracted-prompts/IMPROVEMENT-FRAMEWORK.md` (full analysis), 
 | ID | Issue | Category | Fix | Status |
 |----|-------|----------|-----|--------|
 | I-064 | **Verify thinking depth env vars** — VERIFIED. `DISABLE_ADAPTIVE_THINKING` skips `{type:"adaptive"}` thinking. `EFFORT_LEVEL=max` sets max via `_wH()`. Both in settings.json. | DC-F, DC-M | FX-G | CLOSED (working) |
-| I-040 | **quiet_salted_ember activation** — `clientDataCache` in `~/.claude.json` is the target. `wJH()` checks `w_().clientDataCache?.quiet_salted_ember === "true"`. Server bootstrap `ms7()` overwrites on each session — needs binary patch to persist. Bonus: `coral_reef_sonnet` (Sonnet 4.6 1M context) uses same mechanism. | DC-F | FX-B | READY (needs ms7 patch) |
+| I-040 | **quiet_salted_ember activation** — Binary patch removes `clientDataCache` from ms7() bootstrap. Values set in `~/.claude.json` during apply. Unlocks 7 wJH-gated sections: Communication Style, numeric anchors, comment discipline, exploratory questions, condensed Doing tasks, condensed Using your tools, session guidance. Bonus: `coral_reef_sonnet` (Sonnet 4.6 1M context) also activated. | DC-F | FX-B | DONE (patch 12) |
 | I-097 | **Dynamic boundary audit** — SAFE. Overrides in static sections BEFORE `__SYSTEM_PROMPT_DYNAMIC_BOUNDARY__`. wJH sections are dynamic. No cache conflict. | DC-A | — | CLOSED |
 | I-006 | **CLAUDE.md authority** — `prependUserContext` wraps CLAUDE.md in dismissive framing. | DC-P | FX-B | DONE (governance) |
 | I-042 | **REPL/Tungsten injection** — Ant-only tools DCE'd from external binary. | DC-F | FX-B | DONE (governance) |
@@ -28,13 +28,13 @@ Cross-references: `extracted-prompts/IMPROVEMENT-FRAMEWORK.md` (full analysis), 
 
 | ID | Issue | Category | Fix | Status |
 |----|-------|----------|-----|--------|
-| I-054 | **Communication Style section** — Replace "Output efficiency" (reasoning suppression) with wJH-gated Communication Style (professional prose, visible reasoning). Source: `extracted-prompts/wjh-communication-style.md` | DC-P | FX-O | TODO |
-| I-003 | **Misconception correction** — DCE'd ant-only text: "If you notice the user's request is based on a misconception, say so." Source: `extracted-prompts/dce-misconception-correction.md` | DC-P | FX-O | TODO |
-| I-004 | **False-claims mitigation** — DCE'd ant-only text: "Report outcomes faithfully..." Tagged for Capybara v8 (29-30% FC rate). Source: `extracted-prompts/dce-false-claims-mitigation.md` | DC-P | FX-O | TODO |
-| I-005 | **Thoroughness counterweight** — DCE'd ant-only text: "Before reporting a task complete, verify it actually works..." Source: `extracted-prompts/dce-thoroughness-counterweight.md` | DC-P | FX-O | TODO |
-| I-092 | **Context decay awareness** — No context decay awareness in system prompt. New section. Source: PA-009 analysis. | DC-P | FX-O | TODO |
-| I-094 | **Priority hierarchy clarification** — No explicit instruction priority hierarchy (CLAUDE.md vs system prompt vs user turns). New section. Source: PA-012 analysis. | DC-P | FX-O | TODO |
-| I-001 | **Reasoning suppression** — "Lead with the answer, not the reasoning" actively suppresses reasoning chains. Addressed partially by I-054 Communication Style replacement. | DC-P | FX-O | PARTIAL (via I-054) |
+| I-054 | **Communication Style section** — Now active natively via quiet_salted_ember (I-040). wJH gate returns true, binary's built-in Communication Style section activates without override. | DC-P | FX-O | DONE (via I-040) |
+| I-003 | **Misconception correction** — Injected into Doing tasks override. "You're a collaborator, not just an executor." Source: `extracted-prompts/dce-misconception-correction.md` | DC-P | FX-O | DONE |
+| I-004 | **False-claims mitigation** — Injected into Doing tasks override. "Report outcomes faithfully..." Source: `extracted-prompts/dce-false-claims-mitigation.md` | DC-P | FX-O | DONE |
+| I-005 | **Thoroughness counterweight** — Injected into Doing tasks override. "Before reporting a task complete, verify it actually works." Source: `extracted-prompts/dce-thoroughness-counterweight.md` | DC-P | FX-O | DONE |
+| I-092 | **Context decay awareness** — Injected into Doing tasks override. "Your memory of file contents degrades as conversation context grows." | DC-P | FX-O | DONE |
+| I-094 | **Priority hierarchy clarification** — Injected into Doing tasks override. "CLAUDE.md project instructions override system prompt defaults." | DC-P | FX-O | DONE |
+| I-001 | **Reasoning suppression** — "Lead with the answer, not the reasoning" replaced by Communication Style section (activated via I-040). anti_verbosity dynamic section now active. | DC-P | FX-O | DONE (via I-040) |
 | I-002 | **Compound brevity pressure** — "Be extra concise" + "short and concise" compound to suppress useful detail. | DC-P | FX-O | PARTIAL (existing overrides) |
 | I-009 | **Redundant tone brevity** — "Your responses should be short and concise" in Tone section. | DC-P | FX-O | PARTIAL (existing overrides) |
 | I-081 | **Bash prohibition reframe** — "CRITICAL" prohibition forces 3-4x tool calls. Change to tiered guidance. | DC-P | FX-O | TODO |
@@ -54,10 +54,10 @@ Cross-references: `extracted-prompts/IMPROVEMENT-FRAMEWORK.md` (full analysis), 
 
 | ID | Issue | Category | Fix | Status |
 |----|-------|----------|-----|--------|
-| I-051 | **Numeric length anchors** — wJH-gated "≤25 words between tool calls, ≤100 words final". | DC-P | FX-O | TODO |
+| I-051 | **Numeric length anchors** — wJH-gated "≤25 words between tool calls, ≤100 words final". Now active natively via I-040. | DC-P | FX-O | DONE (via I-040) |
 | I-012 | **EnterPlanMode over-caution** — Triggers planning for simple tasks. | DC-P | FX-O | TODO |
-| I-052 | **Exploratory question protocol** — wJH-gated "respond in 2-3 sentences" for questions. | DC-P | FX-O | TODO |
-| I-053 | **Comment discipline** — wJH-gated "Default to writing no comments". | DC-P | FX-O | TODO |
+| I-052 | **Exploratory question protocol** — wJH-gated "respond in 2-3 sentences" for questions. Now active natively via I-040. | DC-P | FX-O | DONE (via I-040) |
+| I-053 | **Comment discipline** — wJH-gated "Default to writing no comments". Now active natively via I-040. | DC-P | FX-O | DONE (via I-040) |
 | I-093 | **Error recovery strategy** — No error recovery strategy in prompt; model loops on failing approaches. | DC-P | FX-O | TODO |
 | I-095 | **Git Safety simplification** — 500 tokens of "NEVER" language. | DC-P | FX-O | TODO |
 | I-080 | **Prompt deduplication** — ~80 wasted tokens/conversation from duplicated instructions. | DC-P | FX-O | TODO |
@@ -103,7 +103,7 @@ Cross-references: `extracted-prompts/IMPROVEMENT-FRAMEWORK.md` (full analysis), 
 | I-011 | **"Avoid giving time estimates"** — Sometimes users need estimates. | DC-P | FX-O | LOW |
 | I-007 | **Subagent CLAUDE.md stripping** — `tengu_slim_subagent_claudemd` defaults true. | DC-P, DC-F | FX-B | DONE (governance) |
 | I-008 | **system-reminder "bear no direct relation"** — Undermines hook feedback. | DC-P | FX-B | DONE (governance) |
-| I-091 | **25/100-word hard limits suppress inter-tool reasoning** — From wJH gate. | DC-P | FX-O | TODO (see I-051) |
+| I-091 | **25/100-word hard limits suppress inter-tool reasoning** — Now active natively via I-040. Note: these are wJH-gated numeric anchors, same mechanism as I-051. | DC-P | FX-O | DONE (via I-040) |
 
 ---
 
@@ -461,8 +461,18 @@ do not use the fetch() tool for web sources, fetch tool returns only AI summarie
   - [x] Self-analysis (20 friction points), introspective probe (5 findings)
   - [x] Coverage gap analysis: 2/12 divergences covered, 10 gaps remaining
 
-- [ ] Phase 3a - Full system prompt extraction with version tracking
-  - [ ] TBD — scope informed by GP3 findings
+- [x] Phase 3a - quiet_salted_ember + P1 Prompt Overrides [COMPLETE]
+  - [x] Binary patch: ms7() clientDataCache preservation (PATCH 12)
+  - [x] clientDataCache flags written to ~/.claude.json during apply (quiet_salted_ember + coral_reef_sonnet)
+  - [x] 7 wJH-gated sections activated: Communication Style, numeric anchors, comment discipline, exploratory questions, condensed Doing tasks, condensed Using your tools, session guidance
+  - [x] coral_reef_sonnet activated: Sonnet 4.6 1M context token window
+  - [x] P1 prompt override: I-003 misconception correction (DCE'd ant text)
+  - [x] P1 prompt override: I-004 false-claims mitigation (DCE'd ant text)
+  - [x] P1 prompt override: I-005 thoroughness counterweight (DCE'd ant text)
+  - [x] P1 prompt override: I-092 context decay awareness (new)
+  - [x] P1 prompt override: I-094 priority hierarchy clarification (new)
+  - [x] Verification: 21/21 SOVEREIGN, all 5 P1 texts verified in binary
+  - [x] Issues resolved: I-040 DONE, I-054 DONE, I-003 DONE, I-004 DONE, I-005 DONE, I-092 DONE, I-094 DONE, I-001 DONE, I-051 DONE, I-052 DONE, I-053 DONE, I-091 DONE (12 issues closed)
 - [ ] Phase 3b - Prompt diff tool (compare across CC versions)
   - [ ] TBD
 - [ ] Phase 3c - Targeted fixes for specific degradation prompts

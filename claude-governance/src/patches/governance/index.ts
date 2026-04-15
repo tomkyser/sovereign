@@ -19,3 +19,4 @@ export { writeReplToolGuidance } from './repl-guidance';
 export { writeTungstenFs9Patch } from './fs9';
 export { writeTungstenPanelInjection } from './render-tree';
 export { writeTungstenToolGuidance } from './tungsten-guidance';
+export { writeClientDataCachePatch } from './client-data-cache';

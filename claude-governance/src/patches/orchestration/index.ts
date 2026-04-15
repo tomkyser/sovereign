@@ -87,6 +87,13 @@ export const PATCH_DEFINITIONS = [
     description:
       'Injects Tungsten guidance into the Using your tools section (after REPL guidance)',
   },
+  {
+    id: 'client-data-cache',
+    name: 'Client Data Cache Preservation',
+    group: PatchGroup.GOVERNANCE,
+    description:
+      'Patches ms7() bootstrap to preserve clientDataCache values (quiet_salted_ember, coral_reef_sonnet)',
+  },
 ] as const;
 
 export type PatchId = (typeof PATCH_DEFINITIONS)[number]['id'];

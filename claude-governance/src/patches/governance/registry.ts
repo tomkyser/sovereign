@@ -175,4 +175,12 @@ export const VERIFICATION_REGISTRY: VerificationEntry[] = [
     category: 'governance',
     passDetail: 'active in Using your tools',
   },
+  {
+    id: 'client-data-cache',
+    name: 'Client Data Cache Preservation',
+    signature: '__cdc_preserved__',
+    critical: false,
+    category: 'governance',
+    passDetail: 'ms7() skips clientDataCache overwrite',
+  },
 ];

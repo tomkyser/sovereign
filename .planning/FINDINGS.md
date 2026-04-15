@@ -543,6 +543,36 @@ Fix: parse the JSON string, extract `content[0].text` for each text block, join 
 
 ---
 
+## F29: ms7() Bootstrap Patch Unlocks 12 Issues (2026-04-15)
+
+**Phase:** 3a | **Impact:** CRITICAL — highest-leverage single patch in the project
+
+`ms7()` is the bootstrap function at offset 12007569 that calls `ip5()` (API fetch to
+`/api/claude_cli/bootstrap`). For external users, the server returns `client_data: null`,
+which ms7() writes to `~/.claude.json`'s `clientDataCache` field, destroying any manually-set values.
+
+**Patch (PATCH 12):** Three surgical removals from ms7():
+1. `let _=H.client_data??null,` — dead variable removed
+2. `Pj(O.clientDataCache,_)&&` — comparison removed from deep-equal chain
+3. `clientDataCache:_,` — field removed from p_() config write callback
+
+This preserves `additionalModelOptionsCache` and `additionalModelCostsCache` writes while
+leaving `clientDataCache` untouched. Combined with writing `{quiet_salted_ember:"true",
+coral_reef_sonnet:"true"}` to `~/.claude.json` during `apply`, this unlocks:
+
+- 7 wJH-gated prompt sections (Communication Style, numeric anchors, comment discipline,
+  exploratory questions, condensed Doing tasks, condensed Using your tools, session guidance)
+- coral_reef_sonnet (Sonnet 4.6 1M context window)
+- Issues resolved: I-040, I-054, I-001, I-051, I-052, I-053, I-091 (via wJH activation)
+  + I-003, I-004, I-005, I-092, I-094 (via P1 prompt overrides in same phase)
+
+**Unique patterns for detection:**
+- `Pj(*.clientDataCache,*)&&Pj(*.additionalModelOptionsCache,*)` — the triple Pj chain
+- `clientDataCache:*,additionalModelOptionsCache:*,additionalModelCostsCache:*` — the p_ write
+- Both are unique in the entire 12.8M character binary
+
+---
+
 --- OLD FINDINGS FROM CLAUDE.md refactor: ---
 
 - **EMBEDDED_SEARCH_TOOLS**: Single env var activates bfs/ugrep/rg already compiled into
