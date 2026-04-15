@@ -13,10 +13,10 @@ hardware. Every patch is transparent, reversible, and documented.
 ## Architecture
 
 ```
-claude-governance/       # The product — fork of tweakcc, governance-only (126KB build)
-prompts/                 # 9 degradation-fix prompt override .md files
-specs/                   # Design specs for clean-room tool implementations
-docs/                    # Roadmap, state tracking, research findings
+claude-governance/       # The product — fork of tweakcc, governance-only (170KB build)
+  data/overrides/        # 9 degradation-fix prompt override .md files
+  data/tools/            # Deployed tool implementations (Ping, REPL, Tungsten)
+  data/ui/               # UI components (tungsten-panel.js)
 
 ~/.claude/hooks/         # Session hooks (governance verify, embedded tools verify, statusline)
 ~/.claude/settings.json  # Env vars (EMBEDDED_SEARCH_TOOLS, ENABLE_LSP_TOOL, etc.)
