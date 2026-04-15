@@ -25,7 +25,7 @@
 | T5: Split Ping | COMPLETE | (T4) | L1-L6 all pass — pipeline validated |
 | T6: Split REPL | COMPLETE | — | L1-L6, live probes (42*42 + glob handler), restore round-trip |
 | T7: Split Tungsten | COMPLETE | — | L1-L6, live probe (create+send+capture), restore round-trip |
-| T8: Final verification | NEXT | — | — |
+| T8: Final verification | COMPLETE | — | All 7 layers: L1 (170.46KB), L2 (20/20 full breakdown), L3 (restore+apply), L4 (Ping+REPL+Tungsten live), L5 (hooks), L6 (3 tools), L7 (round-trip) |
 
 ## Blockers
 

@@ -74,7 +74,7 @@
   7. Restore round-trip: restore → `claude --version` → re-apply → check → 20/20
 - **Additionally:** Compare deployed tool files byte-for-byte behavior against pre-reorg
   baseline. Any behavioral difference is a failure, even if signatures pass.
-- **Status:** TODO
+- **Status:** COMPLETE
 
 ## Dependencies
 
