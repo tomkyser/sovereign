@@ -15,9 +15,9 @@ cd /Users/tom.kyser/dev/claude-code-patches/claude-governance
 pnpm build && node dist/index.mjs check
 ```
 
-**Status:** NOT STARTED
+**Status:** Phase 3prelim IN PROGRESS — T1, T2 complete, T3 next
 **Previous:** M-2 COMPLETE — 20/20 SOVEREIGN on CC 2.1.101
-**Next:** GP3 research (Ant vs External divergence assessment)
+**Active phase:** `.planning/milestones/M-3/3prelim/` — codebase reorganization
 **Baseline:** 20/20 SOVEREIGN on CC 2.1.101
 
 **M-2 retro recommendations for M-3:**

@@ -6,15 +6,15 @@
 - Delete `prompts/` at project root (9 files — `data/overrides/` is canonical)
 - Delete `docs/` (empty directory)
 - **Verify:** Layers 1, 2
-- **Status:** TODO
+- **Status:** COMPLETE — `a674460`
 
 ### T2: Split governance.ts into per-patch files
-- Create `src/patches/governance/` directory
-- Extract each of the 11 patch functions into its own file
-- Create `src/patches/governance/index.ts` with VERIFICATION_REGISTRY + re-exports
-- Update imports in `src/patches/index.ts`
-- **Verify:** Layers 1, 2, 3, 7 (build, signatures, clean apply, restore round-trip)
-- **Status:** TODO
+- Created `src/patches/governance/` directory (14 files)
+- defaults.ts, types.ts, registry.ts + 11 per-patch files + barrel index.ts
+- All existing import paths resolve unchanged (directory/index.ts)
+- Live session test: Ping, REPL, Tungsten all functional in nested Claude
+- **Verify:** Layers 1, 2, 3, 7 + live session
+- **Status:** COMPLETE — `51a9c4a`
 
 ### T3: Split patches/index.ts into orchestration modules
 - Create `src/patches/orchestration/` directory

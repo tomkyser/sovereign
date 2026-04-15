@@ -1,6 +1,6 @@
 # Phase 3prelim Context — Codebase Reorganization
 
-**Status:** PLANNING
+**Status:** IN PROGRESS — T1, T2 complete. T3 next.
 
 ## What This Phase Does
 
