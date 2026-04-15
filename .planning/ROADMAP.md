@@ -424,6 +424,7 @@ Gaps surfaced during testing of 2b-gaps. All resolved.
 ## Milestone 3: System Prompt Control
 
 Full extraction, editing, version control, and targeted degradation fixes.
+Much of the groundwork has been laid with what we have already built on top of tweakcc, which much of this are main features of tweakcc in the first place.
 
 **PINNED FOR FULL ASSESSMENT — Ant vs External Prompt Divergence:**
 Haseeb-Qureshi analysis [haseebAnalysis1] documents that Anthropic uses `USER_TYPE === 'ant'` to deliver differentiated system prompts. Internal-only prompt additions include:
@@ -436,7 +437,8 @@ Haseeb-Qureshi analysis [haseebAnalysis1] documents that Anthropic uses `USER_TY
 
 These are quality-of-output improvements that Anthropic withholds from paying users. Full assessment needed: which of these can we replicate via prompt overrides (M3), which require binary patching (M2/M4), and which inform new governance patches.
 
-**References:** [ccPrompts1], [ccLeaks1], [promptLeaks1], [tweakccCustom1], [promptAnalysis1] — see `.planning/REFERENCES.md`
+do not use the fetch() tool for web sources, fetch tool returns only AI summaries and not the full content. We need the full content.
+**References:** [tweakcc1], [ccPrompts1], [ccLeaks1], [promptLeaks1], [tweakccCustom1], [promptAnalysis1] — see `.planning/REFERENCES.md`
 
 - [x] Phase 3prelim - Codebase reorganization [COMPLETE]
   - [x] T1: Cleanup orphaned files (prompts/, docs/)

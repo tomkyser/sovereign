@@ -421,3 +421,19 @@ at runtime. Any key can be written via context.setAppState() and read via useApp
 
 The Zustand-like store (useSyncExternalStore) triggers re-renders on any state change,
 regardless of which keys changed. Our tool writes, our injected component reads.
+
+--- OLD FINDINGS FROM CLAUDE.md refactor: ---
+
+- **EMBEDDED_SEARCH_TOOLS**: Single env var activates bfs/ugrep/rg already compiled into
+  every native CC binary. 14 callsites respond. No brew install needed.
+- **Compile-time flags**: 90 flags via `bun:bundle`. 14 enabled in 2.1.101 external build
+  including Monitor, Kairos, WebBrowser, UltraPlan, VoiceMode, FilePersistence.
+- **Runtime flags**: ~70+ `tengu_*` flags in `~/.claude.json`. Both code branches ship in
+  binary. Override via disk cache manipulation (startup window) or binary patching.
+- **Ant-only tools**: REPL, Tungsten, Config gated by build-time USER_TYPE define.
+  Implementations stripped from external binary. Require clean-room reimplementation.
+- **The disclaimer**: `prependUserContext` wraps CLAUDE.md in system-reminder tags with
+  dismissive framing. Patched by governance engine.
+- **Subagent CLAUDE.md stripping**: `tengu_slim_subagent_claudemd` defaults true. Patched.
+- **output-efficiency prompt**: Removed by Anthropic in CC 2.1.100, replaced by
+  communication-style prompt.

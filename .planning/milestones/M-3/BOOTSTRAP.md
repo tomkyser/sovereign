@@ -32,7 +32,14 @@ pnpm build && node dist/index.mjs check
 **P0 investigations for next session:**
 1. **I-040: quiet_salted_ember** — Find where `clientDataCache` is stored. If in `~/.claude.json`, one flag flip unlocks 7 improvements
 2. **I-097: Dynamic boundary audit** — Verify our prompt overrides land BEFORE `SYSTEM_PROMPT_DYNAMIC_BOUNDARY`. If after, our patches break prompt cache every turn
-3. **I-064: Verify thinking depth env vars** — Confirm `EFFORT_LEVEL=max` + `DISABLE_ADAPTIVE_THINKING=1` are effective
+3. **Identify exactly what we currently fix vs what quiet_salted_ember would gain us**
+4. **what is needed to enable this:** tengu_hive_evidence
+
+**PM1(new) Create Investigation Table in ROADMAP** 
+1. copy over and format all items for investigation that resulted from the research previously to an Investigation table at the top of roadmap's body before milestones.
+2. be sure to include all items, this is a shortened example: **I-064: Verify thinking depth env vars** — Confirm `EFFORT_LEVEL=max` + `DISABLE_ADAPTIVE_THINKING=1` are effective
+3. Complete and comprehensive developer documentation for everything we have done so far and how to use it, in /docs, absolute verification of truth at every layer is required. No assumptions whatsoever. Add pointer to the new docs in CLAUDE.md Steps.
+  a. it is essential that you and possibly other developers know how everything we have done and built works, so while we are building it you don't have to relearn everything from code every context wipe.
 
 **P1 prompt overrides to write (6 new):**
 - Communication Style (G1) — replace "Output efficiency"
