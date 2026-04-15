@@ -17,13 +17,14 @@
 - **Status:** COMPLETE — `51a9c4a`
 
 ### T3: Split patches/index.ts into orchestration modules
-- Create `src/patches/orchestration/` directory
-- Extract `applyPatchImplementations` + PATCH_DEFINITIONS → `orchestration/index.ts`
-- Extract `deployPromptOverrides` + `deployTools` → `orchestration/deploy.ts`
-- Extract `validateToolDeployment` + `runFunctionalProbe` → `orchestration/validate.ts`
-- Keep top-level `index.ts` as thin re-export barrel
+- Created `src/patches/orchestration/` directory (3 files)
+- `orchestration/index.ts`: PatchGroup, PATCH_DEFINITIONS, PatchId, PatchDefinition, PatchImplementation, PatchResult, applyPatchImplementations, getAllPatchDefinitions
+- `orchestration/deploy.ts`: deployTools, deployUiComponents, deployPromptOverrides, TOOLS_DIR, UI_DIR
+- `orchestration/validate.ts`: validateToolDeployment, runFunctionalProbe, runSingleProbe + types
+- Top-level `index.ts` reduced from 955→~310 lines: applyCustomization + re-exports
+- Fixed `import.meta.url` paths (bundle-relative, not source-relative) and type-only re-exports
 - **Verify:** Layers 1, 2, 3, 4, 6, 7 (build, signatures, clean apply, probe, tool deploy, round-trip)
-- **Status:** TODO
+- **Status:** COMPLETE
 
 ### T4: Set up tool build pipeline
 - Create `src/tools/` directory

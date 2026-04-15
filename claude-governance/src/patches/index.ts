@@ -1,7 +1,6 @@
 import * as fs from 'node:fs/promises';
 import * as fsSync from 'node:fs';
 import * as path from 'node:path';
-import { createRequire } from 'node:module';
 import chalk from 'chalk';
 
 import {
@@ -15,20 +14,6 @@ import {
   extractClaudeJsFromNativeInstallation,
   repackNativeInstallation,
 } from '../nativeInstallationLoader';
-
-// Notes to patch-writers:
-//
-// - Always use [$\w]+ instead of \w+ to match identifiers (variable/function names), because at
-//   least in Node.js's regex engine, \w+ does not include $, so ABC$, which is a perfectly valid
-//   identifier, would not be matched.  The way cli.js is minified, $ frequently appears in global
-//   identifiers.
-//
-// - When starting a regular expression with an identifier name, for example if you're matching a
-//   string of the form "someVarName = ...", make sure to put some kind of word boundary at the
-//   beginning, e.g. `,` `;` `}` or `{`.  This can **SIGNIFICANTLY** speed up matching, easily
-//   bringing a 1.5s search down to 30ms.  **DO NOT** use `\b`, because it doesn't properly treat
-//   `$`, which appears in identifiers often, as a word character, so `\b[$\w]+` will NOT match `,$=`.
-//
 
 import { applySystemPrompts } from './systemPrompts';
 import {
@@ -45,8 +30,6 @@ import {
   writeTungstenToolGuidance,
   GOVERNANCE_DEFAULTS,
   isContentPatched,
-  VERIFICATION_REGISTRY,
-  VerificationEntry,
 } from './governance';
 import {
   restoreNativeBinaryFromBackup,
@@ -59,6 +42,42 @@ import {
   downloadVirginBinary,
   getVirginPath,
 } from '../binaryVault';
+
+import {
+  PatchGroup,
+  PatchResult,
+  applyPatchImplementations,
+} from './orchestration';
+import type { PatchId, PatchImplementation } from './orchestration';
+import {
+  deployTools,
+  deployUiComponents,
+  deployPromptOverrides,
+} from './orchestration/deploy';
+
+// =============================================================================
+// Re-exports — Orchestration modules
+// =============================================================================
+
+export { PatchGroup, getAllPatchDefinitions } from './orchestration';
+
+export type { PatchResult, PatchId, PatchDefinition } from './orchestration';
+
+export {
+  validateToolDeployment,
+  runFunctionalProbe,
+} from './orchestration/validate';
+
+export type {
+  ToolValidationResult,
+  ToolDeploymentValidation,
+  SingleProbeResult,
+  FunctionalProbeResult,
+} from './orchestration/validate';
+
+// =============================================================================
+// Re-exports — Patch utilities
+// =============================================================================
 
 export { showDiff, showPositionalDiff, globalReplace } from './patchDiffing';
 export {
@@ -75,6 +94,10 @@ export {
   findBoxComponent,
 } from './helpers';
 
+// =============================================================================
+// Local Types
+// =============================================================================
+
 export interface LocationResult {
   startIndex: number;
   endIndex: number;
@@ -87,134 +110,10 @@ export interface ModificationEdit {
   newContent: string;
 }
 
-// =============================================================================
-// Patch Group and Result Types
-// =============================================================================
-
-export enum PatchGroup {
-  SYSTEM_PROMPTS = 'System Prompts',
-  GOVERNANCE = 'Governance',
-  // Kept for Ink UI compatibility (no patches use these anymore)
-  ALWAYS_APPLIED = 'Always Applied',
-  MISC_CONFIGURABLE = 'Misc Configurable',
-  FEATURES = 'Features',
-}
-
-export interface PatchResult {
-  id: string;
-  name: string;
-  group: PatchGroup;
-  applied: boolean;
-  failed?: boolean;
-  skipped?: boolean;
-  details?: string;
-  description?: string;
-}
-
 export interface ApplyCustomizationResult {
   config: TweakccConfig;
   results: PatchResult[];
 }
-
-// =============================================================================
-// Patch Definitions — Governance Only
-// =============================================================================
-
-const PATCH_DEFINITIONS = [
-  {
-    id: 'disclaimer-neutralization',
-    name: 'CLAUDE.md Disclaimer Neutralization',
-    group: PatchGroup.GOVERNANCE,
-    description:
-      'Removes/replaces the "may or may not be relevant" disclaimer after CLAUDE.md content',
-  },
-  {
-    id: 'context-header-reframing',
-    name: 'Context Header Reframing',
-    group: PatchGroup.GOVERNANCE,
-    description:
-      'Replaces ambient "use the following context" with directive framing',
-  },
-  {
-    id: 'subagent-claudemd-restoration',
-    name: 'Subagent CLAUDE.md Restoration',
-    group: PatchGroup.GOVERNANCE,
-    description:
-      'Flips tengu_slim_subagent_claudemd from true to false so subagents receive CLAUDE.md',
-  },
-  {
-    id: 'reminder-authority-fix',
-    name: 'System-Reminder Authority Fix',
-    group: PatchGroup.GOVERNANCE,
-    description:
-      'Fixes system prompt text that says system-reminder tags "bear no direct relation" to context',
-  },
-  {
-    id: 'ismeta-flag-removal',
-    name: 'isMeta Flag Removal',
-    group: PatchGroup.GOVERNANCE,
-    description:
-      'Changes isMeta:!0 to isMeta:!1 on CLAUDE.md messages (optional — affects compaction)',
-  },
-  {
-    id: 'tool-injection',
-    name: 'Tool Registry Injection',
-    group: PatchGroup.GOVERNANCE,
-    description:
-      'Patches getAllBaseTools() to load external tools from ~/.claude-governance/tools/',
-  },
-  {
-    id: 'repl-tool-guidance',
-    name: 'REPL Tool Guidance',
-    group: PatchGroup.GOVERNANCE,
-    description:
-      'Injects REPL batch-operation guidance into the Using your tools section',
-  },
-  {
-    id: 'tungsten-fs9',
-    name: 'Tungsten bashProvider Activation',
-    group: PatchGroup.GOVERNANCE,
-    description:
-      'Patches FS9() stub so Bash commands inherit tmux environment after Tungsten creates a session',
-  },
-  {
-    id: 'tungsten-panel',
-    name: 'Tungsten Live Panel',
-    group: PatchGroup.GOVERNANCE,
-    description:
-      "Injects live terminal panel component into CC render tree at DCE'd TungstenLiveMonitor site",
-  },
-  {
-    id: 'tungsten-tool-guidance',
-    name: 'Tungsten Tool Guidance',
-    group: PatchGroup.GOVERNANCE,
-    description:
-      'Injects Tungsten guidance into the Using your tools section (after REPL guidance)',
-  },
-] as const;
-
-export type PatchId = (typeof PATCH_DEFINITIONS)[number]['id'];
-
-export interface PatchDefinition {
-  id: PatchId;
-  name: string;
-  group: PatchGroup;
-  description: string;
-}
-
-export const getAllPatchDefinitions = (): PatchDefinition[] => {
-  return [...PATCH_DEFINITIONS];
-};
-
-interface PatchImplementation {
-  fn: (content: string) => string | null;
-  condition?: boolean;
-  signature?: string;
-}
-
-// =============================================================================
-// Legacy types (for backward compatibility)
-// =============================================================================
 
 export interface PatchApplied {
   newContent: string;
@@ -227,438 +126,6 @@ export interface PatchApplied {
 
 export const escapeIdent = (ident: string): string => {
   return ident.replace(/\$/g, '\\$');
-};
-
-const applyPatchImplementations = (
-  content: string,
-  implementations: Record<PatchId, PatchImplementation>,
-  patchFilter?: string[] | null
-): { content: string; results: PatchResult[] } => {
-  const results: PatchResult[] = [];
-
-  for (const def of PATCH_DEFINITIONS) {
-    const impl = implementations[def.id];
-
-    if (patchFilter && !patchFilter.includes(def.id)) {
-      results.push({
-        id: def.id,
-        name: def.name,
-        group: def.group,
-        applied: false,
-        skipped: true,
-        description: def.description,
-      });
-      continue;
-    }
-
-    if (impl.condition === false) {
-      results.push({
-        id: def.id,
-        name: def.name,
-        group: def.group,
-        applied: false,
-        skipped: true,
-        description: def.description,
-      });
-      continue;
-    }
-
-    // DUAL DETECTION CONTRACT (G34):
-    // Layer 1 (here): Orchestrator checks signature presence in the full JS.
-    //   If found → patch is complete, skip. This is the fast path.
-    // Layer 2 (inside impl.fn): Individual patch functions run runDetectors()
-    //   to find the original unpatched pattern for replacement.
-    //   These are never called if layer 1 matches.
-    // Contract: signature presence ≡ patch complete. Signatures are chosen to
-    // be unique strings that only exist after successful full application.
-    // Risk: if a signature string appears without the full patch (e.g. partial
-    // application), layer 1 short-circuits and the incomplete patch persists.
-    // Mitigation: signatures use multi-token strings unlikely to appear naturally.
-    if (impl.signature && content.includes(impl.signature)) {
-      results.push({
-        id: def.id,
-        name: def.name,
-        group: def.group,
-        applied: true,
-        description: def.description,
-        details: 'already active',
-      });
-      continue;
-    }
-
-    debug(`Applying patch: ${def.name}`);
-    const result = impl.fn(content);
-    const failed = result === null;
-    const applied = !failed && result !== content;
-
-    if (!failed) {
-      content = result;
-    }
-
-    results.push({
-      id: def.id,
-      name: def.name,
-      group: def.group,
-      applied,
-      failed,
-      description: def.description,
-    });
-  }
-
-  return { content, results };
-};
-
-// =============================================================================
-// Prompt Override Deployment (G5)
-// =============================================================================
-
-import { SYSTEM_PROMPTS_DIR } from '../config';
-
-// =============================================================================
-// Tool Deployment
-// =============================================================================
-
-const TOOLS_DIR = path.join(CONFIG_DIR, 'tools');
-
-const deployTools = async (): Promise<number> => {
-  const srcDir = path.resolve(
-    path.dirname(new URL(import.meta.url).pathname),
-    '..',
-    'data',
-    'tools'
-  );
-
-  if (!fsSync.existsSync(srcDir)) {
-    debug(`deployTools: source dir not found at ${srcDir}`);
-    return 0;
-  }
-
-  await fs.mkdir(TOOLS_DIR, { recursive: true });
-
-  const files = fsSync.readdirSync(srcDir).filter(f => f.endsWith('.js'));
-  let deployed = 0;
-
-  for (const file of files) {
-    const srcPath = path.join(srcDir, file);
-    const dstPath = path.join(TOOLS_DIR, file);
-    const srcContent = fsSync.readFileSync(srcPath, 'utf8');
-
-    let needsCopy = true;
-    if (fsSync.existsSync(dstPath)) {
-      const dstContent = fsSync.readFileSync(dstPath, 'utf8');
-      if (srcContent === dstContent) needsCopy = false;
-    }
-
-    if (needsCopy) {
-      await fs.writeFile(dstPath, srcContent, 'utf8');
-      deployed++;
-      debug(`deployTools: deployed ${file}`);
-    }
-  }
-
-  return deployed;
-};
-
-// =============================================================================
-// UI Component Deployment
-// =============================================================================
-
-const UI_DIR = path.join(CONFIG_DIR, 'ui');
-
-const deployUiComponents = async (): Promise<number> => {
-  const srcDir = path.resolve(
-    path.dirname(new URL(import.meta.url).pathname),
-    '..',
-    'data',
-    'ui'
-  );
-
-  if (!fsSync.existsSync(srcDir)) {
-    debug(`deployUiComponents: source dir not found at ${srcDir}`);
-    return 0;
-  }
-
-  await fs.mkdir(UI_DIR, { recursive: true });
-
-  const files = fsSync.readdirSync(srcDir).filter(f => f.endsWith('.js'));
-  let deployed = 0;
-
-  for (const file of files) {
-    const srcPath = path.join(srcDir, file);
-    const dstPath = path.join(UI_DIR, file);
-    const srcContent = fsSync.readFileSync(srcPath, 'utf8');
-
-    let needsCopy = true;
-    if (fsSync.existsSync(dstPath)) {
-      const dstContent = fsSync.readFileSync(dstPath, 'utf8');
-      if (srcContent === dstContent) needsCopy = false;
-    }
-
-    if (needsCopy) {
-      await fs.writeFile(dstPath, srcContent, 'utf8');
-      deployed++;
-      debug(`deployUiComponents: deployed ${file}`);
-    }
-  }
-
-  return deployed;
-};
-
-// =============================================================================
-// Tool Deployment Validation (G2+G3)
-// =============================================================================
-
-export interface ToolValidationResult {
-  name: string;
-  valid: boolean;
-  missing: string[];
-}
-
-export interface ToolDeploymentValidation {
-  loaderValid: boolean;
-  loaderError?: string;
-  tools: ToolValidationResult[];
-  toolNames: string[];
-}
-
-export const validateToolDeployment = (): ToolDeploymentValidation => {
-  const loaderPath = path.join(TOOLS_DIR, 'index.js');
-
-  if (!fsSync.existsSync(TOOLS_DIR)) {
-    return {
-      loaderValid: false,
-      loaderError: 'tools directory missing',
-      tools: [],
-      toolNames: [],
-    };
-  }
-
-  if (!fsSync.existsSync(loaderPath)) {
-    return {
-      loaderValid: false,
-      loaderError: 'index.js missing',
-      tools: [],
-      toolNames: [],
-    };
-  }
-
-  let tools: unknown[];
-  try {
-    const req = createRequire(import.meta.url);
-    delete req.cache[loaderPath];
-    for (const key of Object.keys(req.cache)) {
-      if (key.startsWith(TOOLS_DIR)) delete req.cache[key];
-    }
-    const loaded = req(loaderPath);
-    if (!Array.isArray(loaded)) {
-      return {
-        loaderValid: false,
-        loaderError: 'loader did not return an array',
-        tools: [],
-        toolNames: [],
-      };
-    }
-    tools = loaded;
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
-    return {
-      loaderValid: false,
-      loaderError: msg,
-      tools: [],
-      toolNames: [],
-    };
-  }
-
-  const results: ToolValidationResult[] = [];
-  const toolNames: string[] = [];
-
-  for (const tool of tools) {
-    if (!tool || typeof tool !== 'object') {
-      results.push({
-        name: '(invalid)',
-        valid: false,
-        missing: ['not an object'],
-      });
-      continue;
-    }
-
-    const t = tool as Record<string, unknown>;
-    const name = typeof t.name === 'string' ? t.name : '(unnamed)';
-    const missing: string[] = [];
-
-    if (typeof t.name !== 'string') missing.push('name');
-    if (typeof t.call !== 'function') missing.push('call');
-    if (typeof t.prompt !== 'function') missing.push('prompt');
-    if (typeof t.description !== 'function') missing.push('description');
-    if (!t.inputJSONSchema || typeof t.inputJSONSchema !== 'object')
-      missing.push('schema');
-
-    results.push({ name, valid: missing.length === 0, missing });
-    if (missing.length === 0) toolNames.push(name);
-  }
-
-  return { loaderValid: true, tools: results, toolNames };
-};
-
-// =============================================================================
-// Functional Probe (G1+G5+G32)
-// =============================================================================
-
-export interface SingleProbeResult {
-  tool: string;
-  success: boolean;
-  inconclusive: boolean;
-  error?: string;
-}
-
-export interface FunctionalProbeResult {
-  success: boolean;
-  inconclusive: boolean;
-  error?: string;
-  probes: SingleProbeResult[];
-}
-
-const runSingleProbe = (
-  binaryPath: string,
-  prompt: string,
-  marker: string,
-  toolName: string,
-  timeoutMs = 45000
-): SingleProbeResult => {
-  const { execFileSync } = require('node:child_process');
-  try {
-    const output = execFileSync(binaryPath, ['-p', prompt], {
-      encoding: 'utf-8',
-      timeout: timeoutMs,
-      cwd: fsSync.existsSync('/tmp') ? '/tmp' : undefined,
-      env: { ...process.env, DISABLE_AUTOUPDATER: '1' },
-      stdio: ['pipe', 'pipe', 'pipe'],
-    });
-
-    if (output.includes(marker)) {
-      return { tool: toolName, success: true, inconclusive: false };
-    }
-    return {
-      tool: toolName,
-      success: false,
-      inconclusive: false,
-      error: `${marker} not in response`,
-    };
-  } catch (err: unknown) {
-    const e = err as {
-      stdout?: string;
-      stderr?: string;
-      message?: string;
-    };
-    if (e.stdout && e.stdout.includes(marker)) {
-      return { tool: toolName, success: true, inconclusive: false };
-    }
-    const msg = e.message || String(err);
-    if (
-      msg.includes('ETIMEDOUT') ||
-      msg.includes('timed out') ||
-      msg.includes('SIGTERM')
-    ) {
-      return {
-        tool: toolName,
-        success: false,
-        inconclusive: true,
-        error: 'probe timed out',
-      };
-    }
-    return {
-      tool: toolName,
-      success: false,
-      inconclusive:
-        msg.includes('auth') ||
-        msg.includes('401') ||
-        msg.includes('403') ||
-        msg.includes('ECONNREFUSED'),
-      error:
-        msg.length > 200 ? msg.substring(0, 200) + '...' : msg,
-    };
-  }
-};
-
-export const runFunctionalProbe = async (
-  binaryPath: string
-): Promise<FunctionalProbeResult> => {
-  const pingMarker = 'governance-verify';
-  const pingResult = runSingleProbe(
-    binaryPath,
-    `Use the Ping tool with message '${pingMarker}'`,
-    pingMarker,
-    'Ping'
-  );
-
-  const probes: SingleProbeResult[] = [pingResult];
-
-  // REPL probe: ask model to evaluate a simple expression
-  if (pingResult.success) {
-    const replMarker = '1764';
-    const replResult = runSingleProbe(
-      binaryPath,
-      `Use the REPL tool to evaluate 42*42 and return the result`,
-      replMarker,
-      'REPL',
-      60000
-    );
-    probes.push(replResult);
-  }
-
-  const anySuccess = probes.some(p => p.success);
-  const allInconclusive = probes.every(p => p.inconclusive);
-  const firstError = probes.find(p => p.error)?.error;
-
-  return {
-    success: anySuccess,
-    inconclusive: allInconclusive,
-    error: firstError,
-    probes,
-  };
-};
-
-// =============================================================================
-// Prompt Override Deployment (G5)
-// =============================================================================
-
-const deployPromptOverrides = async (): Promise<number> => {
-  const overridesDir = path.resolve(
-    path.dirname(new URL(import.meta.url).pathname),
-    '..',
-    'data',
-    'overrides'
-  );
-
-  if (!fsSync.existsSync(overridesDir)) {
-    debug(`deployPromptOverrides: overrides dir not found at ${overridesDir}`);
-    return 0;
-  }
-
-  await fs.mkdir(SYSTEM_PROMPTS_DIR, { recursive: true });
-
-  const files = fsSync.readdirSync(overridesDir).filter(f => f.endsWith('.md'));
-  let deployed = 0;
-
-  for (const file of files) {
-    const srcPath = path.join(overridesDir, file);
-    const dstPath = path.join(SYSTEM_PROMPTS_DIR, file);
-    const srcContent = fsSync.readFileSync(srcPath, 'utf8');
-
-    let needsCopy = true;
-    if (fsSync.existsSync(dstPath)) {
-      const dstContent = fsSync.readFileSync(dstPath, 'utf8');
-      if (srcContent === dstContent) needsCopy = false;
-    }
-
-    if (needsCopy) {
-      await fs.writeFile(dstPath, srcContent, 'utf8');
-      deployed++;
-      debug(`deployPromptOverrides: deployed ${file}`);
-    }
-  }
-
-  return deployed;
 };
 
 // =============================================================================
@@ -681,7 +148,6 @@ export const applyCustomization = async (
       // Backup doesn't exist
     }
 
-    // Contamination check: if backup exists, verify it's from a clean binary.
     if (backupExists) {
       debug('Checking backup for governance contamination...');
       const probe = await extractClaudeJsFromNativeInstallation(
@@ -704,8 +170,6 @@ export const applyCustomization = async (
       await restoreNativeBinaryFromBackup(ccInstInfo);
       pathToExtractFrom = NATIVE_BINARY_BACKUP_FILE;
     } else {
-      // No clean backup — attempt virgin vault recovery before falling back
-      // to the installed binary (which may itself be patched).
       const version = ccInstInfo.version;
       const virginPath = getVirginPath(version);
       let virginAvailable = fsSync.existsSync(virginPath);
@@ -733,12 +197,9 @@ export const applyCustomization = async (
           version,
           ccInstInfo.nativeInstallationPath
         );
-        // Create a clean backup for future apply/restore cycles
         await backupNativeBinary(ccInstInfo);
         pathToExtractFrom = ccInstInfo.nativeInstallationPath;
       } else {
-        // Last resort: installed binary. Signature detection will skip
-        // already-applied patches, but backup is gone.
         debug(
           'No vault available, extracting from installed binary'
         );
@@ -774,35 +235,21 @@ export const applyCustomization = async (
 
   const allResults: PatchResult[] = [];
 
-  // ==========================================================================
-  // Deploy governance tools to config dir before applying
-  // ==========================================================================
   const toolsDeployed = await deployTools();
   if (toolsDeployed > 0) {
-    debug(`Deployed ${toolsDeployed} tool file(s) to ${TOOLS_DIR}`);
+    debug(`Deployed ${toolsDeployed} tool file(s)`);
   }
 
-  // ==========================================================================
-  // Deploy UI components to config dir before applying
-  // ==========================================================================
   const uiDeployed = await deployUiComponents();
   if (uiDeployed > 0) {
-    debug(`Deployed ${uiDeployed} UI component(s) to ${UI_DIR}`);
+    debug(`Deployed ${uiDeployed} UI component(s)`);
   }
 
-  // ==========================================================================
-  // Deploy governance prompt overrides to config dir before applying
-  // ==========================================================================
   const overridesDeployed = await deployPromptOverrides();
   if (overridesDeployed > 0) {
-    debug(
-      `Deployed ${overridesDeployed} prompt override(s) to ${SYSTEM_PROMPTS_DIR}`
-    );
+    debug(`Deployed ${overridesDeployed} prompt override(s)`);
   }
 
-  // ==========================================================================
-  // Apply system prompt customizations (prompt overrides)
-  // ==========================================================================
   const systemPromptsResult = await applySystemPrompts(
     content,
     ccInstInfo.version,
@@ -816,11 +263,6 @@ export const applyCustomization = async (
   );
   allResults.push(...sortedSystemPromptResults);
 
-  // ==========================================================================
-  // Post-prompts: resolve USE_EMBEDDED_TOOLS_FN gates
-  // Runs AFTER prompt system so pieces regex can match the original ternaries,
-  // then cleans up any remaining unresolved gates.
-  // ==========================================================================
   const gateResult = writeEmbeddedToolsGateResolution(content);
   if (gateResult !== null) {
     content = gateResult;
@@ -833,11 +275,6 @@ export const applyCustomization = async (
     });
   }
 
-  // ==========================================================================
-  // Apply governance patches
-  // ==========================================================================
-
-  // Read governance config (governance section)
   const govConfig = (config.settings as unknown as Record<string, unknown>)
     .governance as Record<string, unknown> | undefined;
 
@@ -918,9 +355,6 @@ export const applyCustomization = async (
   content = patchedContent;
   allResults.push(...patchResults);
 
-  // ==========================================================================
-  // Write the modified content back
-  // ==========================================================================
   if (ccInstInfo.nativeInstallationPath) {
     debug(
       `Repacking modified claude.js into native installation: ${ccInstInfo.nativeInstallationPath}`
