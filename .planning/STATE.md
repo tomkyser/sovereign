@@ -7,7 +7,7 @@ Last updated: 2026-04-14
 - **Binary:** `~/.local/share/claude/versions/2.1.101` (191MB Mach-O)
 - **Auto-updater:** Disabled (`DISABLE_AUTOUPDATER=1`)
 
-## Current Patching: claude-governance (Phase 1a Complete)
+## Current Patching: claude-governance (M-2 Complete, M-3 3prelim Complete)
 
 All governance patches and prompt overrides applied by `claude-governance` —
 our fork of tweakcc with cosmetic patches stripped, Ink/React UI removed,
@@ -16,10 +16,17 @@ and governance-specific `check` command added.
 - **Fork location:** `/Users/tom.kyser/dev/claude-code-patches/claude-governance/`
 - **Based on:** tweakcc 4.0.11 (full fork, fresh git)
 - **Config dir:** `~/.claude-governance/` (falls back to `~/.tweakcc/` for migration)
-- **Build:** `pnpm build` → 153KB | **Package:** 2.2MB (npm pack)
+- **Build:** `pnpm build` → 170.46KB main + 51.46KB tools | **Package:** 2.2MB (npm pack)
 - **Apply:** `node dist/index.mjs --apply` (or just `node dist/index.mjs`)
 - **Verify:** `node dist/index.mjs check`
 - **Restore:** `node dist/index.mjs --restore`
+- **Source structure (post-3prelim):**
+  - `src/patches/governance/` — 14 per-patch files (was governance.ts monolith)
+  - `src/patches/orchestration/` — 3 orchestration modules (was index.ts monolith)
+  - `src/tools/ping/` — Ping tool (TypeScript)
+  - `src/tools/repl/` — REPL tool (16 modules: 6 core + 9 handlers + barrel)
+  - `src/tools/tungsten/` — Tungsten tool (12 modules: 6 core + 6 actions)
+  - `data/tools/` — built tool artifacts (CJS .js via tsdown)
 
 ### What's Applied (Verified 20/20 via `check`)
 **Governance Patches (5 active):**
@@ -98,6 +105,7 @@ and governance-specific `check` command added.
 - **2c-gaps-1:** COMPLETE — 11 gaps (G29-G40) closed. Panel crash fix, restore/apply vault wiring, verification honesty, FS9 verified, tungsten.js robustness, panel setAppState fix. All verified in live TUI session. 19/19 SOVEREIGN.
 - **2c-gaps-2:** COMPLETE — Tungsten-first execution posture. PATCH 11 (v2) directive in "Using your tools", tool prompt reframe (complementary layers + lifecycle), SessionStart/Stop lifecycle hooks. 20/20 SOVEREIGN.
 - **M-2 Retro:** COMPLETE — 10 phases evaluated. 13 outstanding gaps catalogued (GAPS.md). Key outcome: GP3 (Ant vs External divergence) defines M-3 scope. Phase 3prelim (codebase reorg) recommended first.
+- **3prelim:** COMPLETE — Codebase reorganization. governance.ts (1184L) → 14 files, index.ts (955L) → 3 orchestration modules, 3 tools → TypeScript with build pipeline. 8 tasks, 7-layer verification. 20/20 SOVEREIGN.
 
 ### Binary Vault (from 2a-gaps)
 - **Module:** `src/binaryVault.ts` — XDG path discovery, GCS download, SHA256 verification, immutable locking

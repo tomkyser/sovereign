@@ -340,14 +340,15 @@ These are quality-of-output improvements that Anthropic withholds from paying us
 
 **References:** [ccPrompts1], [ccLeaks1], [promptLeaks1], [tweakccCustom1], [promptAnalysis1] — see `.planning/REFERENCES.md`
 
-- [ ] Phase 3prelim - Reorganize the codebase and refactor our additions to adhere to proper patterns
-  - [ ] Complete separation of concerns
-  - [ ] logic, data, implementations all live separately from eachother
-    - [ ] let's keep anything not first degree connected to our tweakcc fork in the parent dir and not nested in the fork
-  - [ ] tools need to be completely restructured and rebuilt properly
-    - [ ] see /Users/tom.kyser/dev/cc-source/collection-claude-code-source-code/claude-code-source-code/src/tools/BashTool for reference
-      - [ ] not this sloppy half ass bullshit we have now.
-  - [ ] TBD
+- [x] Phase 3prelim - Codebase reorganization [COMPLETE]
+  - [x] T1: Cleanup orphaned files (prompts/, docs/)
+  - [x] T2: Split governance.ts → 14 per-patch files in src/patches/governance/
+  - [x] T3: Split index.ts → 3 orchestration modules in src/patches/orchestration/
+  - [x] T4: Tool build pipeline (tsdown CJS, per-tool builds, no shared chunks)
+  - [x] T5: Ping tool pipeline validation (6-layer verification)
+  - [x] T6: REPL tool → 16 TypeScript modules in src/tools/repl/
+  - [x] T7: Tungsten tool → 12 TypeScript modules in src/tools/tungsten/
+  - [x] T8: Full 7-layer system proof — SOVEREIGN 20/20, all tools verified live
 
 - [ ] Phase 3a - Full system prompt extraction with version tracking
   - [ ] TBD
