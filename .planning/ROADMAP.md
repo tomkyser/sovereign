@@ -9,6 +9,104 @@ Distributed as modular NPM packages — users choose what they want.
 
 ---
 
+## Investigation Registry
+
+All items from GP3 research (62 registered issues, 112 findings). Priority-ranked by compound impact.
+Cross-references: `extracted-prompts/IMPROVEMENT-FRAMEWORK.md` (full analysis), `.planning/milestones/M-3/GP3/RESEARCH.md` (raw research).
+
+### P0 — Systemic Leverage Points
+
+| ID | Issue | Category | Fix | Status |
+|----|-------|----------|-----|--------|
+| I-064 | **Verify thinking depth env vars** — Confirm `EFFORT_LEVEL=max` + `DISABLE_ADAPTIVE_THINKING=1` are effective. Largest quality lever (67% thinking depth drop without). | DC-F, DC-M | FX-G | INVESTIGATING |
+| I-040 | **quiet_salted_ember activation** — GrowthBook flag + Opus 4.6 check (`wJH()`) gates 7 prompt improvements already in binary. Find where `clientDataCache` is stored. One flag flip unlocks: communication style, numeric anchors, comment discipline, exploratory protocol, condensed doing-tasks, session guidance. | DC-F | FX-G | INVESTIGATING |
+| I-097 | **Dynamic boundary audit** — Verify our governance prompt overrides land BEFORE `SYSTEM_PROMPT_DYNAMIC_BOUNDARY` marker. If after, our patches break prompt cache every turn. | DC-A | FX-B audit | INVESTIGATING |
+| I-006 | **CLAUDE.md authority** — `prependUserContext` wraps CLAUDE.md in dismissive framing. | DC-P | FX-B | DONE (governance) |
+| I-042 | **REPL/Tungsten injection** — Ant-only tools DCE'd from external binary. | DC-F | FX-B | DONE (governance) |
+
+### P1 — Prompt Overrides (low effort, high return)
+
+| ID | Issue | Category | Fix | Status |
+|----|-------|----------|-----|--------|
+| I-054 | **Communication Style section** — Replace "Output efficiency" (reasoning suppression) with wJH-gated Communication Style (professional prose, visible reasoning). Source: `extracted-prompts/wjh-communication-style.md` | DC-P | FX-O | TODO |
+| I-003 | **Misconception correction** — DCE'd ant-only text: "If you notice the user's request is based on a misconception, say so." Source: `extracted-prompts/dce-misconception-correction.md` | DC-P | FX-O | TODO |
+| I-004 | **False-claims mitigation** — DCE'd ant-only text: "Report outcomes faithfully..." Tagged for Capybara v8 (29-30% FC rate). Source: `extracted-prompts/dce-false-claims-mitigation.md` | DC-P | FX-O | TODO |
+| I-005 | **Thoroughness counterweight** — DCE'd ant-only text: "Before reporting a task complete, verify it actually works..." Source: `extracted-prompts/dce-thoroughness-counterweight.md` | DC-P | FX-O | TODO |
+| I-092 | **Context decay awareness** — No context decay awareness in system prompt. New section. Source: PA-009 analysis. | DC-P | FX-O | TODO |
+| I-094 | **Priority hierarchy clarification** — No explicit instruction priority hierarchy (CLAUDE.md vs system prompt vs user turns). New section. Source: PA-012 analysis. | DC-P | FX-O | TODO |
+| I-001 | **Reasoning suppression** — "Lead with the answer, not the reasoning" actively suppresses reasoning chains. Addressed partially by I-054 Communication Style replacement. | DC-P | FX-O | PARTIAL (via I-054) |
+| I-002 | **Compound brevity pressure** — "Be extra concise" + "short and concise" compound to suppress useful detail. | DC-P | FX-O | PARTIAL (existing overrides) |
+| I-009 | **Redundant tone brevity** — "Your responses should be short and concise" in Tone section. | DC-P | FX-O | PARTIAL (existing overrides) |
+| I-081 | **Bash prohibition reframe** — "CRITICAL" prohibition forces 3-4x tool calls. Change to tiered guidance. | DC-P | FX-O | TODO |
+
+### P2 — Strategic Improvements (medium effort)
+
+| ID | Issue | Category | Fix | Status |
+|----|-------|----------|-----|--------|
+| I-041 | **VERIFICATION_AGENT activation** — `tengu_hive_evidence` GrowthBook flag gates full sub-agent verification. Implementation exists in binary. | DC-F | FX-G | INVESTIGATING |
+| I-090 | **Plan mode authority override** — Plan mode injects "supercedes any other instructions" — overrides CLAUDE.md. | DC-P | FX-O/FX-B | TODO |
+| I-065 | **Silent model downgrade detection** — After 3x 529 errors, model silently downgrades with no notification. | DC-A | FX-H | TODO |
+| I-070 | **GrowthBook flag monitoring** — Flags silently change features server-side. | DC-F | FX-H | TODO |
+| I-096 | **System-reminder deduplication** — System-reminder text duplicated after EVERY tool result. | DC-A | FX-B | TODO |
+| I-082 | **Permission tiering** — Push confirmation same category as DROP TABLE. 93% approval rate trains reflexive "yes". | DC-I | FX-O | TODO |
+
+### P3 — Refinements
+
+| ID | Issue | Category | Fix | Status |
+|----|-------|----------|-----|--------|
+| I-051 | **Numeric length anchors** — wJH-gated "≤25 words between tool calls, ≤100 words final". | DC-P | FX-O | TODO |
+| I-012 | **EnterPlanMode over-caution** — Triggers planning for simple tasks. | DC-P | FX-O | TODO |
+| I-052 | **Exploratory question protocol** — wJH-gated "respond in 2-3 sentences" for questions. | DC-P | FX-O | TODO |
+| I-053 | **Comment discipline** — wJH-gated "Default to writing no comments". | DC-P | FX-O | TODO |
+| I-093 | **Error recovery strategy** — No error recovery strategy in prompt; model loops on failing approaches. | DC-P | FX-O | TODO |
+| I-095 | **Git Safety simplification** — 500 tokens of "NEVER" language. | DC-P | FX-O | TODO |
+| I-080 | **Prompt deduplication** — ~80 wasted tokens/conversation from duplicated instructions. | DC-P | FX-O | TODO |
+
+### Architecture & Tool Issues (from self-analysis + community research)
+
+| ID | Issue | Category | Fix | Status |
+|----|-------|----------|-----|--------|
+| I-020 | **REPL read() 256KB limit** — Prevents large file analysis. | DC-A | FX-T | TODO |
+| I-021 | **REPL glob() path ambiguity** — Relative vs absolute path resolution. | DC-A | FX-T | TODO |
+| I-022 | **Parallel Bash cascade cancellation** — One error kills sibling calls. | DC-A | FX-X | WONTFIX (CC arch) |
+| I-023 | **WebFetch only returns summaries** — Useless for exact text research. | DC-A | FX-T | WONTFIX (CC design) |
+| I-024 | **Large Bash output to unreadable JSONL** — Detail loss in persisted output. | DC-A | FX-X | TODO |
+| I-025 | **Agent result summarization** — Sub-agent detail loss. | DC-A | FX-X | TODO |
+| I-030 | **Post-compaction rebuild cost** — 15-30 tool calls to restore context. | DC-C | FX-H | TODO |
+| I-031 | **Read hook cache blocks re-reads** — Truncated reads cached as "already read". | DC-C | FX-H | OBSERVED |
+| I-032 | **CLAUDE.md ~800 lines every turn** — Regardless of relevance. | DC-C | FX-C | TODO |
+| I-034 | **Context decay after 10+ tool calls** — Without re-reads. | DC-C | FX-C | ADDRESSED (CLAUDE.md) |
+| I-043 | **EMBEDDED_SEARCH_TOOLS undocumented** — External users don't know about it. | DC-F | FX-C | ADDRESSED (env-flags module) |
+| I-063 | **MCP tool definitions 25K+ tokens/server** — Context bloat. | DC-A | FX-X | WONTFIX (CC arch) |
+
+### Community-Sourced Issues
+
+| ID | Issue | Category | Fix | Status |
+|----|-------|----------|-----|--------|
+| I-060 | **"Simplest approach" up 642%** — Prompt-induced laziness. | DC-P, DC-M | FX-O | PARTIAL (existing overrides) |
+| I-061 | **Read:Edit ratio collapsed 6.6→2.0** — 70% less research before editing. | DC-M | FX-O | TODO |
+| I-062 | **Write overuse doubled** — Full file rewrites instead of surgical Edit. | DC-M | FX-O | TODO |
+| I-066 | **Compaction summarizer can hallucinate** — Fabricated instructions. | DC-C | FX-H | TODO |
+| I-067 | **Permission fatigue** — 93% approval rate trains reflexive "yes". | DC-I | FX-O | TODO (see I-082) |
+| I-068 | **Thinking loops** — 5-22 min circular reasoning, 100K+ tokens wasted. | DC-M | FX-O | TODO |
+| I-069 | **Hallucination of packages, APIs, SHAs** — False-claims issue. | DC-M | FX-O | TODO (see I-004) |
+| I-071 | **System prompt bloat 40-50% increase** — v2.1.92→v2.1.100. | DC-A | FX-X | OBSERVED |
+| I-098 | **Anti-distillation fake tools** — Injected server-side (unmitigable). | DC-A | None | UNMITIGABLE |
+
+### Introspective Probe Issues
+
+| ID | Issue | Category | Fix | Status |
+|----|-------|----------|-----|--------|
+| I-083 | **CLAUDE.md 8-file startup** — Burns thousands of tokens. | DC-C | FX-C | OBSERVED |
+| I-084 | **"Never simplest path" over-engineering** — Creates over-engineering bias. | DC-C | FX-C | OBSERVED |
+| I-010 | **"Do not propose changes" duplicated** — In Doing tasks section. | DC-P | FX-O | LOW |
+| I-011 | **"Avoid giving time estimates"** — Sometimes users need estimates. | DC-P | FX-O | LOW |
+| I-007 | **Subagent CLAUDE.md stripping** — `tengu_slim_subagent_claudemd` defaults true. | DC-P, DC-F | FX-B | DONE (governance) |
+| I-008 | **system-reminder "bear no direct relation"** — Undermines hook feedback. | DC-P | FX-B | DONE (governance) |
+| I-091 | **25/100-word hard limits suppress inter-tool reasoning** — From wJH gate. | DC-P | FX-O | TODO (see I-051) |
+
+---
+
 ## Completed
 
 ### Research & Discovery
@@ -386,8 +484,36 @@ These are quality-of-output improvements that Anthropic withholds from paying us
 - [ ] Bootstrap Prompt
 ---
 
+## Milestone 3.5: Wire — Inter-Session Communication
+- Needs planning
+Replaces original UDS Sockets (DCE'd no actual source available only references) plan (https://ccleaks.com/#feature-5) with Wire,
+a superior implementation already built in dynamo (`/Users/tom.kyser/Library/Mobile Documents/com~apple~CloudDocs/dev/dynamo/core/services/wire/`).
+
+Wire uses CC's native Channels API (`notifications/claude/channel`) for inbound message
+delivery — no binary patching needed. Typed envelopes with urgency routing, session
+registry with capabilities/permissions, disconnect buffering with TTL reconnect,
+dual transport (Channels for low-latency, HTTP relay for bulk). Architecturally
+superior to Anthropic's UDS Inbox: networkable, resilient, typed, permissioned.
+
+**Integration with Tungsten:** Spawn Claude instances in Tungsten sessions, register
+with Wire, communicate via structured messages instead of screen scraping. Combined
+with REPL and tool injection, this completes the distributed agent platform.
+
+**Integration with Claude Code as a platform:** This will require recreating from scratch, the system wide instructions to not only inform claude of this baseline capability, but to also recreate the features such as coordinator mod, and generally enabling the user to initiate cross session collaboration. Building the fully functional communication layer is NOT enough, claude code must be patched at every layer of depth offered to ensure the LLM uses this. Hooks, tool prompts, system prompts, agent prompts, etc etc, anything and everything. we'll need a /coordinate skill too. 
+
+**Source:** dynamo Wire service (7 files: wire, protocol, registry, transport, relay-server, channel-server, channels-transport)
+**Approach:** Port/adapt from dynamo into claude-governance module system — TBD in phase planning
+
+---
+### Milestone 3.5 Retro
+- [ ] Commentary
+- [ ] Gap analysis
+- [ ] Housekeeping
+- [ ] Bootstrap Prompt
+---
+
 ## Milestone 4: REPL - ReEval and Perfect
-- TBD
+- phases TBD, needs discussion > research > planning
 Notes:
 - node VM vs python vm?
 - the goal is to force PTC (Programmatic Tool Calling)
@@ -413,31 +539,6 @@ Notes:
 - we need deep system prompt support
 
 
-## Milestone 4.5: Wire — Inter-Session Communication
-
-Replaces original UDS Sockets plan (https://ccleaks.com/#feature-5) with Wire,
-a superior implementation already built in dynamo (`/Users/tom.kyser/Library/Mobile Documents/com~apple~CloudDocs/dev/dynamo/core/services/wire/`).
-
-Wire uses CC's native Channels API (`notifications/claude/channel`) for inbound message
-delivery — no binary patching needed. Typed envelopes with urgency routing, session
-registry with capabilities/permissions, disconnect buffering with TTL reconnect,
-dual transport (Channels for low-latency, HTTP relay for bulk). Architecturally
-superior to Anthropic's UDS Inbox: networkable, resilient, typed, permissioned.
-
-**Integration with Tungsten:** Spawn Claude instances in Tungsten sessions, register
-with Wire, communicate via structured messages instead of screen scraping. Combined
-with REPL and tool injection, this completes the distributed agent platform.
-
-**Source:** dynamo Wire service (7 files: wire, protocol, registry, transport, relay-server, channel-server, channels-transport)
-**Approach:** Port/adapt from dynamo into claude-governance module system — TBD in phase planning
-
----
-### Milestone 4.5 Retro
-- [ ] Commentary
-- [ ] Gap analysis
-- [ ] Housekeeping
-- [ ] Bootstrap Prompt
----
 
 ## Milestone 5: HTTP Proxy Layer
 
@@ -605,3 +706,4 @@ This will be 1.0.0 everything after this shall then adhere to the strict semver 
 - Cross-version binary testing automation
 - npm install path patching surface (cli.js is raw JS)
 - Agent refusal patterns — model trained to protect Anthropic over user
+- patch web fetch() tool to support raw full web content not just summaries, let claude decide to opt in to summary mode and indicate that to the user every time
