@@ -102,6 +102,27 @@ export const PATCH_DEFINITIONS = [
       'Removes empty-userFacingName suppression so all tools are visible in TUI',
   },
   {
+    id: 'thinking-dispatch',
+    name: 'Thinking Dispatch Patch',
+    group: PatchGroup.GOVERNANCE,
+    description:
+      'Replaces thinking null-return in SystemTextMessage with inline renderer',
+  },
+  {
+    id: 'thinking-fullshow',
+    name: 'Thinking Full Show Patch',
+    group: PatchGroup.GOVERNANCE,
+    description:
+      'Dead-codes the verbose guard so thinking always shows full content',
+  },
+  {
+    id: 'thinking-assist-guard',
+    name: 'Thinking Assistant Guard Patch',
+    group: PatchGroup.GOVERNANCE,
+    description:
+      'Removes verbose/transcript guard on assistant message thinking dispatch',
+  },
+  {
     id: 'client-data-cache',
     name: 'Client Data Cache Preservation',
     group: PatchGroup.GOVERNANCE,

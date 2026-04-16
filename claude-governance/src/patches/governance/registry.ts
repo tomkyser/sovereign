@@ -208,4 +208,28 @@ export const VERIFICATION_REGISTRY: VerificationEntry[] = [
     category: 'governance',
     passDetail: 'ms7() skips clientDataCache overwrite',
   },
+  {
+    id: 'thinking-dispatch',
+    name: 'Thinking Dispatch Patch',
+    signature: '__thinking_dispatch_patched__',
+    critical: false,
+    category: 'governance',
+    passDetail: 'system thinking rendered instead of suppressed',
+  },
+  {
+    id: 'thinking-fullshow',
+    name: 'Thinking Full Show Patch',
+    signature: '__thinking_fullshow_patched__',
+    critical: false,
+    category: 'governance',
+    passDetail: 'thinking always shows full content',
+  },
+  {
+    id: 'thinking-assist-guard',
+    name: 'Thinking Assistant Guard Patch',
+    signature: '__thinking_assist_guard_patched__',
+    critical: false,
+    category: 'governance',
+    passDetail: 'assistant thinking verbose guard removed',
+  },
 ];

@@ -1,7 +1,7 @@
 # Phase 3.5d Context — Message Components Control
 
 Date: 2026-04-16
-Status: ACT IN PROGRESS — P0 VERIFIED COMPLETE (24/24 SOVEREIGN), P1 next
+Status: ACT IN PROGRESS — P0+P1 COMPLETE (27/27 SOVEREIGN), P1 verify+housekeeping next
 Previous: 3.5c (Governance Integration)
 
 ## Scope
@@ -34,4 +34,7 @@ Every tool call visible, thinking blocks restored, user-customizable component o
 ## Decisions
 - D-01: Full tool visibility is a P0 deliverable — nothing hidden from governance users
 - D-02: 9 deliverables across P0-P3 priority tiers
+- D-03: T9 (30s streaming timeout) closed — mechanism does not exist as described
+- D-04: Three thinking patches cover all hiding points: SystemTextMessage, AssistantMessage, ql_ component
+- D-05: Inline renderer for SystemTextMessage uses r6/m/L (React/Box/Text) from local scope since ql_ inaccessible
 

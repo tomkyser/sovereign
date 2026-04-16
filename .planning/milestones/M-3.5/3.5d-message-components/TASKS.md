@@ -1,6 +1,6 @@
 # Phase 3.5d Tasks — Message Components Control
 
-Status: ACT IN PROGRESS — P0 COMPLETE (verified), P1 next
+Status: ACT IN PROGRESS — P0 VERIFIED, P1 COMPLETE (27/27 SOVEREIGN)
 
 ---
 
@@ -19,10 +19,11 @@ Status: ACT IN PROGRESS — P0 COMPLETE (verified), P1 next
 
 ## P1: Thinking Restoration
 
-- [ ] T7: Binary patch SystemTextMessage thinking dispatch (offset 8193543)
-- [ ] T8: Identify ThinkingMessage minified function name in binary
-- [ ] T9: Binary patch streaming thinking auto-hide (30s timeout removal)
-- [ ] T10: Binary patch AssistantThinkingMessage to show full thinking by default
+- [x] T7: Binary patch SystemTextMessage thinking dispatch — inline renderer replaces null return
+- [x] T8: ThinkingMessage identified as `ql_` (AssistantThinkingMessage)
+- [x] T9: CLOSED — 30s timeout does not exist; thinkingClearLatched (1hr) only affects API, not rendering
+- [x] T10: Binary patch ql_ — verbose guard dead-coded, full thinking always shown
+- [x] T10b: Binary patch assistant message thinking dispatch guard (case"thinking" verbose gate removed)
 - [ ] T11: STOP - Prepare for new session with bootstrap! - THEN: Phase steps 4-6 (/.planning/project-management/phase-steps/{step_number}.md)
   - [ ] 4. Verify all new and existing functionality in live TUI session
   - [ ] 5. Gap analysis & report-discuss-resolve loop

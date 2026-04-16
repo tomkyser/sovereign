@@ -32,6 +32,9 @@ import {
   writeClientDataCachePatch,
   writeChannelDialogBypass,
   writeToolVisibilityPatch,
+  writeThinkingDispatchPatch,
+  writeThinkingFullShowPatch,
+  writeThinkingAssistantGuardPatch,
   GOVERNANCE_DEFAULTS,
   isContentPatched,
 } from './governance';
@@ -359,6 +362,18 @@ export const applyCustomization = async (
     'tool-visibility': {
       fn: c => writeToolVisibilityPatch(c),
       signature: '__tool_visibility_patched__',
+    },
+    'thinking-dispatch': {
+      fn: c => writeThinkingDispatchPatch(c),
+      signature: '__thinking_dispatch_patched__',
+    },
+    'thinking-fullshow': {
+      fn: c => writeThinkingFullShowPatch(c),
+      signature: '__thinking_fullshow_patched__',
+    },
+    'thinking-assist-guard': {
+      fn: c => writeThinkingAssistantGuardPatch(c),
+      signature: '__thinking_assist_guard_patched__',
     },
     'client-data-cache': {
       fn: c => writeClientDataCachePatch(c),
