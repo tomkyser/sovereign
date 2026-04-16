@@ -30,6 +30,19 @@ const tool = {
   name: 'REPL',
   inputJSONSchema,
 
+  renderToolUseMessage(data: { script?: string; description?: string }) {
+    const refs = (globalThis as any).__govReactRefs;
+    const desc = data?.description || 'executing script';
+    if (refs?.R?.createElement && refs?.Text) {
+      return refs.R.createElement(
+        refs.Text,
+        { color: 'cyan' },
+        `REPL — ${desc}`
+      );
+    }
+    return `REPL — ${desc}`;
+  },
+
   async prompt() {
     return getPrompt();
   },

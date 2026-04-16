@@ -541,6 +541,12 @@ async function handleInterrupt(args) {
 var tungsten_default = {
 	name: "Tungsten",
 	inputJSONSchema,
+	renderToolUseMessage(data) {
+		const refs = globalThis.__govReactRefs;
+		const label = `Tungsten ${data?.action || "unknown"} [${data?.session || "main"}]${data?.command ? `: ${data.command.substring(0, 60)}` : ""}`;
+		if (refs?.R?.createElement && refs?.Text) return refs.R.createElement(refs.Text, { color: "yellow" }, label);
+		return label;
+	},
 	async prompt() {
 		return getPrompt();
 	},

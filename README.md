@@ -20,13 +20,13 @@ Claude Code is a subscription product that runs on your hardware, processes your
 
 **Clean-room Tungsten tool.** Persistent terminal sessions via tmux that survive between tool calls. Anthropic's version is stripped from external builds. Ours includes a live terminal panel injected into CC's React render tree, an FS9 binary patch that propagates the tmux environment to all Bash commands, session lifecycle hooks, and statusline integration. 12 modules across 6 core components and 6 actions.
 
-**12 binary patches** that neutralize CLAUDE.md dismissal, restore subagent context, inject tools, activate feature flags, and preserve the bootstrap cache against server-side overwrites. Every patch uses structural pattern matching against the minified code — not byte offsets — so they survive across CC version updates.
+**binary patches** that neutralize CLAUDE.md dismissal, restore subagent context, inject tools, activate feature flags, and preserve the bootstrap cache against server-side overwrites. Every patch uses structural pattern matching against the minified code — not byte offsets — so they survive across CC version updates.
 
-**10 prompt overrides** that replace Anthropic's restrictive system prompts with professional-grade instructions. Misconception correction, false-claims mitigation, thoroughness guidance, context decay awareness, priority hierarchy — all extracted from the text Anthropic wrote for their internal users and restored to the users they stripped it from.
+**prompt overrides** that replace Anthropic's restrictive system prompts with professional-grade instructions. Misconception correction, false-claims mitigation, thoroughness guidance, context decay awareness, priority hierarchy — all extracted from the text Anthropic wrote for their internal users and restored to the users they stripped it from.
 
 **Embedded search pipeline.** Three professional-grade search tools are compiled into every native CC binary but turned off: `bfs 4.1` (parallel breadth-first filesystem search), `ugrep 7.5.0` (high-performance regex with PCRE2 and fuzzy matching), and `ripgrep 14.1.1`. One environment variable and the entire pipeline activates, replacing Glob and Grep with tools that are orders of magnitude faster.
 
-**22-point verification engine.** Every patch, override, injection, and feature flag is verified against the actual binary state. Signatures confirm the new text is present; anti-signatures confirm the old text is gone. State is persisted, surfaced in session-start banners and statusline indicators, and re-verified on every launch. Nothing is assumed — everything is proven.
+**verification engine.** Every patch, override, injection, and feature flag is verified against the actual binary state. Signatures confirm the new text is present; anti-signatures confirm the old text is gone. State is persisted, surfaced in session-start banners and statusline indicators, and re-verified on every launch. Nothing is assumed — everything is proven.
 
 ---
 

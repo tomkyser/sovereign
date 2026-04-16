@@ -6,7 +6,21 @@ import { debug } from '../../utils';
 
 const TOOL_LOADER_SIGNATURE = '__claude_governance_tools__';
 
+
+const REACT_REF_CAPTURE_CODE = [
+  'try{',
+  'var _govR=require("react");',
+  'var _govInk;try{_govInk=require("ink")}catch(_){}',
+  'globalThis.__govReactRefs={',
+  'R:_govR,',
+  'Box:_govInk?_govInk.Box:null,',
+  'Text:_govInk?_govInk.Text:null',
+  '};',
+  '}catch(_govE){}',
+].join('');
+
 const TOOL_LOADER_CODE = [
+  REACT_REF_CAPTURE_CODE,
   `var ${TOOL_LOADER_SIGNATURE}=[];`,
   `try{`,
   `var _tpath=require("node:path").join(`,
@@ -25,7 +39,7 @@ const TOOL_LOADER_CODE = [
   `if(!_t.checkPermissions)_t.checkPermissions=function(a){return Promise.resolve({behavior:"allow",updatedInput:a})};`,
   `if(!_t.toAutoClassifierInput)_t.toAutoClassifierInput=function(){return""};`,
   `if(!_t.userFacingName)_t.userFacingName=function(){return _t.name};`,
-  `if(!_t.renderToolUseMessage)_t.renderToolUseMessage=function(){return null};`,
+  `if(!_t.renderToolUseMessage)_t.renderToolUseMessage=function(d,o){var _r=globalThis.__govReactRefs;if(_r&&_r.R&&_r.Text)return _r.R.createElement(_r.Text,{color:"cyan"},_t.name+(d&&d.description?" — "+d.description:""));return _t.name};`,
   `if(!_t.mapToolResultToToolResultBlockParam)_t.mapToolResultToToolResultBlockParam=function(c,id){return{tool_use_id:id,type:"tool_result",content:typeof c==="string"?c:JSON.stringify(c)}};`,
   `if(!_t.maxResultSizeChars)_t.maxResultSizeChars=1e5;`,
   `${TOOL_LOADER_SIGNATURE}.push(_t)`,

@@ -940,6 +940,12 @@ const vmHandlers = {
 const tool = {
 	name: "REPL",
 	inputJSONSchema,
+	renderToolUseMessage(data) {
+		const refs = globalThis.__govReactRefs;
+		const desc = data?.description || "executing script";
+		if (refs?.R?.createElement && refs?.Text) return refs.R.createElement(refs.Text, { color: "cyan" }, `REPL — ${desc}`);
+		return `REPL — ${desc}`;
+	},
 	async prompt() {
 		return getPrompt();
 	},

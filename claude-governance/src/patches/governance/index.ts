@@ -21,3 +21,4 @@ export { writeTungstenPanelInjection } from './render-tree';
 export { writeTungstenToolGuidance } from './tungsten-guidance';
 export { writeClientDataCachePatch } from './client-data-cache';
 export { writeChannelDialogBypass } from './channel-dialog-bypass';
+export { writeToolVisibilityPatch } from './tool-visibility';

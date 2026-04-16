@@ -193,6 +193,14 @@ export const VERIFICATION_REGISTRY: VerificationEntry[] = [
     passDetail: 'dev channel dialog auto-accepted',
   },
   {
+    id: 'tool-visibility',
+    name: 'Tool Visibility Patch',
+    signature: '__tool_visibility_patched__',
+    critical: false,
+    category: 'governance',
+    passDetail: 'empty-name suppression removed',
+  },
+  {
     id: 'client-data-cache',
     name: 'Client Data Cache Preservation',
     signature: '__cdc_preserved__',

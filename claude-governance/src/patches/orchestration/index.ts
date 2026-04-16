@@ -95,6 +95,13 @@ export const PATCH_DEFINITIONS = [
       'Auto-accepts dev channel dialog for OAuth users (skips interactive confirmation)',
   },
   {
+    id: 'tool-visibility',
+    name: 'Tool Visibility Patch',
+    group: PatchGroup.GOVERNANCE,
+    description:
+      'Removes empty-userFacingName suppression so all tools are visible in TUI',
+  },
+  {
     id: 'client-data-cache',
     name: 'Client Data Cache Preservation',
     group: PatchGroup.GOVERNANCE,

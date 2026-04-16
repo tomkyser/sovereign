@@ -20,6 +20,18 @@ export default {
   name: 'Tungsten',
   inputJSONSchema,
 
+  renderToolUseMessage(data: { action?: string; session?: string; command?: string }) {
+    const refs = (globalThis as any).__govReactRefs;
+    const action = data?.action || 'unknown';
+    const session = data?.session || 'main';
+    const detail = data?.command ? `: ${data.command.substring(0, 60)}` : '';
+    const label = `Tungsten ${action} [${session}]${detail}`;
+    if (refs?.R?.createElement && refs?.Text) {
+      return refs.R.createElement(refs.Text, { color: 'yellow' }, label);
+    }
+    return label;
+  },
+
   async prompt() {
     return getPrompt();
   },

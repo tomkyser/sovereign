@@ -31,6 +31,7 @@ import {
   writeTungstenToolGuidance,
   writeClientDataCachePatch,
   writeChannelDialogBypass,
+  writeToolVisibilityPatch,
   GOVERNANCE_DEFAULTS,
   isContentPatched,
 } from './governance';
@@ -354,6 +355,10 @@ export const applyCustomization = async (
     'channel-dialog-bypass': {
       fn: (c: string) => writeChannelDialogBypass(c),
       signature: '__channel_dialog_bypassed__',
+    },
+    'tool-visibility': {
+      fn: c => writeToolVisibilityPatch(c),
+      signature: '__tool_visibility_patched__',
     },
     'client-data-cache': {
       fn: c => writeClientDataCachePatch(c),
