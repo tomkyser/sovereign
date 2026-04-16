@@ -1,7 +1,7 @@
 # Phase 3.5d Context — Message Components Control
 
 Date: 2026-04-16
-Status: PLANNING COMPLETE — ready for ACT
+Status: ACT IN PROGRESS — P0 complete (24/24 SOVEREIGN), P1 next
 Previous: 3.5c (Governance Integration)
 
 ## Scope

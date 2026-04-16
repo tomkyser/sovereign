@@ -5,7 +5,7 @@
 ## Phase Progress
 - [x] Research — CC source analysis, binary patterns, rendering pipeline
 - [x] Planning — PLANNING.md with implementation approach per deliverable
-- [ ] Act — Implementation
+- [~] Act — P0 complete (T1-T5), P1 next
 - [ ] Verify — 23/23+ SOVEREIGN, visual verification in live TUI
 - [ ] Gap Analysis
 - [ ] Housekeeping

@@ -540,11 +540,11 @@ Status: RESEARCH COMPLETE — PLANNING next
 /Users/tom.kyser/dev/cc-source/collection-claude-code-source-code/claude-code-source-code/src/components/messages
 
 ### P0: Tool Visibility (Blocking)
-- [ ] T1: Update tool-injection.ts renderToolUseMessage default to create visible React elements
-- [ ] T2: Capture React/Ink references in tool loader scope for element creation
-- [ ] T3: Implement REPL-specific renderToolUseMessage (show script description + operations)
-- [ ] T4: Implement Tungsten-specific renderToolUseMessage (show action + session)
-- [ ] T5: Binary patch to override empty-userFacingName suppression check
+- [x] T1: Update tool-injection.ts renderToolUseMessage default to create visible React elements
+- [x] T2: Capture React/Ink references in tool loader scope for element creation
+- [x] T3: Implement REPL-specific renderToolUseMessage (show script description + operations)
+- [x] T4: Implement Tungsten-specific renderToolUseMessage (show action + session)
+- [x] T5: Binary patch to override empty-userFacingName suppression check
 - [ ] T6: Verify all external tools visible in live TUI session
 
 ### P1: Thinking/Reasoning Restoration (Core)

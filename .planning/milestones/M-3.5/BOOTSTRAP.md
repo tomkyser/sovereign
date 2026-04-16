@@ -2,45 +2,49 @@
 
 ---
 
-**Status:** Phases 3.5a-c COMPLETE — Phase 3.5d PLANNING COMPLETE, ready for ACT
-**Baseline:** 23/23 SOVEREIGN on CC 2.1.101
+**Status:** Phases 3.5a-c COMPLETE — Phase 3.5d P0 COMPLETE (24/24 SOVEREIGN)
+**Baseline:** 24/24 SOVEREIGN on CC 2.1.101
 **Previous milestone:** M-3 (System Prompt Control) — COMPLETE
 
 ## Read These Files (In This Order)
 
-1. `.planning/milestones/M-3.5/3.5d-message-components/PLANNING.md` — **Implementation approach per deliverable**
-2. `.planning/milestones/M-3.5/3.5d-message-components/TASKS.md` — **23 tasks (T1-T23)**
-3. `.planning/milestones/M-3.5/3.5d-message-components/RESEARCH.md` — Full research (binary offsets, source analysis)
+1. `.planning/milestones/M-3.5/3.5d-message-components/TASKS.md` — **T1-T5 complete, T6 next**
+2. `.planning/milestones/M-3.5/3.5d-message-components/PLANNING.md` — Approach per deliverable
+3. `.planning/journals/session-2026-04-16-c.md` — P0 implementation details
 4. `.planning/milestones/M-3.5/3.5d-message-components/CONTEXT.md` — Phase context
 5. `.planning/milestones/M-3.5/CONTEXT.md` — Milestone-level shared state
 
-## What Was Built So Far
+## What Was Built This Session
 
-### Phase 3.5a ✅ — Wire MCP Server
-### Phase 3.5b ✅ — Session Registry & Cross-Session Routing
-### Phase 3.5c ✅ — Governance Integration (23/23 SOVEREIGN)
+### PATCH 14: Tool Visibility (T1-T5 complete)
+- **T1**: Default `renderToolUseMessage` changed from null to visible React element (cyan text)
+- **T2**: `globalThis.__govReactRefs` captures React/Ink refs in tool loader scope
+- **T3**: REPL-specific renderer — shows "REPL — {description}"
+- **T4**: Tungsten-specific renderer — shows "Tungsten {action} [{session}]: {command}"
+- **T5**: Binary patch removes `if(i==="")return null` empty-name suppression
 
-## What's Next — Phase 3.5d ACT (Implementation)
+### Key Implementation Details
+- `renderToolUseMessage(parsedData, {theme, verbose, commands})` — verified CC signature
+- React refs via `require("react")` / `require("ink")` in binary scope
+- String fallback when React/Ink unavailable
 
-Planning complete. 23 tasks across 4 priority tiers:
+## What's Next — Phase Steps 4-6 for P0, then P1
 
-- **P0 (T1-T6):** Tool visibility — fix renderToolUseMessage default, capture React/Ink refs, per-tool renderers, empty-name suppression patch
-- **P1 (T7-T11):** Thinking restoration — SystemTextMessage dispatch patch, auto-hide removal, full thinking by default
-- **P2 (T12-T16):** Override system — globalThis registry, injection points in SystemTextMessage/AssistantToolUseMessage, attachment visibility
-- **P3 (T17-T20):** User customization — component directory loading, defaults, hidden commands, docs
-- **Verify (T21-T23):** Registry, SOVEREIGN check, TUI verification
+### Step 4: Verify
+- T6: Interactive TUI verification — launch `claude` and confirm REPL/Tungsten/Ping render visually
+- Verify React element rendering (colored text) vs string fallback
 
-### Implementation Strategy Summary
-- P0 modifies existing tool-injection.ts + adds per-tool renderers (no new binary patches)
-- P1 requires 3 new binary patches (thinking dispatch, auto-hide, full display)
-- P2 requires 3 new binary patches (override registry + injection points)
-- P3 is file-based (no binary patches)
+### Step 5: Gap Analysis
+- Any tools still hidden?
+- Does the renderer display correctly during streaming?
+- Edge cases: concurrent tool calls, error states
 
-### Key Source Files
-- `claude-governance/src/patches/governance/tool-injection.ts` — P0 changes here
-- `claude-governance/src/patches/governance/render-tree.ts` — Pattern for React component patching
-- `claude-governance/src/tools/repl/index.ts` — REPL tool (add renderToolUseMessage)
+### Step 6: Housekeeping
+- Update all tracking docs
+- Commit and push
+- Bootstrap for P1 (Thinking Restoration)
 
 ### Build
-- `pnpm build` → full project build
-- `tsc --noEmit` → typecheck
+- `cd claude-governance && pnpm build` → full project build
+- `node claude-governance/dist/index.mjs -a` → apply patches
+- `node claude-governance/dist/index.mjs check` → 24/24 SOVEREIGN
