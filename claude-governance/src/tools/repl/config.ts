@@ -7,6 +7,7 @@ export interface ReplConfig {
   timeout?: number;
   maxResultSize?: number;
   maxReadFileSize?: number;
+  allowAllModules?: boolean;
 }
 
 let replConfig: ReplConfig | null = null;
@@ -33,6 +34,10 @@ export function loadConfig(): ReplConfig {
       console.error('[REPL] Invalid repl.maxReadFileSize: ' + cfg.maxReadFileSize + ' — must be number >= 1024');
       delete cfg.maxReadFileSize;
     }
+    if (cfg.allowAllModules !== undefined && typeof cfg.allowAllModules !== 'boolean') {
+      console.error('[REPL] Invalid repl.allowAllModules: ' + cfg.allowAllModules + ' — must be boolean');
+      delete cfg.allowAllModules;
+    }
     replConfig = cfg;
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : '';
@@ -54,4 +59,8 @@ export function getMaxResultSize(): number {
 
 export function getMaxReadFileSize(): number {
   return loadConfig().maxReadFileSize || 256 * 1024;
+}
+
+export function getAllowAllModules(): boolean {
+  return loadConfig().allowAllModules === true;
 }

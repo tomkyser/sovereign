@@ -1,4 +1,5 @@
 import * as vm from 'node:vm';
+import { getAllowAllModules } from './config';
 
 export interface ToolContext {
   options?: { tools?: Array<{ name: string; call: Function }> };
@@ -159,12 +160,13 @@ function createCapturedConsole(): CapturedConsole {
 const SAFE_MODULES = new Set(['path', 'url', 'querystring', 'crypto', 'util', 'os']);
 
 function createSafeRequire() {
+  const unrestricted = getAllowAllModules();
   return function safeRequire(moduleName: string) {
-    if (SAFE_MODULES.has(moduleName)) return require(moduleName);
+    if (unrestricted || SAFE_MODULES.has(moduleName)) return require(moduleName);
     throw new Error(
       `require('${moduleName}') is not allowed. ` +
       `Allowed modules: ${[...SAFE_MODULES].join(', ')}. ` +
-      `Use the tool handlers (read, write, bash, etc.) for I/O.`
+      `Set repl.allowAllModules: true in ~/.claude-governance/config.json to unlock all modules.`
     );
   };
 }
@@ -183,7 +185,7 @@ export function getOrCreateVM(handlers: Record<string, Function>): vm.Context & 
     console: capturedConsole,
     JSON, Math, Date, RegExp, Array, Object, Map, Set, WeakMap, WeakSet,
     Promise, Symbol, Proxy, Reflect,
-    Buffer, URL, URLSearchParams, TextEncoder, TextDecoder,
+    Buffer, URL, URLSearchParams, TextEncoder, TextDecoder, process,
     setTimeout, clearTimeout, setInterval, clearInterval,
     parseInt, parseFloat, isNaN, isFinite,
     encodeURIComponent, decodeURIComponent,

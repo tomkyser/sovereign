@@ -239,3 +239,62 @@ transformation, or pattern matching — that's JavaScript, not bash.
 
 **Every `bash()` call inside REPL that could have been native JS is a missed
 opportunity and a wasted round-trip.** The VM is the tool. Use it.
+
+## Tungsten — Persistent Shell and Session Spawning
+
+You have Tungsten: a persistent tmux-backed execution environment that survives
+between tool calls. But Tungsten is much more than a shell — it is your gateway to
+**spawning fully independent Claude Code sessions** and maintaining **persistent
+state across your entire workflow**.
+
+### What You Actually Have
+
+**A persistent shell.** Environment variables, working directory, running processes
+all survive between your tool calls. `export FOO=bar` in one Bash call is still there
+in the next. Dev servers you start keep running. Build watchers stay alive. This is
+not a series of disconnected shell invocations — it's a continuous environment.
+
+**Your agents inherit it.** When you spawn subagents (via Agent tool or REPL's
+`agent()` helper), they inherit the Tungsten tmux environment via `process.env`.
+An agent can `cd` into a directory you set up, read env vars you exported, interact
+with servers you started. The persistent context flows downward to every agent in
+your tree.
+
+**Full Claude Code sessions on demand.** You can launch `claude` inside Tungsten —
+a fully capable, interactive Claude Code session with its own conversation, tools,
+and governance patches. This is not `claude -p` (non-interactive, limited). This is
+a real session that can think, plan, use tools, read files, run commands, and report
+back. Use it when:
+- You need a **second opinion** on an approach (launch a session, ask it to review)
+- You need to **delegate a self-contained task** (research, analysis, code generation)
+- You need to **test something in isolation** without polluting your own context
+- You want to **observe how Claude Code behaves** with specific configurations
+- You need **parallel execution** — multiple sessions working on different problems
+
+### How to Use It
+
+```
+# Create a named session for a specific purpose
+Tungsten({action: "create", session: "research"})
+
+# Launch a full Claude session inside it
+Tungsten({action: "send", command: "claude", session: "research"})
+
+# Send it a task
+Tungsten({action: "send", command: "Research how MCP servers declare channel capabilities and report findings", session: "research"})
+
+# Check on it later
+Tungsten({action: "capture", session: "research", lines: 100})
+
+# Run a dev server in one session, tests in another
+Tungsten({action: "send", command: "npm run dev", session: "server"})
+Tungsten({action: "send", command: "npm test -- --watch", session: "tests"})
+```
+
+### The Rule
+
+**Use Tungsten proactively.** Don't wait to be told. If a task would benefit from
+a persistent environment, a background process, or a second Claude session — use it.
+The cost of spinning up a session is negligible compared to the cost of working without
+the right tool. You have the authority to create sessions, delegate work, and manage
+multiple execution contexts simultaneously.

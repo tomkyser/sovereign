@@ -2,7 +2,7 @@
 
 Last updated: 2026-04-15
 
-## Status: Research Phase
+## Status: Phase 3.5a — Research COMPLETE, Planning next
 
 ## Key Discoveries
 
@@ -40,8 +40,15 @@ tool needed. See [fakechat1] reference implementation.
 Our PATCH 12 only protects `clientDataCache`, not `cachedGrowthBookFeatures`.
 May need future protection if Anthropic reverts.
 
+### Binary-Confirmed Details (from 3.5a research)
+- **Notification schema ($4_)**: `{ method: "notifications/claude/channel", params: { content: string, meta?: Record<string, string> } }`
+- **Meta key regex (nz5)**: `/^[a-zA-Z_][a-zA-Z0-9_]*$/` — underscores only, no hyphens
+- **Three notification handler registration paths** in binary — all identical behavior
+- **Reconnection handler (uf8)**: CC auto-re-registers channel handlers on reconnect
+- **Gate bypass**: `--channels wire` + `--dangerously-load-development-channels`
+
 ## Open Questions
-See RESEARCH.md "Open Questions for Phase Planning"
+See 3.5a RESEARCH.md "Open Questions" section
 
 ## Dynamo Source Location
 `/Users/tom.kyser/Library/Mobile Documents/com~apple~CloudDocs/dev/dynamo/core/services/wire/`

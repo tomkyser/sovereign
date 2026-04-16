@@ -1,9 +1,16 @@
-import { loadConfig } from './config';
+import { loadConfig, getAllowAllModules } from './config';
 
 export function getPrompt(): string {
   const mode = loadConfig().mode || 'coexist';
   if (mode === 'replace') return replacePrompt();
   return coexistPrompt();
+}
+
+function requireNote(): string {
+  if (getAllowAllModules()) {
+    return '- `require()` is available for **all Node.js built-in modules** including `fs`, `child_process`, `http`, `net`, `stream`, etc. Use native JS for file I/O, binary analysis, and data processing instead of shelling out to bash';
+  }
+  return '- `require()` is available for: path, url, querystring, crypto, util, os';
 }
 
 function coexistPrompt(): string {
@@ -140,7 +147,7 @@ Falling back to individual Read/Write/Edit calls after a REPL error wastes the b
 - \`console.log()\` output is captured and included in the result
 - \`return\` a value to include it in the response
 - Use \`try/catch\` inside scripts to handle errors gracefully
-- \`require()\` is available for: path, url, querystring, crypto, util, os
+${requireNote()}
 - All I/O goes through CC's permission system \u2014 writes will prompt for approval when configured
 
 ## Tungsten Integration
@@ -299,7 +306,7 @@ When a script fails, fix it and retry. Common fixes:
 - \`console.log()\` output is captured and included in the result
 - \`return\` a value to include it in the response
 - Use \`try/catch\` inside scripts to handle errors gracefully
-- \`require()\` is available for: path, url, querystring, crypto, util, os
+${requireNote()}
 - All I/O goes through CC's permission system \u2014 writes will prompt for approval when configured
 - All paths are relative to the current working directory
 

@@ -57,6 +57,10 @@ function loadConfig() {
 			console.error("[REPL] Invalid repl.maxReadFileSize: " + cfg.maxReadFileSize + " — must be number >= 1024");
 			delete cfg.maxReadFileSize;
 		}
+		if (cfg.allowAllModules !== void 0 && typeof cfg.allowAllModules !== "boolean") {
+			console.error("[REPL] Invalid repl.allowAllModules: " + cfg.allowAllModules + " — must be boolean");
+			delete cfg.allowAllModules;
+		}
 		replConfig = cfg;
 	} catch (e) {
 		if ((e instanceof Error ? e.message : "").includes("JSON")) console.error("[REPL] config.json parse error — using defaults");
@@ -72,6 +76,9 @@ function getMaxResultSize() {
 }
 function getMaxReadFileSize() {
 	return loadConfig().maxReadFileSize || 256 * 1024;
+}
+function getAllowAllModules() {
+	return loadConfig().allowAllModules === true;
 }
 
 //#endregion
@@ -96,6 +103,10 @@ const inputJSONSchema = {
 function getPrompt() {
 	if ((loadConfig().mode || "coexist") === "replace") return replacePrompt();
 	return coexistPrompt();
+}
+function requireNote() {
+	if (getAllowAllModules()) return "- `require()` is available for **all Node.js built-in modules** including `fs`, `child_process`, `http`, `net`, `stream`, etc. Use native JS for file I/O, binary analysis, and data processing instead of shelling out to bash";
+	return "- `require()` is available for: path, url, querystring, crypto, util, os";
 }
 function coexistPrompt() {
 	return `# REPL \u2014 Batch Operations Engine
@@ -231,7 +242,7 @@ Falling back to individual Read/Write/Edit calls after a REPL error wastes the b
 - \`console.log()\` output is captured and included in the result
 - \`return\` a value to include it in the response
 - Use \`try/catch\` inside scripts to handle errors gracefully
-- \`require()\` is available for: path, url, querystring, crypto, util, os
+${requireNote()}
 - All I/O goes through CC's permission system \u2014 writes will prompt for approval when configured
 
 ## Tungsten Integration
@@ -389,7 +400,7 @@ When a script fails, fix it and retry. Common fixes:
 - \`console.log()\` output is captured and included in the result
 - \`return\` a value to include it in the response
 - Use \`try/catch\` inside scripts to handle errors gracefully
-- \`require()\` is available for: path, url, querystring, crypto, util, os
+${requireNote()}
 - All I/O goes through CC's permission system \u2014 writes will prompt for approval when configured
 - All paths are relative to the current working directory
 
@@ -519,9 +530,10 @@ const SAFE_MODULES = new Set([
 	"os"
 ]);
 function createSafeRequire() {
+	const unrestricted = getAllowAllModules();
 	return function safeRequire(moduleName) {
-		if (SAFE_MODULES.has(moduleName)) return require(moduleName);
-		throw new Error(`require('${moduleName}') is not allowed. Allowed modules: ${[...SAFE_MODULES].join(", ")}. Use the tool handlers (read, write, bash, etc.) for I/O.`);
+		if (unrestricted || SAFE_MODULES.has(moduleName)) return require(moduleName);
+		throw new Error(`require('${moduleName}') is not allowed. Allowed modules: ${[...SAFE_MODULES].join(", ")}. Set repl.allowAllModules: true in ~/.claude-governance/config.json to unlock all modules.`);
 	};
 }
 function getOrCreateVM(handlers) {
@@ -550,6 +562,7 @@ function getOrCreateVM(handlers) {
 		URLSearchParams,
 		TextEncoder,
 		TextDecoder,
+		process,
 		setTimeout,
 		clearTimeout,
 		setInterval,
