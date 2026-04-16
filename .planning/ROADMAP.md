@@ -558,18 +558,18 @@ Status: RESEARCH COMPLETE — PLANNING next
   - [ ] 5. Gap analysis & report-discuss-resolve loop
   - [ ] 6. Housekeeping and handoff
 
-#### P1.5: Binary Patch Pattern Migration (Blocking — inserted 2026-04-16)
+#### P1.5: Binary Patch Pattern Migration — COMPLETE (29/29 SOVEREIGN, 2026-04-16)
 Repack pipeline now uses esbuild ESM→CJS transform. The 13 governance patch regexes
 were written against Bun's minified output and must be re-derived against esbuild's CJS.
 Patterns must anticipate future esbuild version changes and variable name variations.
-- [ ] T25: Research esbuild CJS output structure — map variable names and code patterns
-- [ ] T26: Migrate Tool Registry Injection pattern to esbuild output
-- [ ] T27: Migrate REPL/Tungsten guidance patterns (3 patches)
-- [ ] T28: Migrate Channel Dialog Bypass pattern
-- [ ] T29: Migrate Tool Visibility + Client Data Cache patterns
-- [ ] T30: Migrate Thinking patches (Dispatch, FullShow, AssistantGuard)
-- [ ] T31: Migrate Glob/Grep Exclusion + Explore override patterns
-- [ ] T32: Full SOVEREIGN check — target 27/29+
+- [x] T25: Research esbuild CJS output structure — map variable names and code patterns
+- [x] T26: Migrate Tool Registry Injection pattern to esbuild output
+- [x] T27: Migrate REPL/Tungsten guidance patterns (3 patches)
+- [x] T28: Migrate Channel Dialog Bypass pattern
+- [x] T29: Migrate Tool Visibility + Client Data Cache patterns
+- [x] T30: Migrate Thinking patches (Dispatch, FullShow, AssistantGuard)
+- [x] T31: Migrate Glob/Grep Exclusion + Explore override patterns
+- [x] T32: Full SOVEREIGN check — target 27/29+
 - [ ] T11: Verify thinking blocks visible in live TUI (unblocked)
 - [ ] STOP - Phase steps 4-6
 
