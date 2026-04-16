@@ -111,14 +111,20 @@ function detectToolArray(content: string): ToolArrayDetection | null {
       name: 'function-declaration',
       fn: () => {
         const m = content.match(
-          /function ([$\w]+)\(\)\{return\[([$\w]+),([$\w]+),([$\w]+),/
+          /function\s+([$\w]+)\(\)\s*\{\s*\n?\s*return\s*\[([$\w]+),\s*([$\w]+),\s*([$\w]+),/
         );
         if (!m || m.index === undefined) return null;
         const fnName = m[1];
         const prefix = `function ${fnName}(){return[`;
-        const prefixIdx = content.indexOf(prefix);
+        const prefixAlt = `function ${fnName}() {\n  return [`;
+        let prefixIdx = content.indexOf(prefix);
+        let usedPrefix = prefix;
+        if (prefixIdx === -1) {
+          prefixIdx = content.indexOf(prefixAlt);
+          usedPrefix = prefixAlt;
+        }
         if (prefixIdx === -1) return null;
-        const arrayStart = prefixIdx + prefix.length;
+        const arrayStart = prefixIdx + usedPrefix.length;
         const arrayEnd = findArrayEnd(content, arrayStart);
         if (arrayEnd === -1) return null;
         const arrayContent = content.substring(arrayStart, arrayEnd);
@@ -126,9 +132,9 @@ function detectToolArray(content: string): ToolArrayDetection | null {
         if (spreads < 10) return null;
         return {
           fnName,
-          fnDeclStart: prefix,
+          fnDeclStart: usedPrefix,
           arrayContent,
-          fullMatch: prefix + arrayContent + ']}',
+          fullMatch: usedPrefix + arrayContent + (usedPrefix === prefix ? ']}' : '];\n}'),
           strategy: 'function-declaration',
           spreads,
         };
@@ -138,7 +144,7 @@ function detectToolArray(content: string): ToolArrayDetection | null {
       name: 'arrow-function',
       fn: () => {
         const m = content.match(
-          /(?:var |let |const )([$\w]+)=\(\)=>\[([$\w]+),([$\w]+),([$\w]+),/
+          /(?:var |let |const )([$\w]+)\s*=\s*\(\)\s*=>\s*\[([$\w]+),\s*([$\w]+),\s*([$\w]+),/
         );
         if (!m || m.index === undefined) return null;
         const fnName = m[1];
@@ -173,16 +179,16 @@ function detectToolArray(content: string): ToolArrayDetection | null {
     {
       name: 'content-based',
       fn: () => {
-        const toolSig = /name:"(?:Bash|Read|Edit|Write|Agent)"/;
+        const toolSig = /name:\s*"(?:Bash|Read|Edit|Write|Agent)"/;
         const sigMatch = content.match(toolSig);
         if (!sigMatch || sigMatch.index === undefined) return null;
         const nearby = content.substring(
           Math.max(0, sigMatch.index - 3000),
           sigMatch.index
         );
-        const fnMatch = nearby.match(/function ([$\w]+)\(\)\{return\[/);
+        const fnMatch = nearby.match(/function\s+([$\w]+)\(\)\s*\{\s*\n?\s*return\s*\[/);
         const arrowMatch = nearby.match(
-          /(?:var |let |const )([$\w]+)=\(\)=>\[/
+          /(?:var |let |const )([$\w]+)\s*=\s*\(\)\s*=>\s*\[/
         );
         const match = fnMatch || arrowMatch;
         if (!match) return null;

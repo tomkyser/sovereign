@@ -24,7 +24,7 @@ export const writeReplToolGuidance = (content: string): string | null => {
       name: 'using-your-tools-array-close',
       fn: js => {
         const m = js.match(
-          /sequentially instead\."\]\.filter\(\([$\w]+\)=>[$\w]+!==null\);return\["# Using your tools"/
+          /sequentially instead\."\]\.filter\(\([$\w]+\)\s*=>\s*[$\w]+\s*!==\s*null\)\s*;\s*\n?\s*return\s*\["# Using your tools"/
         );
         return m
           ? {

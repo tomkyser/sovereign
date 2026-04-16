@@ -72,7 +72,7 @@ export const VERIFICATION_REGISTRY: VerificationEntry[] = [
   {
     id: 'embedded-tools-exclusion',
     name: 'Embedded Tools: Glob/Grep Exclusion',
-    signature: /[$\w]+\(\)\?\[\]:\[[$\w]+,[$\w]+\]/,
+    signature: /[$\w]+\(\)\s*\?\s*\[\]\s*:\s*\[[$\w]+,\s*[$\w]+\]/,
     critical: false,
     category: 'gate',
     passDetail: 'Glob/Grep excluded when embedded tools active',
@@ -163,7 +163,7 @@ export const VERIFICATION_REGISTRY: VerificationEntry[] = [
     id: 'tungsten-fs9',
     name: 'Tungsten: bashProvider tmux Activation',
     signature: '__CLAUDE_GOVERNANCE_TMUX_ENV',
-    antiSignature: /function FS9\(\)\{return null\}/,
+    antiSignature: /function\s+(?:FS9|[$\w]+)\(\)\s*\{\s*(?:return null|if)\}/,
     critical: false,
     category: 'tool-injection',
     passDetail: 'FS9() reads Tungsten socket info',

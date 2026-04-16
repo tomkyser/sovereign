@@ -44,7 +44,7 @@ export const writeClientDataCachePatch = (content: string): string | null => {
         // Match the Pj comparison chain inside ms7
         // Pattern: Pj(O.clientDataCache,_)&&Pj(O.additionalModelOptionsCache,q)&&Pj(O.additionalModelCostsCache,K)
         const m = js.match(
-          /([$\w]+)\(([$\w]+)\.clientDataCache,([$\w]+)\)&&\1\(\2\.additionalModelOptionsCache,([$\w]+)\)&&\1\(\2\.additionalModelCostsCache,([$\w]+)\)/
+          /([$\w]+)\(([$\w]+)\.clientDataCache,\s*([$\w]+)\)\s*&&\s*\1\(\2\.additionalModelOptionsCache,\s*([$\w]+)\)\s*&&\s*\1\(\2\.additionalModelCostsCache,\s*([$\w]+)\)/
         );
         return m
           ? { match: m, detector: 'exact-ms7-pj-chain', confidence: 'high' }
@@ -57,7 +57,7 @@ export const writeClientDataCachePatch = (content: string): string | null => {
         // Match the p_ callback that writes clientDataCache
         // Pattern: p_((T)=>({...T,clientDataCache:_,additionalModelOptionsCache:q,additionalModelCostsCache:K}))
         const m = js.match(
-          /([$\w]+)\(\(([$\w]+)\)=>\(\{\.\.\.\2,clientDataCache:([$\w]+),additionalModelOptionsCache:([$\w]+),additionalModelCostsCache:([$\w]+)\}\)\)/
+          /([$\w]+)\(\(([$\w]+)\)\s*=>\s*\(\{\s*\.\.\.\2,\s*clientDataCache:\s*([$\w]+),\s*additionalModelOptionsCache:\s*([$\w]+),\s*additionalModelCostsCache:\s*([$\w]+)\s*\}\)\)/
         );
         return m
           ? {
@@ -89,7 +89,7 @@ export const writeClientDataCachePatch = (content: string): string | null => {
 
   // Edit 1: Remove clientDataCache from Pj comparison chain
   const pjChainPattern =
-    /([$\w]+)\(([$\w]+)\.clientDataCache,([$\w]+)\)&&(\1\(\2\.additionalModelOptionsCache,([$\w]+)\)&&\1\(\2\.additionalModelCostsCache,([$\w]+)\))/;
+    /([$\w]+)\(([$\w]+)\.clientDataCache,\s*([$\w]+)\)\s*&&\s*(\1\(\2\.additionalModelOptionsCache,\s*([$\w]+)\)\s*&&\s*\1\(\2\.additionalModelCostsCache,\s*([$\w]+)\))/;
   const pjMatch = result.match(pjChainPattern);
   if (!pjMatch) {
     debug('  clientDataCache: Pj chain pattern not found for replacement');
@@ -106,7 +106,7 @@ export const writeClientDataCachePatch = (content: string): string | null => {
 
   // Edit 2: Remove clientDataCache from p_ write callback
   const writePattern =
-    /([$\w]+)\(\(([$\w]+)\)=>\(\{\.\.\.\2,clientDataCache:([$\w]+),additionalModelOptionsCache:([$\w]+),additionalModelCostsCache:([$\w]+)\}\)\)/;
+    /([$\w]+)\(\(([$\w]+)\)\s*=>\s*\(\{\s*\.\.\.\2,\s*clientDataCache:\s*([$\w]+),\s*additionalModelOptionsCache:\s*([$\w]+),\s*additionalModelCostsCache:\s*([$\w]+)\s*\}\)\)/;
   const writeMatch = result.match(writePattern);
   if (!writeMatch) {
     debug('  clientDataCache: p_ write pattern not found for replacement');
@@ -131,7 +131,7 @@ export const writeClientDataCachePatch = (content: string): string | null => {
   // This prevents the dead variable from triggering lint-like warnings in
   // the minified code and is cleaner.
   const varPattern =
-    /let ([$\w]+)=([$\w]+)\.client_data\?\?null,([$\w]+)=\2\.additional_model_options/;
+    /let\s+([$\w]+)\s*=\s*([$\w]+)\.client_data\s*\?\?\s*null,\s*([$\w]+)\s*=\s*\2\.additional_model_options/;
   const varMatch = result.match(varPattern);
   if (varMatch) {
     const varOld = varMatch[0];
@@ -145,7 +145,7 @@ export const writeClientDataCachePatch = (content: string): string | null => {
   // Inject signature comment for verification
   // Place it right after the function keyword to be findable
   const ms7Decl = 'async function ms7()';
-  const ms7DeclAlt = result.match(/async function ([$\w]+)\(\)\{try\{let ([$\w]+)=await ([$\w]+)\(\);if\(!\2\)return;let ([$\w]+)=\2\.additional_model_options/);
+  const ms7DeclAlt = result.match(/async function ([$\w]+)\(\)\s*\{\s*\n?\s*try\s*\{\s*\n?\s*let\s+([$\w]+)\s*=\s*await\s+([$\w]+)\(\);\s*\n?\s*if\s*\(!\2\)\s*return;\s*\n?\s*let\s+([$\w]+)\s*=\s*\2\.additional_model_options/);
 
   if (ms7DeclAlt) {
     // The function name might not be ms7 in future versions

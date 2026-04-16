@@ -37,7 +37,7 @@ export const writeTungstenToolGuidance = (content: string): string | null => {
       name: 'post-repl-array-close',
       fn: js => {
         const m = js.match(
-          /diff visibility matters\."\]\.filter\(\([$\w]+\)=>[$\w]+!==null\);return\["# Using your tools"/
+          /sequentially instead\."\]\.filter\(\([$\w]+\)\s*=>\s*[$\w]+\s*!==\s*null\)\s*;\s*\n?\s*return\s*\["# Using your tools"/
         );
         return m
           ? {
@@ -55,8 +55,8 @@ export const writeTungstenToolGuidance = (content: string): string | null => {
   const original = detection.match[0];
   const escapedGuidance = TUNGSTEN_GUIDANCE.replace(/"/g, '\\"');
   const replacement = original.replace(
-    'diff visibility matters."]',
-    `diff visibility matters.","${escapedGuidance}"]`
+    'sequentially instead."]',
+    `sequentially instead.","${escapedGuidance}"]`
   );
 
   const result = content.replace(original, replacement);

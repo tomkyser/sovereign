@@ -15,7 +15,7 @@ export const writeThinkingDispatchPatch = (content: string): string | null => {
       name: 'subtype-thinking-return-null',
       fn: js => {
         const m = js.match(
-          /([$\w]+)\.subtype==="thinking"\)return null;if\(\1\.subtype==="bridge_status"\)/
+          /([$\w]+)\.subtype\s*===\s*"thinking"\)\s*return\s+null;\s*if\s*\(\1\.subtype\s*===\s*"bridge_status"\)/
         );
         return m
           ? {
@@ -30,7 +30,7 @@ export const writeThinkingDispatchPatch = (content: string): string | null => {
       name: 'subtype-thinking-null-general',
       fn: js => {
         const m = js.match(
-          /([$\w]+)\.subtype==="thinking"\)return null/
+          /([$\w]+)\.subtype\s*===\s*"thinking"\)\s*return\s+null/
         );
         return m
           ? {
@@ -48,17 +48,29 @@ export const writeThinkingDispatchPatch = (content: string): string | null => {
   const matched = detection.match[0];
   const msgVar = (detection.match as RegExpMatchArray)[1];
 
+  // Extract React/Box/Text variable names from surrounding context
+  const matchIdx = (detection.match as RegExpMatchArray).index!;
+  const ctx = content.substring(Math.max(0, matchIdx - 3000), matchIdx + 1000);
+  const reactMatch = ctx.match(/([$\w]+)\.createElement\(/);
+  const boxMatch = ctx.match(/\.createElement\(([$\w]+),\s*\{[\s\S]{0,30}flexDirection/);
+  const textMatch = ctx.match(/\.createElement\(([$\w]+),\s*\{[\s\S]{0,30}dimColor/);
+  const addMarginMatch = ctx.match(/addMargin:\s*([$\w]+)/);
+  const R = reactMatch?.[1] || 'r6';
+  const B = boxMatch?.[1] || 'm';
+  const T = textMatch?.[1] || 'L';
+  const AM = addMarginMatch?.[1] || 'K';
+
   const inlineRenderer = [
     msgVar + '.subtype==="thinking"){',
     'var ' + THINKING_DISPATCH_SIGNATURE + '=1;',
     'if(' + msgVar + '.content){',
     'var _thM=' + msgVar + '.content.length>500?',
     msgVar + '.content.substring(0,500)+"\\u2026":' + msgVar + '.content;',
-    'var _thJ=K===void 0?0:K?1:0;',
-    'return r6.createElement(m,{flexDirection:"column",gap:1,marginTop:_thJ,width:"100%"},',
-    'r6.createElement(L,{dimColor:!0,italic:!0},"\\u2234 Thinking\\u2026"),',
-    'r6.createElement(m,{paddingLeft:2},r6.createElement(L,{dimColor:!0},_thM)));',
-    '}return null',
+    'var _thJ=' + AM + '===void 0?0:' + AM + '?1:0;',
+    'return ' + R + '.createElement(' + B + ',{flexDirection:"column",gap:1,marginTop:_thJ,width:"100%"},',
+    R + '.createElement(' + T + ',{dimColor:!0,italic:!0},"\\u2234 Thinking\\u2026"),',
+    R + '.createElement(' + B + ',{paddingLeft:2},' + R + '.createElement(' + T + ',{dimColor:!0},_thM)));',
+    '}return null}',
   ].join('');
 
   let suffix = '';
@@ -89,7 +101,7 @@ export const writeThinkingFullShowPatch = (content: string): string | null => {
       name: 'verbose-guard-with-stub',
       fn: js => {
         const m = js.match(
-          /if\(!\(([$\w]+)\|\|([$\w]+)\)\)\{let ([$\w]+)=([$\w]+)\?1:0/
+          /if\s*\(!\(([$\w]+)\s*\|\|\s*([$\w]+)\)\)\s*\{\s*\n?\s*let\s+([$\w]+)\s*=\s*([$\w]+)\s*\?\s*1\s*:\s*0/
         );
         return m
           ? {
@@ -104,9 +116,11 @@ export const writeThinkingFullShowPatch = (content: string): string | null => {
 
   if (!detection) return null;
 
-  const v1 = (detection.match as RegExpMatchArray)[1];
-  const v2 = (detection.match as RegExpMatchArray)[2];
-  const guard = 'if(!(' + v1 + '||' + v2 + '))';
+  const matched = detection.match[0];
+  // Extract the guard portion (everything up to the opening brace)
+  const guardMatch = matched.match(/if\s*\(!\([$\w]+\s*\|\|\s*[$\w]+\)\)/);
+  if (!guardMatch) return null;
+  const guard = guardMatch[0];
   const newGuard =
     'if(!1/*' + THINKING_FULLSHOW_SIGNATURE + '*/)';
 
@@ -134,7 +148,7 @@ export const writeThinkingAssistantGuardPatch = (
       name: 'case-thinking-verbose-guard',
       fn: js => {
         const m = js.match(
-          /case"thinking":\{if\(!([$\w]+)&&!([$\w]+)\)return null/
+          /case\s*"thinking"\s*:\s*\{\s*\n?\s*if\s*\(!([$\w]+)\s*&&\s*!([$\w]+)\)\s*return\s+null/
         );
         return m
           ? {
@@ -149,15 +163,13 @@ export const writeThinkingAssistantGuardPatch = (
 
   if (!detection) return null;
 
-  const v1 = (detection.match as RegExpMatchArray)[1];
-  const v2 = (detection.match as RegExpMatchArray)[2];
-  const oldGuard = 'if(!' + v1 + '&&!' + v2 + ')return null';
+  const matched = detection.match[0];
+  // Extract the guard: if(!V1 && !V2) return null  (with possible whitespace)
+  const guardMatch = matched.match(/if\s*\(![$\w]+\s*&&\s*![$\w]+\)\s*return\s+null/);
+  if (!guardMatch) return null;
   const newGuard = 'var ' + SIGNATURE + '=1';
 
-  const result = content.replace(
-    'case"thinking":{' + oldGuard,
-    'case"thinking":{' + newGuard
-  );
+  const result = content.replace(matched, matched.replace(guardMatch[0], newGuard));
 
   if (result === content) {
     debug('  thinking assist guard: replacement produced no change');
