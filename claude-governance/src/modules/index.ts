@@ -13,3 +13,4 @@ export {
 } from './registry';
 export { coreModule } from './core';
 export { envFlagsModule } from './env-flags';
+export { wireModule } from './wire';

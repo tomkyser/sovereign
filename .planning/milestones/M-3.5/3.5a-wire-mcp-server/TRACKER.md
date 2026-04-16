@@ -1,22 +1,22 @@
-# 3.5a-wire-mcp-server — Tracker
+# Phase 3.5a Tracker — Wire MCP Server
 
-Status: PLANNING COMPLETE
-Phase: Research ✓ → Planning ✓ → **Act** → Verify → Gap → Housekeeping
+## Status: COMPLETE
+
+## Timeline
+- Research: 2026-04-15 (binary analysis + source reading)
+- Planning: 2026-04-15 (architecture, tasks, decisions)
+- Act: 2026-04-16 (T1-T6 all complete)
+- Verify: 2026-04-16 (MCP harness + live CC integration)
 
 ## Decisions
+- D-01 through D-07: See HANDOFF.md
 
-- **D-01**: TypeScript + CJS build via tsdown (same toolchain as REPL/Tungsten)
-- **D-02**: Port protocol.cjs envelope types, simplify message types for Wire scope
-- **D-03**: Standalone CJS entry point, registered in .mcp.json/settings.json
-- **D-04**: No relay in 3.5a — direct channel notification only
-- **D-05**: Minimum tools: wire_send, wire_status
-- **D-06**: Instructions pattern adapted from fakechat
+## Blockers Encountered
+- `claude -p` mode hangs with MCP servers (resolved: use interactive mode only)
+- `--dangerously-load-development-channels` consumes next arg (resolved: it takes tagged channel name)
+- `.mcp.json` location matters — project-level needed for CC to find Wire
 
-## Blockers
-
-None currently.
-
-## Status Updates
-
-- 2026-04-15: Research complete. 8 findings documented. Binary analysis confirmed channel notification schema, meta key validation, prompt injection path, gate bypass strategy. fakechat and dynamo source fully analyzed. Ready for planning.
-- 2026-04-16: Planning complete. PLANNING.md and TASKS.md created. 6 tasks defined (T1-T6). Architecture: standalone CJS MCP server via tsdown, bundle MCP SDK, fakechat-style instructions. Ready for Act.
+## Interstitial Work (Between Research and Act)
+- REPL `allowAllModules` config toggle
+- `process` added to REPL VM sandbox
+- Tungsten guidance added to project CLAUDE.md

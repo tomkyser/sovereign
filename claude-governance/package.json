@@ -15,7 +15,7 @@
     }
   },
   "scripts": {
-    "build": "tsc --noEmit && tsdown --minify --dts src/index.tsx src/lib/index.ts && pnpm build:tools",
+    "build": "tsc --noEmit && tsdown --minify --dts src/index.tsx src/lib/index.ts && pnpm build:tools && pnpm build:wire",
     "build:dev": "tsdown --dts src/index.tsx src/lib/index.ts",
     "build:tools": "tsdown --config tsdown.tools.config.ts && node -e \"require('fs').readdirSync('data/tools').filter(f=>f.endsWith('.cjs')).forEach(f=>{require('fs').renameSync('data/tools/'+f,'data/tools/'+f.replace('.cjs','.js'))})\"",
     "watch": "tsdown --watch --dts src/index.tsx src/lib/index.ts",
@@ -25,7 +25,8 @@
     "test:dev": "vitest",
     "format": "prettier --write src",
     "postinstall": "node scripts/postinstall.mjs",
-    "prepare": "husky"
+    "prepare": "husky",
+    "build:wire": "tsdown --config tsdown.wire.config.ts"
   },
   "keywords": [
     "cli",
@@ -45,7 +46,7 @@
   "devDependencies": {
     "@eslint/js": "^9.33.0",
     "@types/node": "^20.19.10",
-"@types/which": "^3.0.4",
+    "@types/which": "^3.0.4",
     "eslint": "^9.33.0",
     "eslint-plugin-react": "^7.37.5",
     "globals": "^16.3.0",
@@ -63,6 +64,7 @@
     "*.{json,md}": "prettier --write"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
     "chalk": "^5.5.0",
     "commander": "^14.0.0",
     "diff": "^8.0.3",
@@ -82,6 +84,7 @@
     "data/prompts/prompts-2.1.10*.json",
     "data/overrides/*.md",
     "data/tools/*.js",
-    "scripts/"
+    "scripts/",
+    "data/wire/*.cjs"
   ]
 }

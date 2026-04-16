@@ -7,10 +7,12 @@ import type {
 } from './types';
 import { coreModule } from './core';
 import { envFlagsModule } from './env-flags';
+import { wireModule } from './wire';
 
 const ALL_MODULES: GovernanceModule[] = [
   coreModule,
   envFlagsModule,
+  wireModule,
 ];
 
 export function getAllModules(): GovernanceModule[] {

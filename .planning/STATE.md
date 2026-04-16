@@ -1,6 +1,6 @@
 # Project State
 
-Last updated: 2026-04-15
+Last updated: 2026-04-16
 
 ## Current Claude Code Version
 - **Installed:** 2.1.101 (native, arm64-darwin)
@@ -124,3 +124,15 @@ and governance-specific `check` command added.
 - **Shim failsafe:** Exit 111 + fallback to direct CC launch + UNPROTECTED banner
 
 See `.planning/ROADMAP.md` for full details.
+
+## Wire — Inter-Session Communication (M-3.5 Active)
+
+**Phase 3.5a**: COMPLETE — Wire MCP server built, tested, integrated
+- MCP server: `data/wire/wire-server.cjs` (462KB, self-contained)
+- Tools: `wire_send`, `wire_status` (accessible as `mcp__wire__*`)
+- Channel capability: `claude/channel` declared, CC registers listener
+- Governance module: `modules.wire` (default disabled, enable in config)
+- Launch flag: `--dangerously-load-development-channels server:wire`
+- Status: Verified connected in live CC interactive session
+
+**Next**: Phase 3.5b — Session Registry & Cross-Session Routing

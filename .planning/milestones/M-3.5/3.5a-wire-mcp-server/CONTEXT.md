@@ -2,58 +2,60 @@
 
 Last updated: 2026-04-16
 
-## Phase Status: Research COMPLETE, Planning COMPLETE, ready for Act
+## Phase Status: Act COMPLETE (T1-T5 done, T6 needs interactive test)
 
-## Key Findings
+## Official Docs Review (code.claude.com/docs/en/channels-reference)
 
-### Binary-Confirmed Channel API Contract
-- **Notification schema**: `{ method: "notifications/claude/channel", params: { content: string, meta?: Record<string, string> } }`
-- **Meta key regex**: `/^[a-zA-Z_][a-zA-Z0-9_]*$/` — underscores only, no hyphens
-- **Message wrapping**: `<channel source="NAME" key="val">CONTENT</channel>`
-- **Prompt injection**: `vD({mode:"prompt", priority:"next", isMeta:true, origin:{kind:"channel"}})`
+### Corrections to Our Approach
+- **Only --dangerously-load-development-channels needed** — no --channels flag. The dev flag IS the registration for custom channels during research preview.
+- **Flag format confirmed**: `claude --dangerously-load-development-channels server:wire`
+- **The flag does NOT consume positional args** — our earlier -p failures were likely a different issue (possibly slow MCP init, not arg parsing). Need to retest with interactive mode.
+- **Requires claude.ai login** — Console and API key auth not supported.
 
-### What CC Does Automatically
-1. Installs notification handler on MCP server connection (if gate passes)
-2. Wraps content in `<channel>` XML with meta as attributes
-3. Injects into prompt queue at priority "next"
-4. Re-registers handler on reconnection (uf8)
-5. Validates meta keys, drops invalid ones silently
+### Confirmed Correct
+- MCP server with `claude/channel` capability in experimental — exact match
+- Notification format: `{ method: "notifications/claude/channel", params: { content, meta } }` — exact match  
+- Meta keys: identifiers only (letters, digits, underscores) — exact match
+- Instructions field → Claude's system prompt — exact match
+- Stdio transport, CC spawns as subprocess — exact match
+- .mcp.json registration — exact match
+- tools: {} for two-way, omit for one-way — we declare tools (correct for two-way Wire)
 
-### What Wire Must Do
-1. Declare `experimental: { 'claude/channel': {} }` in MCP capabilities
-2. Connect via StdioServerTransport
-3. Emit `notifications/claude/channel` for inbound messages
-4. Expose MCP tools for outbound messages
-5. Provide `instructions` text teaching Claude how to use Wire tools
+### New Capabilities Discovered
+- **Permission relay**: `claude/channel/permission` capability + `permission_request` notification. Not needed for 3.5a but valuable for 3.5d+
+- **Plugin packaging**: Wrap in plugin for installability. Relevant for 3.5c governance integration.
 
-### Gate Bypass Strategy
-- Layer 5 (session list): Shim passes `--channels wire`
-- Layer 6 (allowlist): `--dangerously-load-development-channels` bypasses
-- Layer 2 (feature flag): `tengu_harbor` currently True, risk monitored
-- Layer 3 (auth): Requires `/login` — document as requirement
+## What Was Built
 
-## Decisions Made
+### Source Files
+- `src/wire/types.ts` — MessageType, UrgencyLevel, Envelope, EnvelopeInput, Result<T>
+- `src/wire/protocol.ts` — createEnvelope, validateEnvelope, filterMetaKeys, envelopeToMeta
+- `src/wire/server.ts` — MCP Server with claude/channel, wire_send + wire_status tools
 
-### D-01: TypeScript + CJS (same toolchain as REPL/Tungsten/Ping)
-### D-02: Port protocol.cjs envelope types, simplify message types
-### D-03: Standalone CJS entry point, registered in .mcp.json/settings.json
-### D-04: No relay in 3.5a — direct notification only
-### D-05: Minimum tools: wire_send, wire_status
-### D-06: Instructions pattern adapted from fakechat
+### Build Pipeline
+- `tsdown.wire.config.ts` — Standalone CJS build config (bundles MCP SDK + ajv)
+- `data/wire/wire-server.cjs` — 462KB self-contained artifact
+- `package.json` — build:wire script, data/wire/*.cjs in files array
 
-## Planning Docs Created
-- `PLANNING.md` — scope, approach, architecture, dependency strategy, risks
-- `TASKS.md` — 6 tasks (T1-T6): protocol → server → tools → build → config → verify
+### Governance Integration
+- `src/modules/wire.ts` — Wire governance module (registers in .mcp.json)
+- `src/modules/registry.ts` — Wire added to ALL_MODULES
+- `src/index.tsx` — handleLaunch injects --dangerously-load-development-channels server:wire
 
-## Interstitial: REPL allowAllModules
-Between research and act, enhanced REPL tool:
-- `repl.allowAllModules: true` in config unlocks all Node.js built-in modules
-- `process` added to VM sandbox globals
-- Tungsten guidance added to project CLAUDE.md
-- All built, applied, verified 22/22 SOVEREIGN, tested via Tungsten child session
+## Findings During Act
 
-## Agent Notes
-- Binary meta key regex is strict — only underscores, letters, digits
-- Three code paths for notification handler registration — all identical behavior
-- fakechat is 268 lines TS — Wire 3.5a should be similar scope
-- REPL now has full `require('fs')` etc when `allowAllModules: true` — use native JS for binary analysis
+### F-ACT-1: Channel names must be tagged
+`--channels wire` rejected. Must be `server:wire` or `plugin:name@marketplace`.
+
+### F-ACT-2: MCP SDK v1.29.0 uses newline-delimited JSON
+Not Content-Length framing. ReadBuffer scans for \n delimiter.
+
+### F-ACT-3: .cjs extension required
+package.json has "type": "module". Node treats .js as ESM, breaking require(). Keep .cjs.
+
+### F-ACT-4: Official docs confirm --dangerously-load-development-channels is the only flag
+No need for --channels separately. The dev flag bypasses allowlist AND registers the channel.
+
+## Next: Interactive Test
+Test with: `claude --dangerously-load-development-channels server:wire`
+(interactive mode, not -p)

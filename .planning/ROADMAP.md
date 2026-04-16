@@ -1,6 +1,6 @@
 # Roadmap — claude-governance
 
-Last updated: 2026-04-15
+Last updated: 2026-04-16
 
 ## Mission
 
@@ -506,13 +506,13 @@ fakechat reference implementation [fakechat1]
 - `tengu_harbor` already True in cachedGrowthBookFeatures
 - Teammate mailbox (file-based, live) provides patterns for fallback
 
-### Phase 3.5a: Wire MCP Server — Channel Contract
-- [ ] Build MCP server implementing `claude/channel` capability
-- [ ] Bidirectional: `notifications/claude/channel` inbound, reply/send tools outbound
-- [ ] Typed message protocol with metadata (adapted from dynamo protocol.cjs)
-- [ ] Plugin packaging (`.mcp.json`, server `instructions` field)
-- [ ] Test end-to-end with `--dangerously-load-development-channels`
-- [ ] Verify: send message in → Claude sees `<channel>` tag → Claude replies via tool
+### Phase 3.5a: Wire MCP Server — Channel Contract ✅ COMPLETE
+- [x] Build MCP server implementing `claude/channel` capability
+- [x] Bidirectional: `notifications/claude/channel` inbound, reply/send tools outbound
+- [x] Typed message protocol with metadata (adapted from dynamo protocol.cjs)
+- [x] Plugin packaging (`.mcp.json`, server `instructions` field)
+- [x] Test end-to-end with `--dangerously-load-development-channels`
+- [x] Verify: send message in → Claude sees `<channel>` tag → Claude replies via tool
 
 ### Phase 3.5b: Session Registry & Cross-Session Routing
 - [ ] Port registry from dynamo (register, unregister, lookup, disconnect/reconnect with TTL)
@@ -523,7 +523,7 @@ fakechat reference implementation [fakechat1]
 
 ### Phase 3.5c: Governance Integration
 - [ ] Wire as a claude-governance module
-- [ ] Shim/launch auto-starts Wire MCP server, passes `--channels` transparently
+- [ ] Shim/launch auto-starts Wire MCP server, passes `--dangerously-load-development-channels` flag
 - [ ] Verification entries for Wire health in registry.ts
 - [ ] SessionStart hook: Wire readiness check
 - [ ] SessionStop hook: Wire cleanup

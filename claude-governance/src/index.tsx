@@ -1013,6 +1013,22 @@ async function handleLaunch(
     // Config read failure is non-fatal for env injection
   }
 
+  // Wire module: inject channel flags if enabled
+  let wireEnabled = false;
+  try {
+    const wireConfig = await readConfigFile();
+    const modules = (wireConfig as unknown as { modules?: Record<string, boolean> }).modules;
+    wireEnabled = modules?.wire === true;
+  } catch {
+    // Config read failure is non-fatal
+  }
+
+  if (wireEnabled) {
+    if (!args.includes('--dangerously-load-development-channels')) {
+      args = ['--dangerously-load-development-channels', 'server:wire', ...args];
+    }
+  }
+
   // Spawn CC with inherited stdio and signal forwarding
   console.log(chalk.dim(`Launching Claude Code ${ccInstInfo.version}...`));
 
