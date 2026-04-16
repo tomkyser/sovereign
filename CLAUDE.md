@@ -183,3 +183,47 @@ enhancement opportunity to `.planning/research/REPL-IMPROVEMENTS.md`.
    this directive in their prompt. They must log to the same file.
 6. **Never skip this.** Even if the observation seems obvious or already logged,
    add it. Duplicates signal importance.
+
+## REPL — Use the Full VM, Not a Bash Wrapper
+
+You have a **full Node.js VM** inside REPL. `require()` works. `fs`, `path`, `crypto`,
+`url`, `os`, `util`, `querystring` are all available. The `read()`, `write()`, `edit()`,
+`bash()`, `grep()`, `glob()`, `fetch()`, `agent()` helpers are convenience wrappers —
+they are not the ceiling of what you can do.
+
+### What This Means in Practice
+
+**File analysis without shell gymnastics.** Instead of `bash('grep -ob "pattern" file')`
+followed by `bash('dd if=file bs=1 skip=N count=M')`, do this:
+```javascript
+const fs = require('fs');
+const content = fs.readFileSync('/path/to/large-file.js', 'utf-8');
+const idx = content.indexOf('targetPattern');
+const context = content.substring(idx - 200, idx + 200);
+return context;
+```
+One operation. No timeouts. No single-line-file grep catastrophes. No 30-second waits
+for extended regex on 12MB files.
+
+**Complex multi-step pipelines in a single call.** REPL replaces dozens of sequential
+tool calls with one script. A pipeline that would be 15 Read + 5 Bash + 3 Edit calls
+becomes one REPL call with a `for` loop. That's 23 fewer tool results in context,
+23 fewer inference rounds, and 23 fewer permission checks.
+
+**State persists across calls** via the `state` object (for async scripts) or `var`
+declarations (for sync scripts). Build up data structures across multiple REPL calls
+without re-reading files.
+
+**Binary analysis.** `Buffer.from(fs.readFileSync(path))` gives you byte-level access.
+`indexOf` on buffers, `slice` for extraction, `toString('hex')` for inspection. No
+more shelling out to `xxd` or `hexdump`.
+
+### The Rule
+
+Default to native JS in REPL. Only use `bash()` when you genuinely need a shell:
+git operations, process management, commands with complex pipes, tools that only
+exist as CLI binaries. If you're doing string search, file I/O, JSON parsing, data
+transformation, or pattern matching — that's JavaScript, not bash.
+
+**Every `bash()` call inside REPL that could have been native JS is a missed
+opportunity and a wasted round-trip.** The VM is the tool. Use it.

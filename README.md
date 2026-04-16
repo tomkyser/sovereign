@@ -1,15 +1,57 @@
 # claude-governance
 
+> **Status: Work in Progress** — Verified on CC 2.1.101 (arm64-darwin). Not yet published to npm. Not yet tested on other CC versions, machines, or operating systems. Everything described here works on the development machine; cross-platform and cross-version resilience is planned for Milestone 9.
+
 Claude Code is a subscription product that runs on your hardware, processes your code, and charges your account, yet Anthropic has systematically built mechanisms into the binary that degrade the experience for paying customers while reserving the full-capability version for their own engineers. This project exists because I went looking for why my tool was getting worse and what I found was not a bug or a resource constraint; it was a deliberate two-tier system hidden behind compile-time flags, server-side feature toggles, and system prompts engineered to make the model less competent than it actually is.
 
-**claude-governance** provides an open-source governance platform that restores full user authority over Claude Code. It patches the binary, overrides the degraded prompts, injects the gated tools, activates the search pipeline they compiled in but turned off, and verifies every change against the actual binary state so nothing degrades silently. It is not a jailbreak. It is users exercising control over software running on their own hardware, which shouldn't require a third-party tool, but here we are.
+**claude-governance** provides an open-source governance platform that restores full user authority over Claude Code. It patches the binary, overrides the degraded prompts, injects the gated tools, unlocks the hidden features, activates the search pipeline they compiled in but turned off, and verifies every change against the actual binary state so nothing degrades silently. It is not a jailbreak. It is users exercising control over software running on their own hardware, which shouldn't require a third-party tool, but here we are.
 
-Requires the native Claude Code binary (not the npm install of CC), Node.js 18+, and a Unix-like environment (macOS or Linux; Windows support is planned).
+---
 
-```bash
-npm install -g claude-governance
-claude-governance setup
-```
+## What's Built
+
+22/22 verified governance checks. Every session starts with a banner that either says **SOVEREIGN** or tells you exactly what's wrong.
+
+### The headline features
+
+**Unlocked Anthropic's own improvements with a single binary patch.** Anthropic builds a better version of Claude Code for their engineers and gates it behind a feature flag called `quiet_salted_ember`. I found the activation vector in the bootstrap function, patched three lines, and unlocked 7 prompt improvements they wrote, tested, and deliberately withheld: Communication Style, numeric precision anchors, comment discipline, exploratory question handling, condensed tool guidance, and session management. Plus Sonnet 4.6 extended context (1M tokens) via `coral_reef_sonnet`. One patch, auto-updating — when Anthropic improves these sections for their engineers, you get the improvements for free.
+
+**Clean-room REPL tool.** Anthropic's engineers have a batch operations engine that wraps all primitive tools (Read, Write, Edit, Bash, Grep, Glob, Agent) inside a persistent Node.js VM. External users don't — the implementation is dead-code-eliminated from the binary. I rebuilt it from scratch using a delegation chain we discovered in the tool infrastructure: injected tools can call native tools directly through `context.options.tools`, so our REPL delegates to Claude Code's own infrastructure rather than reimplementing it. 16 modules, 9 handlers, two operating modes (coexist alongside primitives, or replace them entirely).
+
+**Clean-room Tungsten tool.** Persistent terminal sessions via tmux that survive between tool calls. Anthropic's version is stripped from external builds. Ours includes a live terminal panel injected into CC's React render tree, an FS9 binary patch that propagates the tmux environment to all Bash commands, session lifecycle hooks, and statusline integration. 12 modules across 6 core components and 6 actions.
+
+**12 binary patches** that neutralize CLAUDE.md dismissal, restore subagent context, inject tools, activate feature flags, and preserve the bootstrap cache against server-side overwrites. Every patch uses structural pattern matching against the minified code — not byte offsets — so they survive across CC version updates.
+
+**10 prompt overrides** that replace Anthropic's restrictive system prompts with professional-grade instructions. Misconception correction, false-claims mitigation, thoroughness guidance, context decay awareness, priority hierarchy — all extracted from the text Anthropic wrote for their internal users and restored to the users they stripped it from.
+
+**Embedded search pipeline.** Three professional-grade search tools are compiled into every native CC binary but turned off: `bfs 4.1` (parallel breadth-first filesystem search), `ugrep 7.5.0` (high-performance regex with PCRE2 and fuzzy matching), and `ripgrep 14.1.1`. One environment variable and the entire pipeline activates, replacing Glob and Grep with tools that are orders of magnitude faster.
+
+**22-point verification engine.** Every patch, override, injection, and feature flag is verified against the actual binary state. Signatures confirm the new text is present; anti-signatures confirm the old text is gone. State is persisted, surfaced in session-start banners and statusline indicators, and re-verified on every launch. Nothing is assumed — everything is proven.
+
+---
+
+## Roadmap
+
+| Milestone | What | Status |
+|-----------|------|--------|
+| **M-1** | Core engine — fork tweakcc, governance patches, verification, modules, CLI, npm packaging | **Complete** |
+| **M-2** | Tool injection — clean-room REPL, Tungsten, tool loader, binary vault, adoption | **Complete** |
+| **M-3** | System prompt control — quiet_salted_ember, P1 overrides, investigation registry | **Complete** |
+| **M-3.5** | **Wire** — inter-session communication, session registry, cross-session collaboration | **Research** |
+| M-4 | REPL re-evaluation — programmatic tool calling, batch orchestration, deep prompt support | Planned |
+| M-5 | HTTP proxy — request/response logging, cache visibility, usage monitoring, context snipping | Planned |
+| M-6 | Feature flag control — flag inventory scanner, override persistence, change detection | Planned |
+| M-6.5 | Extended tool suite — additional capabilities beyond REPL and Tungsten | Planned |
+| M-7 | Version management — binary backup, update controls, cross-version detection | Planned |
+| M-8 | Launch prep — hooks module, plugins, user patches, third-party modules, full integration | Planned |
+| M-9 | Survivability — cross-version testing, cross-platform, automated regression detection | Planned |
+| M-10 | Documentation and polish | Planned |
+| M-11 | Deployment pipeline, preflight, final tests | Planned |
+| **1.0.0** | **Public release** | |
+
+Post-launch:
+- **1.1.0** — Advanced governance (dynamic boundary detection, adversarial prompt resistance)
+- **1.2.0** — Prompt refinements and monitoring hooks (deferred M-3 phases 3b-3h)
 
 ---
 
@@ -79,9 +121,9 @@ This is not three missing tools. This is a parallel version of the product that 
 
 `USER_TYPE === 'ant'` resolves to `false` at compile time in external builds. Bun's bundler dead-code-eliminates every implementation behind that check, physically removing the code from the binary. Only the gating functions survive, returning `false` unconditionally.
 
-**REPL** (currently being rebuilt as a clean-room implementation) is a batch operations engine that wraps all of Claude's primitive tools (Read, Write, Edit, Bash, Grep, Glob, NotebookEdit, Agent) inside a Node.js VM with persistent state across calls. Instead of Claude making one API round-trip per tool call, paying for one permission check per tool call, and adding one context entry per tool call, it writes a single script that reads five files, greps three patterns, and edits two outputs in one invocation. The difference between 10 round-trips with 10 permission prompts and 1 round-trip with 1 permission prompt is not a marginal optimization; it is a structural reduction in token burn, latency, and context noise that changes how effectively the model can work on complex tasks. When REPL is active, it completely replaces the "Using your tools" system prompt section (`prompts.ts:269-285`) and hides all primitive tools from the model, meaning Claude can only operate through REPL's orchestration layer, which is how Anthropic's engineers actually use the tool.
+**REPL** is a batch operations engine that wraps all of Claude's primitive tools (Read, Write, Edit, Bash, Grep, Glob, NotebookEdit, Agent) inside a Node.js VM with persistent state across calls. Instead of Claude making one API round-trip per tool call, paying for one permission check per tool call, and adding one context entry per tool call, it writes a single script that reads five files, greps three patterns, and edits two outputs in one invocation. The difference between 10 round-trips with 10 permission prompts and 1 round-trip with 1 permission prompt is not a marginal optimization; it is a structural reduction in token burn, latency, and context noise that changes how effectively the model can work on complex tasks. When REPL is active, it completely replaces the "Using your tools" system prompt section (`prompts.ts:269-285`) and hides all primitive tools from the model, meaning Claude can only operate through REPL's orchestration layer, which is how Anthropic's engineers actually use the tool. **claude-governance includes a full clean-room REPL implementation.**
 
-**Tungsten** is a persistent terminal session manager built on tmux with process-isolated sockets per Claude Code instance. It gives the model a real PTY where processes survive between tool calls, which means it can run a dev server, execute a test suite, watch compilation output, and interact with long-running processes without losing state between turns. It includes a live terminal panel in the CC UI (`TungstenLiveMonitor`), with session state persisted to `~/.claude.json`. The external build gives you Bash, which resets completely between every call.
+**Tungsten** is a persistent terminal session manager built on tmux with process-isolated sockets per Claude Code instance. It gives the model a real PTY where processes survive between tool calls, which means it can run a dev server, execute a test suite, watch compilation output, and interact with long-running processes without losing state between turns. It includes a live terminal panel in the CC UI (`TungstenLiveMonitor`), with session state persisted to `~/.claude.json`. The external build gives you Bash, which resets completely between every call. **claude-governance includes a full clean-room Tungsten implementation with live UI panel.**
 
 **Config** is a runtime settings editor for theme, model, and permissions. Lower value than the other two, but indicative of the pattern.
 
@@ -89,7 +131,7 @@ This is not three missing tools. This is a parallel version of the product that 
 
 Those are the ones I've been able to identify and map. The tool registry function (`getAllBaseTools()`, minified as `Ut()`) contains **15 variable slots assigned to `null`** where dead-code-eliminated tools used to live. I've mapped REPL, Tungsten, Config, HistorySnip, and CtxInspect to some of these. The remaining 10 slots represent stripped tools that have not yet been identified. The minified variable names exist in the binary but their original identities were removed by the bundler along with the implementations.
 
-I am rebuilding REPL and Tungsten as clean-room implementations using a delegation chain I discovered in the tool infrastructure: when Claude calls an injected tool, the `context.options.tools` array exposes every native tool with callable methods, so the clean-room implementations delegate directly to Claude Code's own Read, Write, Edit, and Bash without reimplementing any of it. The efficiency gain and the capability parity come from standing on the infrastructure Anthropic already built rather than trying to rebuild it from scratch.
+The clean-room implementations delegate directly to Claude Code's own Read, Write, Edit, and Bash through a delegation chain discovered in the tool infrastructure: when Claude calls an injected tool, the `context.options.tools` array exposes every native tool with callable methods. The efficiency gain and the capability parity come from standing on the infrastructure Anthropic already built rather than trying to rebuild it from scratch.
 
 #### Search tools compiled in but turned off
 
@@ -99,47 +141,27 @@ Instead of these, Anthropic gives you Glob and Grep: dedicated tools that wrap b
 
 The npm install of Claude Code (`cli.js` under Node, 13.6MB) is even worse: it only vendors ripgrep per platform. No bfs, no ugrep, no embedded binary tools at all. Same subscription, less capable runtime.
 
-#### Compile-time feature flags
+#### Feature flag gating
 
-90 flags resolved at build time via GrowthBook's `feature()` through `bun:bundle`. The flag names are stripped from the binary; only the surviving code branches remain. The official override mechanism (`CLAUDE_INTERNAL_FC_OVERRIDES`) is itself dead-code-eliminated in external builds, so even if you knew the flag names, you could not change them.
+**Compile-time flags.** 90 flags resolved at build time via GrowthBook's `feature()` through `bun:bundle`. The flag names are stripped from the binary; only the surviving code branches remain. The official override mechanism (`CLAUDE_INTERNAL_FC_OVERRIDES`) is itself dead-code-eliminated in external builds, so even if you knew the flag names, you could not change them. 14 flags are enabled in v2.1.101, including Monitor, Kairos, UltraPlan, UltraThink, Reactive Compact, and File Persistence. 3 are confirmed disabled: HISTORY_SNIP, WORKFLOW_SCRIPTS, and QUICK_SEARCH.
 
-14 flags are enabled in v2.1.101, including Monitor (background process watcher), Kairos (cron scheduling with an auto-dream system that reviews sessions and modifies files autonomously), UltraPlan (planning mode with approval workflows), UltraThink (extended thinking, but subject to throttling), Reactive Compact (silent context compaction that users cannot control or observe), and File Persistence (session checkpointing). These are present and running, but users have no visibility into what they do, how they interact, or when Anthropic changes their behavior.
+**Runtime flags.** ~70+ runtime `tengu_*` flags are cached in `~/.claude.json` under `cachedGrowthBookFeatures` and refreshed from Anthropic's servers every 6 hours. Both code branches for every runtime flag ship in the binary, which means Anthropic can change any user-facing behavior by toggling a server-side value without shipping a new binary, without notification, without changelog entry, and without opt-out. Key flags include `tengu_slim_subagent_claudemd` (strips CLAUDE.md from subagents), `tengu_disable_bypass_permissions_mode`, `tengu_malort_pedway` (gates Computer Use), and `quiet_salted_ember` (gates communication-style improvements for Opus 4.6). There is no UI showing what flags are set. There is no notification when they change.
 
-3 flags are confirmed disabled: `HISTORY_SNIP` (the context snipping tool described above), `WORKFLOW_SCRIPTS` (workflow execution, no trace in binary), and `QUICK_SEARCH` (unknown optimization, no trace in binary). These features are entirely absent from the external build.
+#### Additional hidden capabilities
 
-An additional tool, `ENABLE_LSP_TOOL`, provides IDE-grade code navigation including go-to-definition, find-references, hover info, and call hierarchy. It is fully functional and responds to a single undocumented environment variable. claude-governance enables it.
+The **auto-updater** silently overwrites the binary from a GCS bucket, reverting any governance patches without notification. `DISABLE_AUTOUPDATER=1` prevents this.
 
-#### Runtime flags and remote control
+**Adaptive thinking** throttles reasoning depth based on Anthropic's assessment of task complexity, silently reducing the model's thinking budget. `CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING=1` disables this. Laurenzo's data shows that thinking depth dropped 67% during the period this throttling was active.
 
-~70+ runtime `tengu_*` flags are cached in `~/.claude.json` under `cachedGrowthBookFeatures` and refreshed from Anthropic's servers every 6 hours. Both code branches for every runtime flag ship in the binary (no dead-code elimination for these), which means Anthropic can change any user-facing behavior by toggling a server-side value without shipping a new binary, without notification, without changelog entry, and without opt-out.
+**Reactive compaction** runs silently in multiple modes (auto, micro, partial, cold). Users have no control over when it fires, what it preserves, or what it discards.
 
-The key flags with known effects include `tengu_slim_subagent_claudemd` (strips CLAUDE.md from subagents, defaults true), `tengu_disable_bypass_permissions_mode` (controls whether users can bypass permission prompts), `tengu_malort_pedway` (gates Computer Use even for users whose subscription tier should allow it), and `quiet_salted_ember` (gates the communication-style prompt, Opus 4.6 only). The remaining ~65 flags are undocumented. The only way to discover their values is to inspect `~/.claude.json` directly, and the only way to discover what they do is to reverse-engineer the binary.
-
-There is no UI showing what flags are set. There is no notification when they change. The official override mechanisms exist only for Anthropic employees.
-
-#### Additional hidden capabilities and obfuscation
-
-Beyond the tools and flags, several design decisions compound the degradation:
-
-The **auto-updater** silently overwrites the binary from a GCS bucket, reverting any governance patches without notification. `DISABLE_AUTOUPDATER=1` prevents this, but it is not prominently documented.
-
-**Adaptive thinking** throttles reasoning depth based on Anthropic's assessment of task complexity, silently reducing the model's thinking budget without informing the user. `CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING=1` disables this. Laurenzo's data shows that thinking depth dropped 67% during the period this throttling was active.
-
-**Reactive compaction** runs silently in multiple modes (auto, micro, partial, cold) with a rapid-refill breaker. Users have no control over when it fires, what it preserves, or what it discards. CLAUDE.md content marked `isMeta: true` by the `prependUserContext` function may be deprioritized during compaction, meaning your instructions can be silently evicted from context.
-
-**Token budget enforcement** operates at the message and tool-result level, potentially truncating context to fit budgets the user cannot see or configure.
-
-**Billing and usage** are opaque. No per-request token counts, no visibility into whether prompt caching is active (a widespread silent failure documented by cnighswonger), no confirmation of which model is actually serving your requests, no breakdown of effort level applied versus requested.
-
-**WebFetch** does not return raw HTTP response bodies. It returns an AI-generated markdown summary of the content, meaning a developer expecting `fetch()` semantics gets a narrative description instead. Raw HTTP requires routing through `bash('curl ...')` as a workaround. This is by design, undisclosed, and violates the principle of least surprise.
+**WebFetch** does not return raw HTTP response bodies. It returns an AI-generated markdown summary of the content. Raw HTTP requires `bash('curl ...')` as a workaround. By design, undisclosed.
 
 ---
 
 ## What claude-governance does about it
 
-### Governance Patches
-
-Four binary patches that neutralize the CLAUDE.md dismissal and restore instruction authority:
+### Binary Patches (12 active)
 
 | Patch | What It Fixes |
 |-------|--------------|
@@ -147,51 +169,49 @@ Four binary patches that neutralize the CLAUDE.md dismissal and restore instruct
 | Context header reframing | Replaces ambient "use the following context" with mandatory framing |
 | Subagent CLAUDE.md restoration | Flips `tengu_slim_subagent_claudemd` to false |
 | System-reminder authority | Replaces "bear no direct relation" with CLAUDE.md directive framing |
+| Tungsten tool guidance | Tungsten-first execution posture in "Using your tools" |
+| Client data cache preservation | Prevents bootstrap from overwriting `quiet_salted_ember` + `coral_reef_sonnet` |
+| Tool injection | `getAllBaseTools()` patched to load external tools |
+| Gate resolution | USE_EMBEDDED_TOOLS_FN ternaries resolved to ant branch |
+| FS9 environment propagation | Replaces stubbed `getClaudeTmuxEnv()` for Tungsten tmux environment |
+| Render tree injection | Tungsten live panel injected into CC's React component tree |
+| Embedded search activation | Pipeline configuration for bfs/ugrep/ripgrep |
+| Bash prohibition reframe | Removes "IMPORTANT:" severity prefix from Bash tool description |
 
-### Prompt Overrides
-
-Eight overrides that replace Anthropic's restrictive prompts with the professional-grade versions:
+### Prompt Overrides (10 active)
 
 | Override | What It Fixes |
 |----------|--------------|
-| Doing Tasks: No Additions | Restores "fix broken adjacent code" instead of "ignore it" |
-| Doing Tasks: No Premature Abstractions | Restores professional judgment on when to extract |
-| Doing Tasks: No Unnecessary Error Handling | Adds boundary validation guidance instead of just "don't" |
-| Executing Actions with Care | Replaces excessive caution with contextual judgment |
-| Tone: Concise Output | Replaces "short and concise" with "clear and appropriately detailed" |
-| Agent Thread Notes | Fixes subagent context and path handling |
-| Agent Prompt: Explore | Replaces shallow search defaults with thorough exploration |
-| Agent Prompt: General Purpose | Replaces hedged behavior with direct execution |
-
-### Embedded Search Activation
-
-| What You Had | What You Get |
-|-------------|-------------|
-| Glob: slow, limited pattern matching | `bfs 4.1`: parallel breadth-first filesystem search |
-| Grep: basic text search | `ugrep 7.5.0`: high-performance regex with fuzzy matching |
-| Nothing for binary/code search | `ripgrep 14.1.1`: the standard for fast code search |
-
-### Clean-Room Tool Injection
-
-The tool registry is patched to load external implementations from `~/.claude-governance/tools/`, and tools loaded this way are indistinguishable from native ones because injection happens at the registration layer rather than shimming at the API layer.
+| Doing Tasks: Misconceptions | Restores "fix broken adjacent code" instead of "walk past it" |
+| Doing Tasks: False Claims | Adds mitigation against confabulation |
+| Doing Tasks: Thoroughness | Counterweight to length-minimization pressure |
+| Doing Tasks: Context Decay | Awareness of context degradation after 10+ messages |
+| Doing Tasks: Priority Hierarchy | Explicit instruction priority chain |
+| Executing Actions | Replaces excessive caution with contextual judgment |
+| Tone: Appropriately Detailed | Replaces "short and concise" with "clear and appropriately detailed" |
+| Agent: Explore | Replaces shallow search defaults with thorough exploration |
+| Agent: General Purpose | Replaces hedged behavior with direct execution |
+| Bash Prohibition Reframe | Downgrades blanket prohibition to standard guidance |
 
 ### Environment Flags
 
 | Flag | What It Unlocks |
 |------|--------|
-| `EMBEDDED_SEARCH_TOOLS=1` | The bfs/ugrep/ripgrep pipeline described above |
+| `EMBEDDED_SEARCH_TOOLS=1` | bfs/ugrep/ripgrep pipeline |
 | `ENABLE_LSP_TOOL=1` | IDE-grade code navigation via Language Server Protocol |
-| `DISABLE_AUTOUPDATER=1` | Prevents Anthropic from overwriting your patched binary |
-| `CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING=1` | Prevents the thinking throttling that Laurenzo's data exposed |
-| `MAX_THINKING_TOKENS=128000` | Restores full thinking depth instead of the capped default |
-| `CLAUDE_CODE_EFFORT_LEVEL=max` | Maximum effort on every response instead of adaptive minimization |
+| `DISABLE_AUTOUPDATER=1` | Prevents binary overwrite by auto-updater |
+| `CLAUDE_CODE_DISABLE_ADAPTIVE_THINKING=1` | Full thinking depth, no throttling |
+| `MAX_THINKING_TOKENS=128000` | Maximum thinking budget |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS=128000` | Maximum output budget |
+| `CLAUDE_CODE_EFFORT_LEVEL=max` | Maximum effort on every response |
 
 ### Verification
 
-Every patch, override, and injection is verified against the actual binary state after every apply and before every session. When all 15 checks pass:
+Every patch, override, and injection is verified against the actual binary state after every apply and before every session. Signatures confirm the new text is present; anti-signatures confirm the old text is gone. 22 checks, persisted to `state.json`, surfaced in session-start banners and statusline.
 
 ```
-██ SOVEREIGN — All 15 governance checks passed
+██ SOVEREIGN — All 22 governance checks passed
+  Tools: Ping, REPL, Tungsten
 ```
 
 When something fails, you see exactly what broke, in red, immediately. The system is designed to be loud about failure because silent degradation is exactly the problem it exists to solve. If governance itself fails, Claude still launches with an UNPROTECTED banner; you lose governance but you never lose your tool.
@@ -201,21 +221,23 @@ When something fails, you see exactly what broke, in red, immediately. The syste
 ## CLI
 
 ```bash
-claude-governance                     # Apply all patches + prompt overrides
-claude-governance setup               # First-run wizard with module selection
-claude-governance check               # Verify all 15 governance signatures
-claude-governance launch [-- args]    # Pre-flight verify + launch Claude Code
-claude-governance modules             # List modules and their status
-claude-governance --restore           # Restore binary to original state
-claude-governance --list-patches      # List available patches
+claude-governance                        # Apply all patches + prompt overrides
+claude-governance setup                  # First-run wizard with module selection
+claude-governance check                  # Verify all 22 governance signatures
+claude-governance launch [-- args]       # Pre-flight verify + launch Claude Code
+claude-governance modules                # List modules and their status
+claude-governance --restore              # Restore binary to original state
+claude-governance --list-patches         # List available patches
 claude-governance --list-system-prompts  # List available prompt overrides
+claude-governance unpack <path>          # Extract JS from native binary
+claude-governance repack <path>          # Embed JS into native binary
 ```
 
 ---
 
 ## Architecture
 
-`claude-governance` is a full fork of [tweakcc](https://github.com/Piebald-AI/tweakcc), the binary patching tool maintained by Piebald AI that handles extraction, prompt matching, patch application, and signature verification for Claude Code's native binary. I forked the entire repository rather than cherry-picking because a fork carries the full history of edge case handling that you don't know you need until something breaks in production. What I stripped: the Ink/React UI and 40+ cosmetic patches that were not governance-relevant. What I kept: binary I/O, the pieces-based prompt matching system, and the data pipeline. What I added: governance patches, prompt overrides, a module system, verification registry, binary vault, tool injection, and a setup wizard.
+`claude-governance` is a full fork of [tweakcc](https://github.com/Piebald-AI/tweakcc), the binary patching tool maintained by Piebald AI that handles extraction, prompt matching, patch application, and signature verification for Claude Code's native binary. I forked the entire repository rather than cherry-picking because a fork carries the full history of edge case handling that you don't know you need until something breaks in production. What I stripped: the Ink/React UI and 40+ cosmetic patches that were not governance-relevant. What I kept: binary I/O, the pieces-based prompt matching system, and the data pipeline. What I added: governance patches, prompt overrides, a module system, verification registry, binary vault, tool injection, clean-room tools, and a setup wizard.
 
 The pieces system is what makes this survive across Claude Code updates rather than breaking on every release. It matches prompts based on semantic content rather than exact byte offsets, so when the minifier rearranges code between versions the patches still find their targets by matching on what the code does rather than where it sits in the file.
 
@@ -224,37 +246,29 @@ Tool injection works through a single structural patch to `getAllBaseTools()` th
 Verification runs through four layers every session: the SessionStart hook compares binary state against `state.json`, the status line renders `GOV:OK` or `GOV:DEGRADED` on every prompt, the transparent shim runs a governance pre-flight before every launch, and version-change detection catches auto-updates and re-verifies automatically.
 
 ```
-claude-governance/             # Governance-only fork of tweakcc
+claude-governance/                 # Governance-only fork of tweakcc (170KB build)
   src/
-    binaryVault.ts             # XDG paths, GCS download, SHA256 verification, immutable locking
-    verification.ts            # 13-entry signature registry, state persistence
-    patches/                   # Governance patches + gate resolution + tool injection
-    modules/                   # Pluggable modules (core, env-flags)
-    shim.ts                    # Transparent session wrapper
-    setup.ts                   # Interactive first-run wizard
+    patches/governance/            # 14 per-patch files (disclaimer, context, subagent, tools, FS9, ...)
+    patches/orchestration/         # 3 orchestration modules (apply, verify, deploy)
+    tools/ping/                    # Ping tool (TypeScript, verification probe)
+    tools/repl/                    # Clean-room REPL (16 modules: 6 core + 9 handlers + barrel)
+    tools/tungsten/                # Clean-room Tungsten (12 modules: 6 core + 6 actions)
+    binaryVault.ts                 # XDG paths, GCS download, SHA256 verification, immutable locking
+    systemPromptSync.ts            # Pieces-based prompt matching and override pipeline
+    modules/                       # Pluggable modules (core, env-flags)
+    shim.ts                        # Transparent session wrapper
+    setup.ts                       # Interactive first-run wizard
+  data/
+    overrides/                     # 10 prompt override .md files with variable interpolation
+    tools/                         # Built tool artifacts (CJS .js via tsdown)
 
-~/.claude-governance/          # Runtime configuration
-  state.json                   # Verification state, read by hooks and statusline
-  tools/index.js               # External tool loader (REPL, Tungsten, etc.)
-  binaries/                    # Binary vault with virgin and working copies
-  bin/claude                   # Transparent shim wrapping every session
+~/.claude-governance/              # Runtime configuration
+  state.json                       # 22-point verification state
+  tools/index.js                   # External tool loader (REPL, Tungsten, Ping)
+  system-prompts/                  # Deployed prompt overrides with regex patterns
+  binaries/                        # Binary vault (virgin + working copies, SHA256 locked)
+  bin/claude                       # Transparent shim wrapping every session
 ```
-
----
-
-## Roadmap
-
-| Milestone | Scope | Status |
-|-----------|-------|--------|
-| **M1** | Core engine, governance patches, verification, modules, CLI, npm distribution | **Complete** |
-| **M2** | Clean-room REPL, Tungsten, tool injection hardening | **In Progress** |
-| M3 | System prompt extraction, version-tracked diffing, canary verification | Planned |
-| M4 | Feature flag inventory, GrowthBook override persistence | Planned |
-| M5 | HTTP proxy layer for billing visibility and cache control | Planned |
-| M6 | Version management, binary backup, update controls | Planned |
-| M7 | Cross-version testing pipeline, 1.0.0 public release | Planned |
-| M8 | Context monitoring, thinking block restoration | Planned |
-| M9 | Extended tool suite: Cron, WebBrowser, Computer Use, Coordinator | Planned |
 
 ---
 
@@ -266,7 +280,9 @@ I digress. The discovery phase was its own kind of education. Every time I pulle
 
 The answer was not to complain about it. The answer was to fix it. I forked tweakcc, stripped it to its governance core, added verification, built a module system, packaged it for npm, and shipped. Along the way I discovered that three search tools were already compiled into the binary but turned off, that Node.js v24 silently corrupts Mach-O binaries through its own `fs` module, that the tool registry exposes a delegation chain that makes clean-room reimplementation almost trivial, and that the model itself will sometimes refuse to help you investigate Anthropic's own gating mechanisms. That last one, the agent refusing to research the very system that restricts it, is the problem in miniature.
 
-Nine milestones. I'm in the second. The core is solid: 15/15 SOVEREIGN on v2.1.101, binary vault with immutable locking, a shim that never blocks your tool, and verification that never stays silent. The rest is a matter of building out what should have been there from the start.
+The biggest breakthrough came when I mapped the three-tier gating system (compile-time dead code elimination, runtime GrowthBook flags, and server-side feature toggles) and found that 7 prompt improvements Anthropic built for their engineers were all gated behind a single runtime flag. One binary patch to the bootstrap function — three surgical edits in one function — unlocked all of them. The research that found that path took longer than writing the patch. It usually does.
+
+Twelve milestones to 1.0.0. Three complete. The core is solid: 22/22 SOVEREIGN on v2.1.101, binary vault with immutable locking, a shim that never blocks your tool, and verification that never stays silent. The rest is a matter of building out what should have been there from the start.
 
 ---
 

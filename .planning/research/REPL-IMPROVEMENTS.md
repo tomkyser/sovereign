@@ -91,3 +91,16 @@ Testing Tungsten tmux environment propagation through various tool/agent paths. 
 - Context: running functional probes via `claude -p "Use REPL: ..."` 
 - The model paraphrases results instead of returning raw output. Hard to distinguish "model summarized 30,000" from "REPL returned 30,000"
 - Observation: need a more deterministic probe mechanism — maybe a dedicated test harness that inspects REPL tool result directly
+
+### Observation: grep -oE with extended context on single-line files times out (2026-04-15)
+**Context:** Searching 12.8MB single-line minified JS for patterns with surrounding context.
+**What happened:** `grep -oE ".{0,100}pattern.{0,100}"` on the binary JS consistently times out
+at 30 seconds. The -oP (Perl regex) variant also fails. The file being a single line means
+regex engines backtrack catastrophically on lookaround-style context extraction.
+**What works:** `grep -ob "pattern"` returns byte offsets in <1 second. Then `dd bs=1 skip=N count=M`
+extracts context at specific offsets. This two-step approach (offset + dd) is 100x faster than
+trying to do context extraction in grep.
+**Improvement idea:** REPL could provide a `binarySearch(file, pattern, contextBytes)` helper
+that automatically uses the offset+dd pattern for large single-line files. Detection: check if
+file has <10 newlines and is >1MB.
+
