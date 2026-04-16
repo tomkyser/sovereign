@@ -1,6 +1,6 @@
 # Phase 3.5d Tasks — Message Components Control
 
-Status: PENDING (populate during Planning step)
+Status: PLANNING COMPLETE — ready for ACT
 
 ---
 

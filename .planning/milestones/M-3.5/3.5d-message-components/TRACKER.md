@@ -1,10 +1,10 @@
 # Phase 3.5d Tracker — Message Components Control
 
-## Status: RESEARCH COMPLETE → PLANNING next
+## Status: PLANNING COMPLETE → ACT next
 
 ## Phase Progress
 - [x] Research — CC source analysis, binary patterns, rendering pipeline
-- [ ] Planning — PLAN.md with implementation approach per deliverable
+- [x] Planning — PLANNING.md with implementation approach per deliverable
 - [ ] Act — Implementation
 - [ ] Verify — 23/23+ SOVEREIGN, visual verification in live TUI
 - [ ] Gap Analysis

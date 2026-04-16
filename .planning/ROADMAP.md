@@ -535,7 +535,7 @@ fakechat reference implementation [fakechat1]
 - [x] Wire state directory ~/.claude-governance/wire/
 - [x] Verified: 23/23 SOVEREIGN, interactive launch clean, Wire channel active, TOOLS:3 statusline
 
-## Phase 3.5d: Message Components Control — Complete Override and Patching
+## Phase 3.5d: Message Components Control — PLANNING COMPLETE → ACT
 Status: RESEARCH COMPLETE — PLANNING next
 /Users/tom.kyser/dev/cc-source/collection-claude-code-source-code/claude-code-source-code/src/components/messages
 
