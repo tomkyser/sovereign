@@ -1,56 +1,32 @@
-# Milestone 3.5 Findings — Wire
 
-Milestone-scoped discoveries. Project-level findings go to `.planning/FINDINGS.md`.
 
----
+## Phase 3.5d Findings — Message Components Control
 
----
+### F30: REPL Tool Invisible Due to renderToolUseMessage Default
+tool-injection.ts defaults renderToolUseMessage to `function(){return null}`.
+CC's AssistantToolUseMessage returns null for the entire message when this returns null.
+Root cause of "REPL tool use not appearing in TUI" issue.
 
-## F-3.5a-1: MCP SDK v1.29.0 Uses Newline-Delimited JSON (2026-04-16)
+### F31: Three Tool Visibility Suppression Mechanisms in CC
+1. Empty userFacingName → return null (ToolSearchTool, TaskStopTool/ant, BriefTool)
+2. renderToolUseMessage returns null → return null (external tools)
+3. isTransparentWrapper → only progress shown (defined but unused)
 
-**Phase:** 3.5a Act | **Impact:** Transport framing for all Wire communication
+### F32: Five Thinking Suppression Points
+1. SystemTextMessage:122 — subtype==="thinking" → return null (offset 8193543)
+2. AssistantThinkingMessage:36 — hideInTranscript
+3. REPL.tsx:852 — streaming thinking auto-hides after 30s
+4. betas.ts:270 — REDACT_THINKING_BETA_HEADER replaces thinking with opaque stubs
+5. AssistantThinkingMessage:42 — non-verbose shows only stub
 
-The MCP SDK's `StdioServerTransport` uses `ReadBuffer` which scans for `\n` delimiters,
-not Content-Length headers. Messages are `JSON.stringify(msg) + '\n'`. This is the v1.29.0
-behavior — older SDK versions used Content-Length framing.
+### F33: Default Opus 4.6 Effort is Medium for Pro Users
+utils/effort.ts: getDefaultEffortForModel returns 'medium' for Pro subscribers on Opus 4.6.
+Users on the most capable model receive reduced reasoning unless they explicitly escalate.
 
----
+### F34: 27 Null-Rendered Attachment Types
+nullRenderingAttachments.ts lists 27 types that are invisible in the TUI but present in context.
+Includes critical_system_reminder, token_usage, output_token_usage, compaction_reminder.
 
-## F-3.5a-2: --dangerously-load-development-channels Takes Tagged Channel Names (2026-04-16)
-
-**Phase:** 3.5a Act | **Impact:** Corrects launch flag strategy
-
-The flag is NOT boolean. It takes space-separated tagged channel names:
-`--dangerously-load-development-channels server:wire`
-
-Without a tagged value, it consumes the next CLI argument. Passing `--dangerously-load-development-channels -p "prompt"` eats `-p` as its argument.
-
-The `server:` prefix means "manually configured MCP server" (from .mcp.json).
-The `plugin:` prefix means "plugin-provided channel" (from marketplace).
-
-No `--channels` flag needed separately for dev channels.
-
----
-
-## F-3.5a-3: Official Channels Docs Confirm Wire Architecture (2026-04-16)
-
-**Phase:** 3.5a Act | **Impact:** Validates entire approach
-
-`code.claude.com/docs/en/channels-reference` confirms:
-- `capabilities: { experimental: { 'claude/channel': {} } }` — exact match
-- `notifications/claude/channel` with `{ content, meta }` — exact match
-- Meta keys: identifiers only (letters, digits, underscores) — exact match
-- `instructions` field → Claude's system prompt — exact match
-- Permission relay via `claude/channel/permission` capability (future use)
-- Plugin packaging path for distribution
-
----
-
-## F-3.5a-4: .mcp.json Must Be Project-Level for Channel Registration (2026-04-16)
-
-**Phase:** 3.5a Act | **Impact:** Configuration strategy
-
-`~/.claude/.mcp.json` registered the MCP server but channel matching failed with
-"no MCP server configured with that name". Project-level `.mcp.json` works correctly.
-The `server:wire` tag in `--dangerously-load-development-channels` matches against
-MCP server names in the project config, not user-level config.
+### F35: Ultrathink System Hidden
+Ultrathink effort attachment is null-rendered. The keyword triggers effort escalation
+but the mechanism is invisible to the user.
