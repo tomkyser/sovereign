@@ -88,6 +88,13 @@ export const PATCH_DEFINITIONS = [
       'Injects Tungsten guidance into the Using your tools section (after REPL guidance)',
   },
   {
+    id: 'channel-dialog-bypass',
+    name: 'Channel Dialog Bypass',
+    group: PatchGroup.GOVERNANCE,
+    description:
+      'Auto-accepts dev channel dialog for OAuth users (skips interactive confirmation)',
+  },
+  {
     id: 'client-data-cache',
     name: 'Client Data Cache Preservation',
     group: PatchGroup.GOVERNANCE,

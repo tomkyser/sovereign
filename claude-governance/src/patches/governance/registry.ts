@@ -185,6 +185,14 @@ export const VERIFICATION_REGISTRY: VerificationEntry[] = [
     passDetail: 'active in Using your tools',
   },
   {
+    id: 'channel-dialog-bypass',
+    name: 'Channel Dialog Bypass',
+    signature: '__channel_dialog_bypassed__',
+    critical: false,
+    category: 'governance',
+    passDetail: 'dev channel dialog auto-accepted',
+  },
+  {
     id: 'client-data-cache',
     name: 'Client Data Cache Preservation',
     signature: '__cdc_preserved__',

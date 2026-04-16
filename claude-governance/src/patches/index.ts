@@ -30,6 +30,7 @@ import {
   writeTungstenPanelInjection,
   writeTungstenToolGuidance,
   writeClientDataCachePatch,
+  writeChannelDialogBypass,
   GOVERNANCE_DEFAULTS,
   isContentPatched,
 } from './governance';
@@ -349,6 +350,10 @@ export const applyCustomization = async (
       fn: c => writeTungstenToolGuidance(c),
       signature:
         'Tungsten session is established at the start of every work session',
+    },
+    'channel-dialog-bypass': {
+      fn: (c: string) => writeChannelDialogBypass(c),
+      signature: '__channel_dialog_bypassed__',
     },
     'client-data-cache': {
       fn: c => writeClientDataCachePatch(c),

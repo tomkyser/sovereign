@@ -540,6 +540,10 @@ fakechat reference implementation [fakechat1]
 - [ ] MCP server `instructions` field (fakechat pattern)
 - [ ] Coordinator mode recreation at prompt level (COORDINATOR_MODE is DCE'd)
 - [ ] Model must understand WHEN cross-session collaboration is right, not just HOW
+- [ ] Research: UI display and further examples and reference regarding the DCE'd UDP Socket's based comms
+  - [ ] /Users/tom.kyser/dev/cc-source/collection-claude-code-source-code/claude-code-source-code/src/constants/xml.ts
+  - [ ] UDS_INBOX | UserCrossSessionMessage | /Users/tom.kyser/dev/cc-source/collection-claude-code-source-code/claude-code-source-code/src/components/messages/UserTextMessage.tsx
+  - [ ] 
 
 ### Phase 3.5e: /coordinate Skill & Tungsten Orchestration
 - [ ] `/coordinate` skill for user-initiated cross-session collaboration
