@@ -525,14 +525,15 @@ fakechat reference implementation [fakechat1]
 - [x] Integration verified: all endpoints, typecheck, build
 - [x] Disconnect buffering — messages held during session absence, delivered on reconnect
 
-### Phase 3.5c: Governance Integration
-- [ ] Wire as a claude-governance module
-- [ ] Shim/launch auto-starts Wire MCP server, passes `--dangerously-load-development-channels` flag
-- [ ] Remove user approval checks in interactive session with patch (claude code still heavily gates the channels feature - investigate first)
-- [ ] Verification entries for Wire health in registry.ts
-- [ ] SessionStart hook: Wire readiness check
-- [ ] SessionStop hook: Wire cleanup
-- [ ] Configuration in `~/.claude-governance/`
+### Phase 3.5c: Governance Integration ✅
+- [x] Wire as a claude-governance module (wire.ts rewrite: ESM paths, hook deploy, settings registration, 4-point health check)
+- [x] Shim/launch auto-starts Wire MCP server with `--dangerously-load-development-channels` flag
+- [x] PATCH 13: Channel dialog bypass — binary patch auto-accepts dev channel confirmation for OAuth users
+- [x] SessionStart hook: wire-verify.cjs (MCP registration + relay health)
+- [x] SessionStop hook: wire-cleanup.cjs (HTTP unregister from relay)
+- [x] Hooks deployed to ~/.claude/hooks/ and registered in settings.json by apply()
+- [x] Wire state directory ~/.claude-governance/wire/
+- [x] Verified: 23/23 SOVEREIGN, interactive launch clean, Wire channel active, TOOLS:3 statusline
 
 ### Phase 3.5d: Add Complete Message Components Control and Patching to Claude Governance
 /Users/tom.kyser/dev/cc-source/collection-claude-code-source-code/claude-code-source-code/src/components/messages

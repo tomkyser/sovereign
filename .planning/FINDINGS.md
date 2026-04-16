@@ -588,3 +588,18 @@ coral_reef_sonnet:"true"}` to `~/.claude.json` during `apply`, this unlocks:
 - **Subagent CLAUDE.md stripping**: `tengu_slim_subagent_claudemd` defaults true. Patched.
 - **output-efficiency prompt**: Removed by Anthropic in CC 2.1.100, replaced by
   communication-style prompt.
+
+## F30: Channel Dialog Bypass — OAuth Gate Analysis (2026-04-16)
+
+**Phase:** 3.5c | **Impact:** CRITICAL — required binary patch for Wire to work for all users
+
+The dev channel loading path: `if(!isChannelsEnabled() || !getClaudeAIOAuthTokens()?.accessToken)` → auto-accept, else show dialog.
+
+- `isChannelsEnabled()` = `E_("tengu_harbor", false)` — GrowthBook feature flag
+- `getClaudeAIOAuthTokens()` reads OAuth tokens from keychain/env/credential store
+- OAuth users (majority) have `accessToken` at runtime → dialog APPEARS
+
+**PATCH 13:** Replaces entire if/else block (288 chars) with auto-accept call (83 chars).
+Unique match. Verified in interactive session — no dialog, Wire channel active.
+
+**Lesson:** Never trust "works on my machine" when the gate involves auth state that varies across users.

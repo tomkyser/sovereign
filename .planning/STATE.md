@@ -28,7 +28,7 @@ and governance-specific `check` command added.
   - `src/tools/tungsten/` — Tungsten tool (12 modules: 6 core + 6 actions)
   - `data/tools/` — built tool artifacts (CJS .js via tsdown)
 
-### What's Applied (Verified 22/22 via `check`)
+### What's Applied (Verified 23/23 via `check`)
 **Governance Patches (6 active):**
 - Disclaimer neutralization — replaces "may or may not be relevant" with directive framing
 - Context header reframing — replaces ambient "use the following context" with mandatory framing

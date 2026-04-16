@@ -104,3 +104,11 @@ trying to do context extraction in grep.
 that automatically uses the offset+dd pattern for large single-line files. Detection: check if
 file has <10 newlines and is >1MB.
 
+
+## 2026-04-16 Session (3.5c Governance Integration)
+
+### write() silently fails when hook guard blocks overwrite
+Context: Tried to overwrite channel-dialog-bypass.ts via REPL write(). Reported "update" but read() showed old content.
+
+### REPL read() CWD shifts after Tungsten cd
+Context: After Tungsten session did cd, REPL paths resolved from new CWD. Required absolute paths.
