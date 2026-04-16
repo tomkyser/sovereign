@@ -235,24 +235,33 @@ Wire isn't just a communication library — it's a multi-layer integration:
 
 | Transport | Role | Binary Support |
 |-----------|------|---------------|
-| **Channels API** | Inbound to Claude sessions (low-latency) | LIVE — `notifications/claude/channel` |
-| **HTTP Relay** | Outbound from Claude sessions + bulk data | Need to build |
-| **File-based** | Fallback, teammate-style polling | Pattern exists in mailbox |
+| **Channels API** | Bidirectional — inbound via notifications, outbound via MCP tools | LIVE — `notifications/claude/channel` + tool calls |
+| **HTTP Relay** | Cross-machine routing between Wire MCP servers | May need for remote sessions |
+| **File-based** | Fallback for environments without Channels | Pattern exists in teammate mailbox |
 
-### The Outbound Problem
+### Bidirectional Communication via MCP Tools
 
-Channels API is **inbound only** — an MCP server pushes to Claude. For Claude to send
-a message TO another session, it needs to call a tool that routes through the relay/file
-transport. The flow is:
+The Channels API is **bidirectional by design**. An MCP server that declares
+`claude/channel` handles BOTH directions:
+
+- **Inbound** (to Claude): Server sends `notifications/claude/channel` → message
+  arrives as `<channel>` tag in conversation
+- **Outbound** (from Claude): Server exposes MCP tools (e.g., `reply`, `send`) →
+  Claude calls them to send messages out
+
+Reference implementation: [fakechat1] — Anthropic's official channel test plugin.
+The server declares `{ tools: {}, experimental: { 'claude/channel': {} } }` in
+capabilities, sends notifications for inbound, and exposes `reply`/`edit_message`
+tools for outbound. The server's `instructions` field teaches Claude how to reply.
 
 ```
-Session A (Claude) → Wire Tool (send) → Relay Server → Wire MCP Server (session B) 
-  → notifications/claude/channel → Session B (Claude) sees <channel> message
+Session A (Claude) calls Wire MCP reply tool → Wire MCP Server routes to Session B's
+  Wire MCP Server → sends notifications/claude/channel → Session B (Claude) sees message
+  → Session B calls its Wire MCP reply tool → routes back to Session A
 ```
 
-This means Wire needs both:
-1. An MCP server running alongside each Claude session (receives via Channels)
-2. A tool injected into each session (sends via relay)
+This means Wire is **one MCP server per session**, handling both directions.
+No separate injected tool needed. No relay for the basic case.
 
 ---
 

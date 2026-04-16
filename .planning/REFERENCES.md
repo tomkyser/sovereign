@@ -66,6 +66,14 @@ planning docs instead of raw URLs. Grouped by category, sorted by relevance.
 | cattusResearch1 | https://gist.github.com/mrcattusdev/53b046e56b5a0149bdb3c0f34b5f217a | CC research gist. |
 | ceaksanResearch1 | https://gist.github.com/ceaksan/57af569318917940c9e1e1160c02a982 | CC research gist. |
 
+## Channels API & Inter-Session Communication
+
+| ID | URL | Description |
+|----|-----|-------------|
+| channelsRef1 | https://code.claude.com/docs/en/channels-reference | Official Channels API reference. Covers MCP server setup, notification schema, reply tools, permission relay. |
+| fakechat1 | https://github.com/anthropics/claude-plugins-official/tree/main/external_plugins/fakechat | Reference implementation of a channel plugin. Demonstrates bidirectional messaging: inbound via notifications, outbound via exposed MCP tools. |
+| pluginsOfficial1 | https://github.com/anthropics/claude-plugins-official | Official Claude Code plugins repository. Contains channel examples and plugin patterns. |
+
 ## Programmatic Tool Calling & REPL Research
 
 | ID | URL | Description |
@@ -85,3 +93,4 @@ planning docs instead of raw URLs. Grouped by category, sorted by relevance.
 | tweakccLocal | `/Users/tom.kyser/dev/tweakcc` | Local tweakcc checkout. Fork source. |
 | ccSource | `/Users/tom.kyser/dev/cc-source` | Leaked CC source code. Reference for internals. |
 | clawbackLocal | `/Users/tom.kyser/dev/clawback` | Clawback hooks project. Active on Tom's setup. |
+| dynamoWire | `/Users/tom.kyser/Library/Mobile Documents/com~apple~CloudDocs/dev/dynamo/core/services/wire/` | Dynamo Wire service (2526 lines). Port source for M-3.5. |

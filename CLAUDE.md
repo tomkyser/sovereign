@@ -162,6 +162,18 @@ REFERENCES.md for their scoped context.
 - CC leaked source: `/Users/tom.kyser/dev/cc-source`
 - Clawback hooks: `/Users/tom.kyser/dev/clawback`
 
+## WebFetch Returns AI Summaries — Use curl for Raw Content
+
+The WebFetch tool and REPL's `fetch()` helper do NOT return raw HTTP responses.
+They return an AI-generated markdown summary of the page content. This means:
+- JSON APIs return narrative descriptions, not the actual JSON
+- Documentation pages return lossy summaries, not the source text
+- Raw data is transformed and potentially hallucinated
+
+**Always use `bash('curl -sL "URL"')` or REPL's `bash()` when you need actual content.**
+WebFetch is only useful when you want a quick summary of a page you don't need to
+parse or quote accurately.
+
 ## REPL Tool Observation Directive — Mandatory
 
 **Every session, every agent, every REPL tool call.** This is a standing order.

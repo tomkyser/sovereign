@@ -23,13 +23,16 @@ Last updated: 2026-04-15
 - `--channels server:name` or `--dangerously-load-development-channels` enables channel notifications
 - Our governance shim (`claude-governance launch`) can pass `--dangerously-load-development-channels`
 
-### Wire Architecture (revised from dynamo)
-Wire becomes a multi-component integration:
-1. **MCP Server** — declares `claude/channel`, receives from relay, pushes to session
-2. **Injected Tool** — session calls tool to send messages outbound
-3. **Relay Server** — localhost HTTP, routes between Wire MCP servers
-4. **Registry** — port from dynamo, session discovery + capabilities
-5. **Prompt/Hook/Skill layer** — teaches model to use Wire
+### Wire Architecture (revised after channels reference + fakechat analysis)
+Wire is one MCP server per session, handling both directions:
+1. **MCP Server** — declares `claude/channel`, sends notifications inbound, exposes reply tools outbound
+2. **Relay/Router** — routes messages between Wire MCP servers (for cross-session)
+3. **Registry** — port from dynamo, session discovery + capabilities
+4. **Prompt/Hook/Skill layer** — teaches model to use Wire
+
+Key correction: Channels API is BIDIRECTIONAL. Server exposes MCP tools for outbound
+(Claude calls `reply` tool), sends notifications for inbound. No separate injected
+tool needed. See [fakechat1] reference implementation.
 
 ### GrowthBook Risk
 `cachedGrowthBookFeatures` is synced from Anthropic's server on bootstrap.
