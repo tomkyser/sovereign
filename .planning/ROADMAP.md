@@ -591,8 +591,6 @@ REPL Notes:
   - there doesn't appear to be any noticeable persistence in use or gains without my explict instruction.
   - 
 
-
-
 ## Milestone 5: HTTP Proxy Layer
 
 **References:** [billingProxy1], [cliProxy1], [promptCaching1], [cacheFix1], [cacheFixTool1], [usageTracker1], [sessionViewer1] — see `.planning/REFERENCES.md`
@@ -635,21 +633,6 @@ REPL Notes:
 - [ ] Bootstrap Prompt
 ---
 
-## 6.5: Extended Tool Suite 
-Phase planning TODO
-**References:** [ralphCC1], [cattusResearch1], [ceaksanResearch1] — see `.planning/REFERENCES.md`
-
-- [ ] Durable Cron, File Persistence, WebBrowser, Computer Use
-- [ ] Coordinator Mode, Daemon Mode, Reactive Compact
-- [ ] https://github.com/harrymunro/nelson for coordinator mode?
-
----
-### 6.5 Retro
-- [ ] Commentary
-- [ ] Gap analysis
-- [ ] Housekeeping
-- [ ] Bootstrap Prompt
----
 
 ## Milestone 7: Version Management
 
@@ -791,6 +774,23 @@ Collected from Investigation Registry P1 (remaining), P2, and P3 items.
 - [ ] Housekeeping
 - [ ] Bootstrap Prompt
 ---
+
+## 1.3.0: Extended Tool Suite 
+Phase planning TODO
+**References:** [ralphCC1], [cattusResearch1], [ceaksanResearch1] — see `.planning/REFERENCES.md`
+
+- [ ] Durable Cron, File Persistence, WebBrowser, Computer Use
+- [ ] Coordinator Mode, Daemon Mode, Reactive Compact
+- [ ] https://github.com/harrymunro/nelson for coordinator mode?
+
+---
+### 1.3.0 Retro
+- [ ] Commentary
+- [ ] Gap analysis
+- [ ] Housekeeping
+- [ ] Bootstrap Prompt
+---
+
 
 ------- 
 

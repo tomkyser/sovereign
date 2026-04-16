@@ -22,7 +22,7 @@ gets delivered to Session B's poll loop, and arrives as a `<channel>` notificati
 | `src/wire/relay-client.ts` | Relay client — fetch-based register/send/poll/discover with poll loop |
 | `src/wire/relay-lifecycle.ts` | Relay process management — auto-start, PID files, health check |
 
-### Modified Files (3)
+### Modified Files (2)
 
 | File | Changes |
 |------|---------|
@@ -85,6 +85,7 @@ Session A                           Session B
 - D-03: Relay auto-started by first MCP server as detached child
 - D-08: Session identity: WIRE_SESSION_NAME env → cwd basename → random suffix
 - D-09: Graceful degradation: local-only mode when relay unavailable
+- D-10: Shared protocol chunk via tsdown code splitting
 
 ## What's NOT Done (for next phases)
 
@@ -93,10 +94,11 @@ Session A                           Session B
 - **3.5e**: /coordinate skill + Tungsten orchestration
 - **3.5f**: Hardening, WebSocket upgrade, testing, docs
 - E2E test with two CC sessions not yet done (requires 3.5c governance integration)
+- Broadcast not verified end-to-end (relay logic tested, MCP routing not tested)
 
 ## Gotchas for Next Phase
 
 1. **Relay auto-start requires the CJS artifact path.** Server computes it from `process.argv[1]`. If the governance module changes how Wire is launched, this path resolution may break.
 2. **Shared protocol chunk has a hash in its filename** (e.g., `protocol-CXWKtyVA.cjs`). All three files must be deployed together.
-3. **Relay logs to file** (`~/.claude-governance/wire/relay.log`) because it's a detached process.
+3. **Relay logs to file** (`~/.claude-governance/wire/relay.log`) because it's a detached process. No stdout/stderr visible.
 4. **ESLint has a pre-existing chalk compatibility crash.** Use `tsc --noEmit` for typecheck, not `pnpm lint`.

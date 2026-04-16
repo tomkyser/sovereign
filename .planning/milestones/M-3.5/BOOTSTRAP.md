@@ -2,26 +2,27 @@
 
 ---
 
-**Status:** Phase 3.5b — Research + Planning COMPLETE, Act phase next
+**Status:** Phase 3.5b COMPLETE — Phase 3.5c next (Governance Integration)
 **Baseline:** 22/22 SOVEREIGN on CC 2.1.101
 **Previous milestone:** M-3 (System Prompt Control) — COMPLETE
 
 ## Read These Files (In This Order)
 
-1. `.planning/milestones/M-3.5/3.5b-session-registry/PLANNING.md` — **THE PLAN. Architecture, waves, file map.**
-2. `.planning/milestones/M-3.5/3.5b-session-registry/TASKS.md` — **Task breakdown (T1-T9), 5 waves**
-3. `.planning/milestones/M-3.5/3.5b-session-registry/CONTEXT.md` — Shared state, dynamo source mapping
-4. `.planning/milestones/M-3.5/3.5b-session-registry/RESEARCH.md` — 12 findings (R-1 through R-12)
-5. `.planning/milestones/M-3.5/3.5a-wire-mcp-server/HANDOFF.md` — What 3.5a delivered (the MCP server you're extending)
-6. Read the existing Wire source: `claude-governance/src/wire/{types.ts, protocol.ts, server.ts}`
-7. `.planning/ROADMAP.md` — M-3.5 section (scan only — PLANNING.md has the detail)
+1. `.planning/milestones/M-3.5/3.5b-session-registry/HANDOFF.md` — **What 3.5b delivered**
+2. `.planning/milestones/M-3.5/CONTEXT.md` — Milestone-level shared state
+3. `.planning/ROADMAP.md` — Phase 3.5c scope (Governance Integration)
+4. Read the current Wire source: `claude-governance/src/wire/{types.ts, protocol.ts, server.ts, registry.ts, queue.ts, relay-server.ts, relay-client.ts, relay-lifecycle.ts}`
+5. Read the governance module: `claude-governance/src/modules/wire.ts`
+6. `.planning/milestones/M-3.5/3.5a-wire-mcp-server/HANDOFF.md` — What 3.5a delivered (for governance integration context)
 
-## What You're Building
+## What Was Built So Far
 
-Cross-session message routing for Wire. Session A calls `wire_send(to=B)` → message
-routes through a shared HTTP relay → Session B receives as `<channel>` notification.
+### Phase 3.5a ✅ — Wire MCP Server
+Single-session Wire MCP server with channel capability. `wire_send` and `wire_status` tools.
+Local notification echo only (no cross-session routing).
 
-### Architecture (from PLANNING.md)
+### Phase 3.5b ✅ — Session Registry & Cross-Session Routing
+Cross-session message routing via HTTP relay. Full architecture:
 
 ```
 Session A                           Session B
@@ -38,39 +39,19 @@ Session A                           Session B
                      └──────────────┘
 ```
 
-### Execution Waves
+New files: registry.ts, queue.ts, relay-server.ts, relay-client.ts, relay-lifecycle.ts
+Modified: types.ts (7 new interfaces), server.ts (relay integration + wire_discover), tsdown config (dual artifacts)
+Build: wire-server.cjs (480KB) + wire-relay.cjs (14KB)
 
-| Wave | Tasks | Files |
-|------|-------|-------|
-| 1 | T1: types, T2: registry, T3: queue | `types.ts` (mod), `registry.ts` (new), `queue.ts` (new) |
-| 2 | T4: relay server | `relay-server.ts` (new) |
-| 3 | T5: relay client, T6: lifecycle | `relay-client.ts` (new), `relay-lifecycle.ts` (new) |
-| 4 | T7: server integration | `server.ts` (mod) |
-| 5 | T8: build pipeline, T9: verify | `tsdown.wire.config.ts` (mod) |
+## What's Next (Phase 3.5c — Governance Integration)
 
-### Key Architecture Decisions (already made)
-- D-01: HTTP relay (node:http, no external deps)
-- D-02: Long-polling for delivery (25s timeout)
-- D-03: Relay auto-started by first MCP server as detached child
-- D-04: File coordination: `~/.claude-governance/wire/{relay.pid, relay.port}`
-- D-05: Port 9876 default, fallback 9877-9886
-- D-06: In-memory messages only
-- D-07: New `wire_discover` tool for peer discovery
-
-### Dynamo Source Location (port-from reference)
-`/Users/tom.kyser/Library/Mobile Documents/com~apple~CloudDocs/dev/dynamo/core/services/wire/`
-- `registry.cjs` (238 lines) → `src/wire/registry.ts`
-- `queue.cjs` (141 lines) → `src/wire/queue.ts`
-- `relay-server.cjs` (315 lines) → `src/wire/relay-server.ts`
-- `transports/relay-transport.cjs` (209 lines) → `src/wire/relay-client.ts`
+Wire as a claude-governance module:
+- Shim/launch auto-starts Wire MCP server with `--dangerously-load-development-channels`
+- Verification entries for Wire health
+- SessionStart/SessionStop hooks
+- Configuration in `~/.claude-governance/`
 
 ### Build
 - `pnpm build:wire` → produces `data/wire/wire-server.cjs` + `data/wire/wire-relay.cjs`
 - `pnpm build` → full project build (typecheck + all artifacts)
-- `pnpm lint` → typecheck
-
-## Begin Execution
-
-Start with Wave 1 (T1, T2, T3). Read the dynamo source files listed above before
-porting — they are the reference implementations. Check task status via TaskList
-to see what's already done (in case work started before compaction).
+- `tsc --noEmit` → typecheck (use this instead of `pnpm lint` — ESLint has a chalk crash)

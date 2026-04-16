@@ -2,7 +2,7 @@
 
 Last updated: 2026-04-16
 
-## Status: Phase 3.5a COMPLETE — Phase 3.5b Research COMPLETE, Planning next
+## Status: Phase 3.5a COMPLETE — Phase 3.5b COMPLETE — Phase 3.5c next
 
 ## Key Discoveries
 
@@ -23,16 +23,14 @@ Last updated: 2026-04-16
 - `--channels server:name` or `--dangerously-load-development-channels` enables channel notifications
 - Our governance shim (`claude-governance launch`) can pass `--dangerously-load-development-channels`
 
-### Wire Architecture (revised after channels reference + fakechat analysis)
-Wire is one MCP server per session, handling both directions:
-1. **MCP Server** — declares `claude/channel`, sends notifications inbound, exposes reply tools outbound
-2. **Relay/Router** — routes messages between Wire MCP servers (for cross-session)
-3. **Registry** — port from dynamo, session discovery + capabilities
-4. **Prompt/Hook/Skill layer** — teaches model to use Wire
-
-Key correction: Channels API is BIDIRECTIONAL. Server exposes MCP tools for outbound
-(Claude calls `reply` tool), sends notifications for inbound. No separate injected
-tool needed. See [fakechat1] reference implementation.
+### Wire Architecture (finalized after 3.5b)
+1. **MCP Server** — declares `claude/channel`, sends notifications inbound, exposes tools outbound
+2. **HTTP Relay** — standalone Node.js server, routes messages between MCP servers via long-poll
+3. **Registry** — session tracking with TTL disconnect buffering (inside relay)
+4. **Priority Queue** — urgency-based message ordering (inside relay mailboxes)
+5. **Relay Client** — fetch-based HTTP client in each MCP server process
+6. **Relay Lifecycle** — auto-start, PID coordination, health check
+7. **Prompt/Hook/Skill layer** — teaches model to use Wire (3.5c-3.5e)
 
 ### GrowthBook Risk
 `cachedGrowthBookFeatures` is synced from Anthropic's server on bootstrap.
@@ -41,10 +39,8 @@ Our PATCH 12 only protects `clientDataCache`, not `cachedGrowthBookFeatures`.
 May need future protection if Anthropic reverts.
 
 ### Binary-Confirmed Details (from 3.5a research)
-- **Notification schema ($4_)**: `{ method: "notifications/claude/channel", params: { content: string, meta?: Record<string, string> } }`
-- **Meta key regex (nz5)**: `/^[a-zA-Z_][a-zA-Z0-9_]*$/` — underscores only, no hyphens
-- **Three notification handler registration paths** in binary — all identical behavior
-- **Reconnection handler (uf8)**: CC auto-re-registers channel handlers on reconnect
+- **Notification schema**: `{ method: "notifications/claude/channel", params: { content: string, meta?: Record<string, string> } }`
+- **Meta key regex**: `/^[a-zA-Z_][a-zA-Z0-9_]*$/` — underscores only, no hyphens
 - **Gate bypass**: `--channels wire` + `--dangerously-load-development-channels`
 
 ## Open Questions
