@@ -646,7 +646,7 @@ ___
 
 ## Milestone 3.75: RALPH — Reasoning-Anchored Loop for Planning and Hypothesizing
 
-**Status:** ✅ COMPLETE
+**Status:** ✅ CLOSED
 **References:** `.planning/research/2026-04-17-ralph-framework-design.md`, `.planning/research/2026-04-17-ralph-implementation-plan.md`
 **Impact:** `.planning/milestones/M-3.75/IMPACT.md`
 

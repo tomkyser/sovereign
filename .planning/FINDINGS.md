@@ -681,3 +681,38 @@ CC assigns `userFacingName: () => ""` as default for custom tools. Loader fallba
 ### F34: React refs .default resolution for esbuild CJS (2026-04-16, session i)
 `require("react")` in esbuild CJS returns module object, not React namespace.
 `createElement` is at `.default.createElement`. Fix: `_govR.default || _govR`.
+
+## F32: "type": "prompt" Hooks Use Separate Haiku Model
+**Discovered:** 2026-04-17 (M-3.75 P1/P2)
+**Impact:** All RALPH hooks must use `"type": "command"` with `additionalContext`
+
+CC's `"type": "prompt"` hooks send the prompt text to a **separate small model
+(Haiku by default)** for yes/no evaluation. They are designed for permission
+decisions, not reasoning scaffolds. Only available for PreToolUse, PostToolUse,
+and PermissionRequest events.
+
+For injecting text into the main model's conversation context, use
+`"type": "command"` hooks that output JSON with
+`hookSpecificOutput.additionalContext`. This creates a `hook_additional_context`
+message that gets injected alongside the user's prompt.
+
+## F33: UserPromptSubmit Hook additionalContext Injection Path
+**Discovered:** 2026-04-17 (M-3.75 P1)
+**Impact:** Confirmed mechanism for Layer 0 cognitive redirect
+
+The `executeUserPromptSubmitHooks` function (i$7) fires for all prompt types.
+When a command hook returns `hookSpecificOutput.additionalContext`, CC creates
+a `hook_additional_context` message via H4() and pushes it into the conversation
+messages array. This is the same mechanism used by SessionStart hooks.
+
+## F34: Model Reliably Follows HALT/END/HERE/DELTA When Scaffolded
+**Discovered:** 2026-04-17 (M-3.75 P1-P2)
+**Impact:** Core RALPH hypothesis validated
+
+When the cognitive redirect scaffold is injected via additionalContext, the model
+consistently:
+- Classifies Tier 1 requests and acts directly (no overhead)
+- Classifies Tier 3 requests and resolves unknowns before planning
+- Produces structured DELTA with [F]/[A]/[U] markers
+- Asks before proceeding on complex tasks
+Tested in both headless (-p) and interactive TUI modes.

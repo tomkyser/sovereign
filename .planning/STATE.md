@@ -1,6 +1,6 @@
 # Project State
 
-Last updated: 2026-04-17 (M-3.75 RALPH COMPLETE — hooks + governance module shipped)
+Last updated: 2026-04-17 (M-3.75 CLOSED — next: M-4 Version Management)
 
 ## Current Claude Code Version
 - **Installed:** 2.1.101 (native, arm64-darwin)
