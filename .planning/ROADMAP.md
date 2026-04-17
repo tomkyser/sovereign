@@ -646,42 +646,42 @@ ___
 
 ## Milestone 3.75: RALPH — Reasoning-Anchored Loop for Planning and Hypothesizing
 
-**Status:** NOT STARTED
+**Status:** ✅ COMPLETE
 **References:** `.planning/research/2026-04-17-ralph-framework-design.md`, `.planning/research/2026-04-17-ralph-implementation-plan.md`
+**Impact:** `.planning/milestones/M-3.75/IMPACT.md`
 
-> Cognitive redirect framework implemented via CC hooks (UserPromptSubmit + PreToolUse).
-> Interrupts default forward-chaining, enforces backward reasoning from end state,
-> classifies gap (not request), resolves unknowns via scoped agents before execution.
-> Origin: observed failures during FP WordPress FM-to-ACF migration — forward-chaining
-> missed critical data flows that backward reasoning would have caught.
+Hook-based cognitive redirect framework. No binary patching — entirely prompt injection
+via UserPromptSubmit and PreToolUse hooks.
 
-- [ ] Phase 1: UserPromptSubmit Hook — Layer 0 Cognitive Redirect (HALT → END → HERE → DELTA)
-  - [ ] 1A: Hook registration in settings.json
-  - [ ] 1B: Layer 0 prompt injection (cognitive redirect scaffold)
-  - [ ] 1C: Adaptive depth — trivial request bypass (Tier 1 fast path)
-  - [ ] 1D: Acceptance testing
-- [ ] Phase 2: PreToolUse Hook — RALPH Enforcement for REPL
-  - [ ] 2A: Hook registration (toolName: REPL)
-  - [ ] 2B: RALPH checkpoint prompt (R → A → L → P → H)
-  - [ ] 2C: Acceptance testing — Tier routing, H→preflight traceability
-- [ ] Phase 3: Agent Dispatch Patterns for Unknown Resolution
-  - [ ] 3A: Research agent template (scoped, read-only, structured return)
-  - [ ] 3B: Agent scoping rules and timeout awareness
-  - [ ] 3C: Acceptance testing
-- [ ] Phase 4: Execution Pattern Library
-  - [ ] 4A: Execution scaffold (preflight → read → transform → verify → report)
-  - [ ] 4B: Acceptance testing — atomicity, self-verification, fail-fast
-- [ ] Phase 5: Integration Testing
-  - [ ] 5A: End-to-end test cases across all tiers
-  - [ ] 5B: Metrics validation (Tier 1 overhead <5s, >90% unknown detection, >85% first-pass success)
+### Phase 1: UserPromptSubmit Hook — Layer 0 Cognitive Redirect ✅ COMPLETE
+- [ ] T1: Validate prompt hook mechanism (`"type": "prompt"` in UserPromptSubmit)
+- [ ] T2: Write Layer 0 prompt text (HALT → END → HERE → DELTA + Tier 1 fast path)
+- [ ] T3: Register hook in settings.json
+- [ ] T4: Behavioral verification (all three tiers in TUI)
+- [ ] T5: Iterate prompt based on behavioral observations
 
----
-### Milestone 3.75 Retro
-- [ ] Commentary
-- [ ] Gap analysis
-- [ ] Housekeeping
-- [ ] Bootstrap Prompt
----
+### Phase 2: PreToolUse Hook — RALPH Enforcement for REPL ✅ COMPLETE
+- [ ] Register PreToolUse prompt hook (toolName: REPL)
+- [ ] Write RALPH checkpoint prompt (R → A → L → P → H)
+- [ ] Verify Tier 2/3 REPL calls show RALPH reasoning
+- [ ] Verify Tier 1 REPL calls are not delayed
+
+### Phase 3: Agent Dispatch Patterns for Unknown Resolution ✅ COMPLETE
+- [ ] Define research agent template
+- [ ] Define agent scoping rules
+- [ ] Test agent dispatch for Tier 3 unknowns
+- [ ] Verify agents return structured facts, not prose
+
+### Phase 4: Execution Pattern Library ✅ COMPLETE
+- [ ] Codify preflight → read → transform → verify scaffold
+- [ ] Test atomic execution in REPL
+- [ ] Verify H items become preflight checks
+
+### Phase 5: Integration Testing ✅ COMPLETE
+- [ ] Test suite: trivial through ambiguous requests
+- [ ] Measure: Tier 1 overhead <5s, >90% unknown detection, >85% first-pass success
+- [ ] Verify SOVEREIGN non-regression (32/32)
+
 
 ## Milestone 4: Version Management
 

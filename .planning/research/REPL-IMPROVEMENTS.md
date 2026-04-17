@@ -33,3 +33,11 @@ REPL (file writes) and Tungsten (cp command) to work around it.
 Multiple 15-25 second waits between sending a prompt and checking output. No way to
 poll for "response complete" from Tungsten — just sleep and hope. Would benefit from
 a "wait until output changes" or "wait until prompt returns" primitive.
+
+## 2026-04-17T21:35:43.091Z — Prompt hook type discovery
+**Context:** Researching "type": "prompt" hook support for RALPH milestone
+**Observation:** Binary documentation at idx 86307178 states: "2. Prompt Hook - Evaluates a condition with LLM" and "Only available for tool events: PreToolUse, PostToolUse, PermissionRequest." This means "type": "prompt" hooks cannot be used for UserPromptSubmit events. The workaround is "type": "command" hooks that output JSON with hookSpecificOutput.additionalContext — CC injects this into the model's conversation context as a hook_additional_context message.
+
+## 2026-04-17T21:49:38.557Z — Prompt hook type clarification
+**Context:** RALPH Phase 2 research — PreToolUse hook mechanism
+**Observation:** "type": "prompt" hooks send text to a SEPARATE small model (Haiku by default) for evaluation, not to the main conversation model. They're designed for yes/no permission decisions. For injecting reasoning scaffolds into the main model's context, use "type": "command" hooks with hookSpecificOutput.additionalContext. This applies to ALL hook events, not just UserPromptSubmit.
