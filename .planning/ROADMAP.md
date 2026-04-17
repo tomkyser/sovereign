@@ -585,10 +585,10 @@ Patterns must anticipate future esbuild version changes and variable name variat
   - [ ] 6. Housekeeping and handoff
 
 #### P3: User Customization (Future)
-- [ ] T17: Implement ~/.claude-governance/components/ directory loading
-- [ ] T18: Governance default component overrides in data/components/
-- [ ] T19: Unhide hidden commands patch
-- [ ] T20: Documentation for component override API
+- [x] T17: Implement ~/.claude-governance/components/ directory loading
+- [x] T18: Governance default component overrides in data/components/
+- [x] T19: Unhide hidden commands patch
+- [x] T20: Documentation for component override API
 - [ ] STOP - Prepare for new session with bootstrap! - THEN: Phase steps 4-6 (/.planning/project-management/phase-steps/{step_number}.md)
   - [ ] 4. Verify all new and existing functionality in live TUI session
   - [ ] 5. Gap analysis & report-discuss-resolve loop
