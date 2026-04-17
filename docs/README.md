@@ -19,23 +19,23 @@ Every claim in these docs is verified against the actual codebase at the stated 
 | [CLI Reference](cli-reference.md) | All commands: apply, check, restore, launch, setup, modules, unpack, repack |
 | [Env Flags](env-flags.md) | The 6 recommended CC environment variables and what they unlock |
 
-## Quick Start (WRONG! THIS NEEDS TO REFLECT OUR CURRENT DEVELOPMENT -- NOT NPM WHICH WE DO NOT HAVE CONFIGURED YET -- CLAUDE FIX!)
+## Quick Start
 
 ```bash
-# Install
-npm install -g claude-governance
+# Clone and build
+git clone https://github.com/anthropics/claude-code-patches.git
+cd claude-code-patches/claude-governance
+pnpm install
+pnpm build
 
-# First-run setup (interactive)
-claude-governance setup
+# Apply governance patches to your local Claude Code binary
+node dist/index.mjs -a
 
-# Apply patches
-claude-governance --apply
+# Verify all patches applied
+node dist/index.mjs check
 
-# Verify everything
-claude-governance check
-
-# Launch CC with pre-flight verification
-claude-governance launch
+# Launch Claude Code (governance shim handles pre-flight automatically)
+claude
 ```
 
 ## How to Read These Docs
