@@ -25,9 +25,21 @@ Status: P2 COMPLETE + bugfixes (29/29 SOVEREIGN). Phase steps 4-6 done. P3 next 
 - [x] Replace mode verified working (primitives filtered, REPL-only)
 - [x] REPL tool call renders visibly in TUI (user confirmed)
 
-## P3: User Customization — COMPLETE
+## P3: User Customization — INCOMPLETE (gap phase required)
 - [x] T17: Component directory loading (~/.claude-governance/components/)
-- [x] T18: Default component overrides in data/components/
-- [x] T19: Unhide hidden commands patch (30/30 SOVEREIGN)
-- [x] T20: Documentation for component override API
+- [ ] ~~T18: Default component overrides~~ **MARKED IN ERROR** — skeleton only, zero tested overrides
+- [x] T19: Unhide hidden commands patch (30/30 SOVEREIGN, TUI verified)
+- [ ] ~~T20: Component override API docs~~ **MARKED IN ERROR** — handler signature unverified against binary
 - [x] T21: Unhide Commands added to verification registry
+
+## P3-GAP: Component Override Verification
+> Remediation phase. P3 tasks T18/T20 were rubber-stamped without behavioral testing.
+> The override system pipeline exists but has never rendered a single user-defined
+> component in the TUI. This gap phase exists because of sloppy verification.
+
+- [ ] T18a: Verify handler signature — read binary injection code, confirm args passed to handlers
+- [ ] T18b: Write a real component override (e.g., custom thinking block render)
+- [ ] T18c: End-to-end test: drop .js in components/, launch TUI, confirm it renders
+- [ ] T18d: Ship verified default overrides in data/components/ (replace skeleton)
+- [ ] T20a: Verify and correct docs/README.md Component Override API against tested behavior
+- [ ] T20b: Document update resilience — what survives CC updates, what needs re-apply

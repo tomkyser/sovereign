@@ -584,20 +584,35 @@ Patterns must anticipate future esbuild version changes and variable name variat
   - [ ] 5. Gap analysis & report-discuss-resolve loop
   - [ ] 6. Housekeeping and handoff
 
-#### P3: User Customization (Future)
+#### P3: User Customization
 - [x] T17: Implement ~/.claude-governance/components/ directory loading
-- [x] T18: Governance default component overrides in data/components/
-- [x] T19: Unhide hidden commands patch
-- [x] T20: Documentation for component override API
-- [ ] STOP - Prepare for new session with bootstrap! - THEN: Phase steps 4-6 (/.planning/project-management/phase-steps/{step_number}.md)
+- [x] ~~T18: Governance default component overrides in data/components/~~ **MARKED IN ERROR** — skeleton only, no actual overrides, never tested
+- [x] T19: Unhide hidden commands patch (30/30 SOVEREIGN, TUI verified)
+- [x] ~~T20: Documentation for component override API~~ **MARKED IN ERROR** — docs written but handler signature never verified against binary injection code
+- [x] T21: Unhide Commands added to verification registry
+
+#### P3-GAP: Component Override Verification (gap phase — added due to prior sloppy verification)
+> This gap phase exists because P3 tasks T18 and T20 were rubber-stamped as complete
+> without behavioral verification. The component override system was built (registry,
+> binary patches, deploy pipeline, scanner) but never tested end-to-end. No component
+> override has ever rendered in the TUI. The documented API was never verified against
+> the actual binary injection code. This is a remediation phase.
+
+- [ ] T18a: Verify handler signature — confirm binary injection passes (message, props) matching docs
+- [ ] T18b: Write a real component override that renders in the TUI (e.g., thinking block customization)
+- [ ] T18c: Test end-to-end: drop .js in ~/.claude-governance/components/, launch TUI, verify render
+- [ ] T18d: Ship verified default overrides in data/components/ (replaces skeleton)
+- [ ] T20a: Verify and correct docs/README.md Component Override API section against tested behavior
+- [ ] T20b: Document update resilience — what survives CC updates, what needs re-apply
+- [ ] STOP - Phase steps 4-6 (/.planning/project-management/phase-steps/{step_number}.md)
   - [ ] 4. Verify all new and existing functionality in live TUI session
   - [ ] 5. Gap analysis & report-discuss-resolve loop
   - [ ] 6. Housekeeping and handoff
 
 #### Verification
 - [x] T21: Add all new patches to VERIFICATION_REGISTRY (covered by T16)
-- [x] T22: Full SOVEREIGN check — 29/29 SOVEREIGN
-- [x] T23: Interactive TUI verification — all elements confirmed
+- [x] T22: Full SOVEREIGN check — 30/30 SOVEREIGN
+- [x] ~~T23: Interactive TUI verification — all elements confirmed~~ **PARTIAL** — tool visibility and unhide verified, component overrides never tested
 
 #### Notes
 - Root cause: tool-injection.ts defaults renderToolUseMessage to return null → entire tool hidden
