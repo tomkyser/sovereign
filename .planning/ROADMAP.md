@@ -595,9 +595,9 @@ Patterns must anticipate future esbuild version changes and variable name variat
   - [ ] 6. Housekeeping and handoff
 
 #### Verification
-- [ ] T21: Add all new patches to VERIFICATION_REGISTRY
-- [ ] T22: Full SOVEREIGN check (target: 23+ signatures)
-- [ ] T23: Interactive TUI verification of all restored UI elements
+- [x] T21: Add all new patches to VERIFICATION_REGISTRY (covered by T16)
+- [x] T22: Full SOVEREIGN check — 29/29 SOVEREIGN
+- [x] T23: Interactive TUI verification — all elements confirmed
 
 #### Notes
 - Root cause: tool-injection.ts defaults renderToolUseMessage to return null → entire tool hidden
