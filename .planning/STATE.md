@@ -21,7 +21,7 @@ and governance-specific `check` command added.
 - **Verify:** `node dist/index.mjs check`
 - **Restore:** `node dist/index.mjs --restore`
 - **Repack pipeline:** esbuild ESM→CJS transform (bytecode→CJS→raw overwrite)
-- **SOVEREIGN (30/30) passing (all governance patches + prompt overrides active)
+- **SOVEREIGN (32/32) passing (all governance patches + prompt overrides active)
 - **Binary status:** Patched, runs cleanly (`2.1.101 (Claude Code)`)
 - **Shim:** Active (`~/.claude-governance/bin/claude`) — governance applied on every launch
 - **Source structure (post-3prelim):**

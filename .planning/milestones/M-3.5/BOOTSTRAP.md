@@ -3,7 +3,7 @@
 ---
 
 **Status:** P3 INCOMPLETE — two gap phases blocking closure
-**SOVEREIGN:** 30/30
+**SOVEREIGN:** 32/32
 **Next:** P3-GAP-REPL (REPL TUI visibility), then P3-GAP (component overrides)
 
 ## Read First

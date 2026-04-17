@@ -6,7 +6,7 @@
 - [x] Research — CC source analysis, binary patterns, rendering pipeline
 - [x] Planning — PLANNING.md with implementation approach per deliverable
 - [~] Act — P0-P2 complete. P3 partially complete (T17/T19/T21 done, T18/T20 marked in error)
-- [~] Verify — SOVEREIGN 30/30 but behavioral gaps found: REPL invisible, components untested
+- [~] Verify — SOVEREIGN 32/32 but behavioral gaps found: REPL invisible, components untested
 - [~] Gap Analysis — TWO gap phases identified (REPL visibility, component verification)
 - [ ] Housekeeping — blocked until gap phases resolve
 

@@ -1,7 +1,7 @@
 # Phase 3.5d Handoff — Message Components Control
 
 **Status**: P3-GAP-REPL COMPLETE — two gap phases required
-**SOVEREIGN**: 30/30
+**SOVEREIGN**: 32/32
 **Commit**: HEAD on master (post-gap-planning)
 **Date**: 2026-04-17
 
@@ -42,5 +42,5 @@ Override system built but never tested. No override has ever rendered in TUI.
 cd claude-governance && pnpm build
 /bin/cp ~/.claude-governance/native-binary.backup ~/.local/share/claude/versions/2.1.101
 node claude-governance/dist/index.mjs -a
-node claude-governance/dist/index.mjs check   # Target: 30/30 SOVEREIGN
+node claude-governance/dist/index.mjs check   # Target: 32/32 SOVEREIGN
 ```

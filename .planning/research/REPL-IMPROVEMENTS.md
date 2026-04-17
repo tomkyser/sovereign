@@ -9,3 +9,10 @@
 - Most calls were bash() wrappers instead of native fs/string operations
 - No defensive structure — failed write() aborted entire call
 - Should have: enumerated all research targets, written single comprehensive script with try/catch per target, returned structured summary
+
+## 2026-04-17: write() relative path resolution when CWD changes
+
+**Context:** Building REPL visibility patches. Used `write('claude-governance/src/...')` and `write('.planning/...')` inside REPL calls where the Tungsten session had cd'd into claude-governance.
+**Observation:** REPL's `write()` resolves relative paths from the session CWD, not the project root. When the CWD was inside `claude-governance/`, relative paths like `claude-governance/src/...` created double-nested directories, and `.planning/...` created stray copies inside the governance subdirectory.
+**Impact:** 7 stray planning doc copies + 2 misplaced patch files required manual cleanup.
+**Suggestion:** Always use absolute paths in REPL write() calls, or ensure CWD is at project root before relative-path writes.

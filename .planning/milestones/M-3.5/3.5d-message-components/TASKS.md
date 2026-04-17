@@ -1,7 +1,7 @@
 # Phase 3.5d Tasks — Message Components Control
 
 Status: P3 INCOMPLETE — two gap phases required before phase can close
-SOVEREIGN: 30/30 (patches work, but component system untested, REPL invisible)
+SOVEREIGN: 32/32 (patches work, but component system untested, REPL invisible)
 
 ---
 
@@ -17,7 +17,7 @@ SOVEREIGN: 30/30 (patches work, but component system untested, REPL invisible)
 ## P3: User Customization — PARTIALLY COMPLETE
 - [x] T17: Component directory loading (defaults.js scans ~/.claude-governance/components/)
 - [ ] ~~T18~~ **MARKED IN ERROR** — skeleton only, no actual override logic, never tested
-- [x] T19: Unhide hidden commands (30/30 SOVEREIGN, TUI verified: /init, /insights visible)
+- [x] T19: Unhide hidden commands (32/32 SOVEREIGN, TUI verified: /init, /insights visible)
 - [ ] ~~T20~~ **MARKED IN ERROR** — handler signature never verified against binary injection
 - [x] T21: Verification registry entry for unhide-commands
 
