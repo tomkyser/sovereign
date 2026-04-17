@@ -93,53 +93,52 @@ function contentHandler(block, props, React) {
 
 ### Writing a Component Override
 
-Create a `.js` file in `~/.claude-governance/components/`:
+Create a `.js` file in `~/.claude-governance/components/`. Use `module.exports` —
+IIFE return values are ignored by `require()`.
 
 ```javascript
 // ~/.claude-governance/components/my-override.js
-(function() {
-  var refs = globalThis.__govReactRefs;
-  if (!refs || !refs.R) return {};
-
-  var React = refs.R;
-  var Text = refs.Text;
-
-  return {
-    messageOverrides: {
-      // Override system message rendering
-      system: function(message, props, R) {
-        return React.createElement(Text, { color: "green" }, "SYS: " + message.content);
-      }
-    },
-    contentOverrides: {
-      // Override thinking block rendering
-      thinking: function(block, props, R) {
-        return React.createElement(Text, { color: "magenta" }, block.thinking);
-      }
+module.exports = {
+  messageOverrides: {
+    system: function(message, props, R) {
+      var ink = require("ink");
+      return R.createElement(ink.Text, { color: "green" }, "SYS: " + message.content);
     }
-  };
-})();
+  },
+  contentOverrides: {
+    thinking: function(block, props, R) {
+      if (!block.thinking) return null;
+      var ink = require("ink");
+      var preview = block.thinking.substring(0, 200);
+      if (block.thinking.length > 200) preview += "...";
+      return R.createElement(
+        ink.Box, { flexDirection: "column" },
+        R.createElement(ink.Text, { color: "magenta", bold: true }, "\u2731 Thinking"),
+        R.createElement(ink.Text, { color: "gray", dimColor: true }, preview)
+      );
+    }
+  }
+};
 ```
 
-### Available React Refs
+### React and Ink Access
 
-`globalThis.__govReactRefs` provides:
-- `R` — React instance (`createElement`, `useState`, etc.)
-- `Box` — Ink Box component (layout)
-- `Text` — Ink Text component (styled text output)
+The third handler argument `R` is the React instance from the binary scope. Use
+`require("ink")` inside handlers for Ink components (Box, Text). Both are available
+at render time within the CC process.
 
-### Message Types
+`globalThis.__govReactRefs` is set by tool-injection but may not be available during
+the first render cycle. Prefer `R` (handler arg) and `require("ink")` over refs.
+
+### Message Types (oOY renderer)
 
 | Type | Description |
 |------|-------------|
-| `system` | System messages |
+| `attachment` | File attachments |
 | `assistant` | Assistant responses |
 | `user` | User input |
-| `attachment` | File attachments |
-| `grouped_tool_use` | Grouped tool calls |
-| `collapsed_read_search` | Collapsed read/search results |
 
-### Content Block Types
+### Content Block Types (sOY renderer)
 
 | Type | Description |
 |------|-------------|
@@ -147,11 +146,14 @@ Create a `.js` file in `~/.claude-governance/components/`:
 | `text` | Text content |
 | `thinking` | Thinking/reasoning block |
 | `redacted_thinking` | Redacted thinking |
+| `server_tool_use` | Server-side tool call |
+| `advisor_tool_result` | Advisor tool result |
 
 ### Default Overrides
 
-Shipped in `data/components/defaults.js` and deployed to `~/.claude-governance/components/`
-during `claude-governance -a`. Edit or replace to customize.
+Shipped in `data/components/thinking-marker.js` and deployed to
+`~/.claude-governance/components/` during `claude-governance -a`.
+Edit or replace to customize.
 
 ### Error Handling
 

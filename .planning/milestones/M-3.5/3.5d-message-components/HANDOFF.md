@@ -1,6 +1,6 @@
 # Phase 3.5d Handoff — Message Components Control
 
-**Status**: P3-GAP-ENV COMPLETE — component override verification remaining
+**Status**: P3-GAP COMPLETE — all gap phases closed, component overrides verified in TUI
 **SOVEREIGN**: 32/32
 **Commit**: HEAD on master (post-gap-planning)
 **Date**: 2026-04-17 (env hardening completed same day)
