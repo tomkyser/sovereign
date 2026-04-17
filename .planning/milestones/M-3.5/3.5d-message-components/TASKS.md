@@ -49,3 +49,13 @@ SOVEREIGN: 32/32 (patches work, but component system untested, REPL invisible)
 > Cannot complete until both gap phases pass. Partial verification done:
 > tools visible, thinking visible, hidden commands visible.
 > Missing: REPL visibility, component override rendering.
+
+## P3-GAP-ENV: Environment Flag Hardening
+> Settings.json env block is a suggestion — CC may ignore or override it.
+> The shim must export mandatory env vars at the OS process level before exec.
+> Include CLAUDE_CODE_REPL=1 (was T-REPL-2, skipped because settings.json was "enough").
+
+- [ ] T-GAP-7: Export mandatory env vars in shim shell script (both governance launch path AND failsafe path)
+- [ ] T-GAP-8: Add CLAUDE_CODE_REPL=1 to RECOMMENDED_ENV + shim exports
+- [ ] T-GAP-9: Merge RECOMMENDED_ENV into launch command's launchEnv (currently reads config.governance.env only)
+- [ ] T-GAP-10: Verify env vars present in running CC process (check from within a session)

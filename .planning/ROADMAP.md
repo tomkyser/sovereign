@@ -1,4 +1,8 @@
 # Roadmap — claude-governance
+- [ ] T-GAP-7: Export mandatory env vars in shim (both launch + failsafe paths)
+- [ ] T-GAP-8: Add CLAUDE_CODE_REPL=1 to RECOMMENDED_ENV + shim exports
+- [ ] T-GAP-9: Merge RECOMMENDED_ENV into launch launchEnv (not just config.governance.env)
+- [ ] T-GAP-10: Verify env vars present in running CC process
 
 Last updated: 2026-04-16
 

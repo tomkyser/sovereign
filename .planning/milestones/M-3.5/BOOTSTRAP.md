@@ -44,6 +44,10 @@ THEN
 - T-GAP-4: Ship verified default overrides in data/components/
 - T-GAP-5: Correct docs/README.md to match verified handler signature
 - T-GAP-6: Document update resilience (what survives CC updates, what doesn't)
+- T-GAP-7: Export mandatory env vars in shim shell script (process-level, not settings.json)
+- T-GAP-8: Add CLAUDE_CODE_REPL=1 to env overrides
+- T-GAP-9: Merge RECOMMENDED_ENV into launch command's launchEnv
+- T-GAP-10: Verify env vars present in running CC process
 
 ## Key Context for P3-GAP
 - Override system: `globalThis.__govMessageOverrides` / `__govContentOverrides` registries
