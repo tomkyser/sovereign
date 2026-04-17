@@ -8,11 +8,13 @@ import type {
 import { coreModule } from './core';
 import { envFlagsModule } from './env-flags';
 import { wireModule } from './wire';
+import { ralphModule } from './ralph';
 
 const ALL_MODULES: GovernanceModule[] = [
   coreModule,
   envFlagsModule,
   wireModule,
+  ralphModule,
 ];
 
 export function getAllModules(): GovernanceModule[] {
