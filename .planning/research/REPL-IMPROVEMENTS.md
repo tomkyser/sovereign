@@ -41,3 +41,7 @@ a "wait until output changes" or "wait until prompt returns" primitive.
 ## 2026-04-17T21:49:38.557Z — Prompt hook type clarification
 **Context:** RALPH Phase 2 research — PreToolUse hook mechanism
 **Observation:** "type": "prompt" hooks send text to a SEPARATE small model (Haiku by default) for evaluation, not to the main conversation model. They're designed for yes/no permission decisions. For injecting reasoning scaffolds into the main model's context, use "type": "command" hooks with hookSpecificOutput.additionalContext. This applies to ALL hook events, not just UserPromptSubmit.
+
+## 2026-04-17T22:15:53.907Z — RALPH checkpoint self-observation
+**Context:** RALPH REPL checkpoint hook fires on this session's own REPL calls
+**Observation:** Every REPL call with write()/edit()/bash() triggers the checkpoint system-reminder. The model correctly ignores it for routine operations. This confirms the hook works but adds ~10 lines of system-reminder to every qualifying REPL result, which accumulates in context. Consider whether the checkpoint should have a session-level "already acknowledged" state to reduce repetition.
