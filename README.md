@@ -1,6 +1,8 @@
 # claude-governance
 
-> **Status: Work in Progress** — Verified on CC 2.1.101 (arm64-darwin). Not yet published to npm. Not yet tested on other CC versions, machines, or operating systems. Everything described here works on the development machine; cross-platform and cross-version resilience is planned for Milestone 9.
+> **This repository is archived. Its vendor-specific experiments are superseded by a model/vendor-neutral agent governance framework focused on verification, instruction hierarchy, context discipline, and safe tool orchestration.**
+
+**Verified:** on CC 2.1.101 (arm64-darwin). Not yet published to npm. Not yet tested on other CC versions, machines, or operating systems. Everything described here works on the development machine; cross-platform and cross-version resilience is planned for Milestone 9.
 
 Claude Code is a subscription product that runs on your hardware, processes your code, and charges your account, yet Anthropic has systematically built mechanisms into the binary that degrade the experience for paying customers while reserving the full-capability version for their own engineers. This project exists because I went looking for why my tool was getting worse and what I found was not a bug or a resource constraint; it was a deliberate two-tier system hidden behind compile-time flags, server-side feature toggles, and system prompts engineered to make the model less competent than it actually is.
 
